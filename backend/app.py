@@ -5,7 +5,6 @@ from flask_socketio import SocketIO, emit
 import zipfile
 import rarfile
 import os
-import shutil
 import io
 
 app = Flask(__name__)

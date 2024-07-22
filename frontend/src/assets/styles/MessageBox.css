@@ -1,0 +1,19 @@
+/* src/components/MessageBox.css */
+.message-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+    max-height: 200px; /* Adjust as needed */
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.message {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.message:last-child {
+    border-bottom: none;
+}

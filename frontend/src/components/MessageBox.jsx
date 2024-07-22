@@ -1,13 +1,18 @@
 // src/components/MessageBox.jsx
-import React, { useContext } from 'react';
-import { MessageContext } from '../contexts/MessageContext';
+import React from 'react';
+import { useMessage } from '../contexts/MessageContext';
+import '../assets/styles/MessageBox.css'; // Import the CSS file for styling
 
 const MessageBox = () => {
-    const { messages } = useContext(MessageContext);
+    const { messages } = useMessage();
 
     return (
         <div className="message-box">
-            <textarea rows="10" cols="50" value={messages.join('\n')} readOnly />
+            {messages.map((msg, index) => (
+                <div key={index} className="message">
+                    {msg}
+                </div>
+            ))}
         </div>
     );
 };

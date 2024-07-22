@@ -4,6 +4,7 @@ BACKEND
  NOTE: return only modified files OR return modified files + original ones
 !! Back input validation
 ! Create backup of each modified scenario
+!! Keep the scenario data saved for the duration of the scenario edit + until the next time user opens up the editor. Ask them if they want to open the last scenario. If not, delete it.
 
 FRONTEND
 !!! Inputs for each tab
@@ -14,6 +15,12 @@ FRONTEND
 
 MISCELLANEOUS
 !! Progress bar
+!!! split code into files
 
 
-split code into files!!!
+WARNINGS to add:
+- files not listed on the file structure:
+ - allow user to choose, if they want to keep the file despite it (in that case, remove related warning)
+ - allow user to create file (in-editor setting) with custom files (optionally button "remember files for next time") 
+- file extension found, but naming mishap (base: .scenario file name)
+- multiple files with the same extension

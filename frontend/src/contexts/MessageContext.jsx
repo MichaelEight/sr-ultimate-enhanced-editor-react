@@ -1,7 +1,7 @@
-// src/context/MessageContext.jsx
-import React, { createContext, useState } from 'react';
+// src/contexts/MessageContext.jsx
+import React, { createContext, useContext, useState } from 'react';
 
-export const MessageContext = createContext();
+const MessageContext = createContext();
 
 export const MessageProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
@@ -15,4 +15,8 @@ export const MessageProvider = ({ children }) => {
             {children}
         </MessageContext.Provider>
     );
+};
+
+export const useMessage = () => {
+    return useContext(MessageContext);
 };
