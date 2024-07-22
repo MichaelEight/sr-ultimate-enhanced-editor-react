@@ -19,7 +19,7 @@ FRONTEND
 MISCELLANEOUS
 !! Add 'close project' button, which resets all data and backend
 !!! split code into files
-
+!! Handle custom files - upload files for future use as defaults
 
 WARNINGS to add:
 - files not listed on the file structure:

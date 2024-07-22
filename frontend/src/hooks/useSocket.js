@@ -5,8 +5,8 @@ import { useMessage } from '../contexts/MessageContext';
 
 const socket = io('http://localhost:5000');
 
-const useSocket = (setProgress, setProgressMessage) => {
-    const { addMessage } = useMessage();
+const useSocket = () => {
+    const { addMessage, setProgress, setProgressMessage } = useMessage();
 
     useEffect(() => {
         socket.on('progress', (data) => {
@@ -23,6 +23,8 @@ const useSocket = (setProgress, setProgressMessage) => {
             socket.off('message');
         };
     }, [addMessage, setProgress, setProgressMessage]);
+
+    return { setProgress, setProgressMessage, addMessage };
 };
 
 export default useSocket;

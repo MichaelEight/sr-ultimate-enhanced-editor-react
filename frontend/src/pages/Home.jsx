@@ -2,59 +2,88 @@
 import React, { useState } from 'react';
 import useFileUpload from '../hooks/useFileUpload';
 import useSocket from '../hooks/useSocket';
-import ProgressBar from '../components/Progressbar';
+import ProgressBar from '../components/ProgressBar';
+import ProjectContent from '../components/ProjectContent';
+
+// Mock function for loading default project data
+const loadDefaultProjectData = (project) => {
+    // Mock data structure, replace with actual logic
+    return {
+        scenarioName: 'DefaultScenario',
+        cacheName: 'DefaultCache',
+        mapName: 'DefaultMap',
+        oof: 'DefaultOOF',
+        unit: 'DefaultUNIT',
+        pplx: 'DefaultPPLX',
+        ttrx: 'DefaultTTRX',
+        terx: 'DefaultTERX',
+        newsitems: 'DefaultNEWSITEMS',
+        profile: 'DefaultPROFILE',
+        cvp: 'DefaultCVP',
+        wmdata: 'DefaultWMData',
+        oob: 'DefaultOOB',
+        precache: 'DefaultPreCache',
+        postcache: 'DefaultPostCache',
+        sameAsScenarioName: true,
+        createNewMap: false,
+        useDefaultFiles: true,
+    };
+};
 
 const Home = () => {
     const {
         file,
-        validationResults,
-        progress,
-        setProgress, // Add setProgress here
         handleFileChange,
-        handleUpload,
-        handleExport,
-        handleCheckboxChange
+        handleUpload
     } = useFileUpload();
-    const [progressMessage, setProgressMessage] = useState('');
+    const [activeSection, setActiveSection] = useState(null);
+    const [projectData, setProjectData] = useState(null);
+    const [validationResults, setValidationResults] = useState(null);
+    const { setProgress, setProgressMessage, addMessage } = useSocket();
 
-    useSocket(setProgress, setProgressMessage);
+    const handleCreateProject = () => {
+        setProjectData({});
+        setActiveSection('project');
+    };
+
+    const handleLoadDefaultProject = (project) => {
+        const data = loadDefaultProjectData(project);
+        setProjectData(data);
+        setActiveSection('project');
+    };
+
+    const handleUploadFile = async () => {
+        const response = await handleUpload();
+        if (response) {
+            const data = await response.json();
+            setValidationResults(data.structure);
+            setProjectData(data.scenario_data);
+            setActiveSection('project');
+        }
+    };
 
     return (
-        <div>
-            <h1>Home</h1>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload}>Upload</button>
-            <ProgressBar progress={progress} message={progressMessage} />
-            {validationResults && (
-                <div>
-                    <h2>Validation Results</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Path</th>
-                                <th>Required</th>
-                                <th>Exists</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(validationResults).map(([key, value]) => (
-                                <tr key={key}>
-                                    <td>{key}</td>
-                                    <td>
-                                        <input
-                                            type="checkbox"
-                                            checked={value.required}
-                                            onChange={() => handleCheckboxChange(key)}
-                                        />
-                                    </td>
-                                    <td>{value.exists ? 'Yes' : 'No'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <button onClick={handleExport}>Export</button>
-                </div>
+        <div className="home">
+            <div className="buttons">
+                <button onClick={handleCreateProject}>Create Empty Project</button>
+                <input
+                    type="file"
+                    onChange={(e) => {
+                        handleFileChange(e);
+                        handleUploadFile();
+                    }}
+                    style={{ display: 'none' }}
+                    id="upload-input"
+                />
+                <button onClick={() => document.getElementById('upload-input').click()}>Upload Project</button>
+                <button onClick={() => handleLoadDefaultProject('defaultProject')}>Load Default Project</button>
+                <button disabled>Load Last Project</button>
+                <button disabled={!projectData} onClick={() => setActiveSection(null)}>Close Current Project</button>
+            </div>
+            {activeSection === 'project' && (
+                <ProjectContent projectData={projectData} setProjectData={setProjectData} />
             )}
+            <ProgressBar />
         </div>
     );
 };
