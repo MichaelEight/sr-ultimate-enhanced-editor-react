@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -6,12 +5,24 @@ const Navbar = () => {
     return (
         <nav>
             <ul>
-                <li><NavLink exact to="/" activeClassName="active">Home</NavLink></li>
-                <li><NavLink to="/scenario" activeClassName="active">Scenario</NavLink></li>
-                <li><NavLink to="/settings" activeClassName="active">Settings</NavLink></li>
-                <li><NavLink to="/regions" activeClassName="active">Regions</NavLink></li>
-                <li><NavLink to="/theaters" activeClassName="active">Theaters</NavLink></li>
-                <li><NavLink to="/resources" activeClassName="active">Resources</NavLink></li>
+                <li>
+                    <NavLink to="/" exact="true" className={({ isActive }) => isActive ? "active" : undefined}>Home</NavLink>
+                </li>
+                <li>
+                    <NavLink to="/scenario" className={({ isActive }) => isActive ? "active" : undefined}>Scenario</NavLink>
+                </li>
+                <li>
+                    <NavLink to="/settings" className={({ isActive }) => isActive ? "active" : undefined}>Settings</NavLink>
+                </li>
+                <li>
+                    <NavLink to="/regions" className={({ isActive }) => isActive ? "active" : undefined}>Regions</NavLink>
+                </li>
+                <li>
+                    <NavLink to="/theaters" className={({ isActive }) => isActive ? "active" : undefined}>Theaters</NavLink>
+                </li>
+                <li>
+                    <NavLink to="/resources" className={({ isActive }) => isActive ? "active" : undefined}>Resources</NavLink>
+                </li>
             </ul>
         </nav>
     );
