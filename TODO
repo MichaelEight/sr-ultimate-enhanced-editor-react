@@ -1,0 +1,13 @@
+BACKEND
+!!! Handle load scenario
+!!! Handle export scenario - receive data, format it, save to file, return file (ZIP merge of all files)
+ NOTE: return only modified files OR return modified files + original ones
+!! Back input validation
+! Create backup of each modified scenario
+
+FRONTEND
+!!! Inputs for each tab
+!!! Export button
+!!! Load scenario
+!! Front input validation
+! Styles
