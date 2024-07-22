@@ -3,11 +3,12 @@ from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from message import send_progress, send_message, socketio
 from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER
-from utilities import extract_archive, find_scenario_file, read_first_three_lines
+from utilities import extract_archive, find_scenario_file, parse_scenario_file
 from validation import validate_file_structure
 import zipfile
 import os
 import io
+import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -49,11 +50,11 @@ def upload_file():
         # Validate the file structure
         structure = validate_file_structure(base_dir, scenario_name)
 
-        # Read the first three lines of the .SCENARIO file
+        # Parse the .SCENARIO file
         scenario_file_path = os.path.join(base_dir, f"{scenario_name}.SCENARIO")
-        first_three_lines = read_first_three_lines(scenario_file_path)
+        scenario_data = parse_scenario_file(scenario_file_path)
 
-        print(first_three_lines)
+        print(json.dumps(scenario_data, indent=4))  # Print the JSON data for debugging
 
         send_progress(100, "File uploaded and validated")
         return jsonify(structure), 200
@@ -61,7 +62,7 @@ def upload_file():
     except Exception as e:
         send_message(f"!! Internal server error: {str(e)}")
         return jsonify({'error': str(e)}), 500
-    
+
 @app.route('/export', methods=['POST'])
 def export_files():
     try:
