@@ -6,6 +6,10 @@
 /.pnp
 .pnp.js
 
+# used files (import, export)
+/backend/extracted
+/backend/uploads
+
 # testing
 /coverage
 
