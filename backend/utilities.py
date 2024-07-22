@@ -40,7 +40,50 @@ def parse_scenario_file(file_path):
         "mapfile": []
     }
 
-    settings_data = {}
+    settings_data = {
+        "startymd": None,
+        "defaultregion": None,
+        "difficulty": None,
+        "resources": None,
+        "initialfunds": None,
+        "aistance": None,
+        "limitdareffect": None,
+        "limitmareffect": None,
+        "reservelimit": None,
+        "missilenolimit": None,
+        "wminvolve": None,
+        "wmduse": None,
+        "grouployaltymerge": None,
+        "groupresearchmerge": None,
+        "alliedvictory": None,
+        "debtfree": None,
+        "noloypenalty": None,
+        "mapgui": None,
+        "approvaleff": None,
+        "wmdeff": None,
+        "svictorycond": None,
+        "victoryhex": None,
+        "gamelength": None,
+        "fastfwddays": None,
+        "mapsplash": None,
+        "scenarioid": None,
+        "startyear": None,
+        "techtreedefault": None,
+        "nocapitalmove": None,
+        "regionequip": None,
+        "fastbuild": None,
+        "govchoice": None,
+        "relationseffect": None,
+        "limitinscenario": None,
+        "mapmusic": None,
+        "campaigngame": None,
+        "victorytech": None,
+        "regionallies": None,
+        "regionaxis": None,
+        "nosphere": None,
+        "spherenn": None,
+        "victoryymd": None
+    }
 
     include_pattern = re.compile(r'#include\s+"([^"]+)",\s*"([^"]+)"')
     savfile_pattern = re.compile(r'savfile\s+"([^"]+)"')
@@ -100,6 +143,8 @@ def parse_scenario_file(file_path):
                     settings_data[key] = [int(v) for v in value.split(",") if v]
                 elif key == "victoryhex":
                     settings_data[key] = [int(v) if v else None for v in value.split(",") if v]
+                elif key == "fastfwddays":
+                    settings_data[key] = float(value) if value else None
                 else:
                     settings_data[key] = int(value) if value.isdigit() else value
             i += 1
