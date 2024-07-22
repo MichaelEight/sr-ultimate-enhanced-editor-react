@@ -27,3 +27,10 @@ WARNINGS to add:
  - allow user to create file (in-editor setting) with custom files (optionally button "remember files for next time") 
 - file extension found, but naming mishap (base: .scenario file name)
 - multiple files with the same extension
+
+
+PRIORITY:
+- Based on scenario data -- if value is not DEFAULT, check if the file written exists.
+ - throw warning if the file written is empty (error if it's WMData)
+ - validate files' content, if they match template, if the labels are correctly spelled, if there are no duplicates, incorrect values...
+  - you can make it as a separate scan i.e. it is done in the background while user plays with other files... unless they can't be loaded because of something. Maybe try...catch to load, and if an error happened, throw an error, propose a deep scan of the file and if user agrees, point out everything, what is wrong with it. Remember to limit, if the quantity of the same error is greater than 5 (or 10). Or write it as (quantity) [error]
