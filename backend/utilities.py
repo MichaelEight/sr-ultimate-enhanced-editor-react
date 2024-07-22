@@ -1,6 +1,6 @@
 # backend/utils.py
 import zipfile
-import rarfile
+# import rarfile
 import os
 
 def extract_archive(file_path, extract_path):
@@ -8,8 +8,9 @@ def extract_archive(file_path, extract_path):
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(extract_path)
     elif file_path.endswith('.rar'):
-        with rarfile.RarFile(file_path, 'r') as rar_ref:
-            rar_ref.extractall(extract_path)
+        raise ValueError("Convert to ZIP. RAR is not supported. Never will.")
+        # with rarfile.RarFile(file_path, 'r') as rar_ref:
+        #     rar_ref.extractall(extract_path)
     else:
         raise ValueError("Unsupported archive format")
 
