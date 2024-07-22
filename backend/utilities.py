@@ -37,12 +37,15 @@ def parse_scenario_file(file_path):
         "precache": [],
         "postcache": [],
         "savfile": [],
-        "mapfile": []
+        "mapfile": [],
+        "settings_data": {}
     }
 
     include_pattern = re.compile(r'#include\s+"([^"]+)",\s*"([^"]+)"')
     savfile_pattern = re.compile(r'savfile\s+"([^"]+)"')
     mapfile_pattern = re.compile(r'mapfile\s+"([^"]+)"')
+    gmc_pattern = re.compile(r'&&GMC(.*?)&&END', re.DOTALL)
+    key_value_pattern = re.compile(r'(\w+):\s*(.*)')
 
     for match in include_pattern.finditer(content):
         filename = match.group(1)
@@ -74,5 +77,30 @@ def parse_scenario_file(file_path):
     mapfile_match = mapfile_pattern.search(content)
     if mapfile_match:
         data['mapfile'].append(mapfile_match.group(1))
+
+    gmc_match = gmc_pattern.search(content)
+    if gmc_match:
+        gmc_content = gmc_match.group(1)
+        key_values = key_value_pattern.findall(gmc_content)
+        i = 0
+        while i < len(key_values):
+            key, value = key_values[i]
+            value = value.strip()
+            if ":" in value:
+                parts = value.split(":", 1)
+                data['settings_data'][key] = None
+                key_values.insert(i + 1, (parts[0].strip(), parts[1].strip()))
+            else:
+                if not value:
+                    data['settings_data'][key] = None
+                elif key == "startymd":
+                    data['settings_data'][key] = [int(v) for v in value.split(",") if v]
+                elif key == "difficulty":
+                    data['settings_data'][key] = [int(v) for v in value.split(",") if v]
+                elif key == "victoryhex":
+                    data['settings_data'][key] = [int(v) if v else None for v in value.split(",") if v]
+                else:
+                    data['settings_data'][key] = int(value) if value.isdigit() else value
+            i += 1
 
     return data
