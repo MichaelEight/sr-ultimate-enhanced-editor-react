@@ -5,6 +5,7 @@ BACKEND
 !! Back input validation
 ! Create backup of each modified scenario
 !! Keep the scenario data saved for the duration of the scenario edit + until the next time user opens up the editor. Ask them if they want to open the last scenario. If not, delete it.
+!! While exporting, make sure you don't copy files, which are not listed on the file structure. 
 
 FRONTEND
 !!! Inputs for each tab
@@ -12,6 +13,7 @@ FRONTEND
 !!! Load scenario
 !! Front input validation
 ! Styles
+! Display green server online, yellow server busy, red server issue/inactive/refused connection etc.
 
 MISCELLANEOUS
 !! Progress bar

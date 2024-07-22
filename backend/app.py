@@ -1,48 +1,16 @@
-# backend/app.py
+# app.py
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
+from message import send_progress, send_message, socketio
+from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER
+from utilities import extract_archive, find_scenario_file
+from validation import validate_file_structure
 import zipfile
-import rarfile
 import os
 import io
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-UPLOAD_FOLDER = 'uploads'
-EXTRACT_FOLDER = 'extracted'
-EXPORT_FOLDER = 'exported'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-if not os.path.exists(EXTRACT_FOLDER):
-    os.makedirs(EXTRACT_FOLDER)
-if not os.path.exists(EXPORT_FOLDER):
-    os.makedirs(EXPORT_FOLDER)
-
-def send_progress(progress, message):
-    socketio.emit('progress', {'progress': progress, 'message': message})
-
-def extract_archive(file_path, extract_path):
-    if file_path.endswith('.zip'):
-        with zipfile.ZipFile(file_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-    elif file_path.endswith('.rar'):
-        with rarfile.RarFile(file_path, 'r') as rar_ref:
-            rar_ref.extractall(extract_path)
-    else:
-        raise ValueError("Unsupported archive format")
-
-def find_scenario_file(extract_path):
-    for root, _, files in os.walk(extract_path):
-        for file in files:
-            if file.endswith('.SCENARIO'):
-                return os.path.splitext(file)[0], root
-    raise ValueError("No .SCENARIO file found")
-
-def send_message(message):
-    socketio.emit('message', {'message': message})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -79,47 +47,7 @@ def upload_file():
             return jsonify({'error': str(e)}), 500
 
         # Validate the file structure
-        structure = {
-            f"{scenario_name}.SCENARIO": {'required': True, 'exists': False},
-            f"MAPS/{scenario_name}.CVP": {'required': False, 'exists': False},
-            f"MAPS/{scenario_name}.MAPX": {'required': False, 'exists': False},
-            f"MAPS/{scenario_name}.OOF": {'required': False, 'exists': False},
-            f"MAPS/{scenario_name}.REGIONINCL": {'required': False, 'exists': False},
-            f"MAPS/ORBATS/{scenario_name}.OOB": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.WMDATA": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.UNIT": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.PPLX": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.TTRX": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.TERX": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.NEWSITEMS": {'required': False, 'exists': False},
-            f"MAPS/DATA/{scenario_name}.PRF": {'required': False, 'exists': False},
-        }
-
-        for root, _, files in os.walk(base_dir):
-            for file in files:
-                relative_path = os.path.relpath(os.path.join(root, file), base_dir).replace("\\", "/")
-                if relative_path in structure:
-                    structure[relative_path]['exists'] = True
-                else:
-                    send_message(f"?? Unexpected file: {relative_path}")
-
-                    # Check for out of place files
-                    expected_folder = '/'.join(relative_path.split('/')[:-1])
-                    for key in structure.keys():
-                        if key.startswith(expected_folder) and file in key:
-                            send_message(f"?? File out of place: {relative_path}")
-                            break
-
-        # Check for multiple files with the same extension
-        extension_count = {}
-        for relative_path in structure.keys():
-            ext = os.path.splitext(relative_path)[1]
-            if ext not in extension_count:
-                extension_count[ext] = 0
-            if structure[relative_path]['exists']:
-                extension_count[ext] += 1
-                if extension_count[ext] > 1:
-                    send_message(f"?? Possible file conflict: {relative_path}")
+        structure = validate_file_structure(base_dir, scenario_name)
 
         send_progress(100, "File uploaded and validated")
         return jsonify(structure), 200
@@ -154,7 +82,8 @@ def export_files():
                 for file in files:
                     file_path = os.path.join(root, file)
                     arcname = os.path.relpath(file_path, base_dir).replace("\\", "/")
-                    zip_file.write(file_path, arcname=arcname)
+                    if arcname in structure:
+                        zip_file.write(file_path, arcname=arcname)
 
         zip_buffer.seek(0)
         send_progress(100, "Export complete")
@@ -164,4 +93,5 @@ def export_files():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    socketio.init_app(app)
     socketio.run(app, debug=True)
