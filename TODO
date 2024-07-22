@@ -14,9 +14,10 @@ FRONTEND
 !! Front input validation
 ! Styles
 ! Display green server online, yellow server busy, red server issue/inactive/refused connection etc.
+!! Progress bar (with steps)
 
 MISCELLANEOUS
-!! Progress bar
+!! Add 'close project' button, which resets all data and backend
 !!! split code into files
 
 
