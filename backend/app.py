@@ -39,17 +39,22 @@ def find_scenario_file(extract_path):
     for root, _, files in os.walk(extract_path):
         for file in files:
             if file.endswith('.SCENARIO'):
-                return os.path.splitext(file)[0]
+                return os.path.splitext(file)[0], root
     raise ValueError("No .SCENARIO file found")
+
+def send_message(message):
+    socketio.emit('message', {'message': message})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
         if 'file' not in request.files:
+            send_message("!! No file part")
             return jsonify({'error': 'No file part'}), 400
 
         file = request.files['file']
         if file.filename == '':
+            send_message("!! No selected file")
             return jsonify({'error': 'No selected file'}), 400
 
         # Save uploaded file
@@ -64,12 +69,14 @@ def upload_file():
         try:
             extract_archive(file_path, extract_path)
         except ValueError as e:
+            send_message(f"!! Extraction error: {str(e)}")
             return jsonify({'error': str(e)}), 500
 
-        # Find the scenario name based on the .SCENARIO file
+        # Find the scenario name and set the base directory
         try:
-            scenario_name = find_scenario_file(extract_path)
+            scenario_name, base_dir = find_scenario_file(extract_path)
         except ValueError as e:
+            send_message(f"!! No .SCENARIO file found: {str(e)}")
             return jsonify({'error': str(e)}), 500
 
         # Validate the file structure
@@ -89,18 +96,19 @@ def upload_file():
             f"MAPS/DATA/{scenario_name}.PRF": {'required': False, 'exists': False},
         }
 
-        for root, _, files in os.walk(extract_path):
+        for root, _, files in os.walk(base_dir):
             for file in files:
-                relative_path = os.path.relpath(os.path.join(root, file), extract_path).replace("\\", "/")
+                relative_path = os.path.relpath(os.path.join(root, file), base_dir).replace("\\", "/")
                 if relative_path in structure:
                     structure[relative_path]['exists'] = True
                 else:
-                    print(f"Unexpected file: {relative_path} ?")
+                    send_message(f"?? Unexpected file: {relative_path}")
+
                     # Check for out of place files
                     expected_folder = '/'.join(relative_path.split('/')[:-1])
                     for key in structure.keys():
                         if key.startswith(expected_folder) and file in key:
-                            print(f"File out of place: {relative_path} !")
+                            send_message(f"?? File out of place: {relative_path}")
                             break
 
         # Check for multiple files with the same extension
@@ -112,12 +120,13 @@ def upload_file():
             if structure[relative_path]['exists']:
                 extension_count[ext] += 1
                 if extension_count[ext] > 1:
-                    print(f"Possible file conflict: {relative_path} ?")
+                    send_message(f"?? Possible file conflict: {relative_path}")
 
         send_progress(100, "File uploaded and validated")
         return jsonify(structure), 200
 
     except Exception as e:
+        send_message(f"!! Internal server error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/export', methods=['POST'])
@@ -127,12 +136,14 @@ def export_files():
         scenario_name = data['scenario_name']
         structure = data['structure']
         extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
-        export_path = os.path.join(EXPORT_FOLDER, f"{scenario_name}.zip")
+
+        # Find the base directory of the scenario file
+        _, base_dir = find_scenario_file(extract_path)
 
         # Create any missing required files
         for path, info in structure.items():
             if info['required'] and not info['exists']:
-                full_path = os.path.join(extract_path, path)
+                full_path = os.path.join(base_dir, path)
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 with open(full_path, 'w') as f:
                     f.write(f"Placeholder for {path}")
@@ -140,10 +151,10 @@ def export_files():
         # Create a ZIP file
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for root, _, files in os.walk(extract_path):
+            for root, _, files in os.walk(base_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    arcname = os.path.relpath(file_path, extract_path).replace("\\", "/")
+                    arcname = os.path.relpath(file_path, base_dir).replace("\\", "/")
                     zip_file.write(file_path, arcname=arcname)
 
         zip_buffer.seek(0)

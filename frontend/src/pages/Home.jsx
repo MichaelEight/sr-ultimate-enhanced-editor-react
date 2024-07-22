@@ -1,6 +1,7 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import io from 'socket.io-client';
+import { MessageContext } from '../contexts/MessageContext';
 
 const socket = io('http://localhost:5000');
 
@@ -9,6 +10,7 @@ const Home = () => {
     const [validationResults, setValidationResults] = useState(null);
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
+    const { addMessage } = useContext(MessageContext);
 
     useEffect(() => {
         socket.on('progress', (data) => {
@@ -16,10 +18,15 @@ const Home = () => {
             setProgressMessage(data.message);
         });
 
+        socket.on('message', (data) => {
+            addMessage(data.message);
+        });
+
         return () => {
             socket.off('progress');
+            socket.off('message');
         };
-    }, []);
+    }, [addMessage]);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -27,7 +34,7 @@ const Home = () => {
 
     const handleUpload = async () => {
         if (!file) {
-            console.log('No file selected');
+            addMessage('!! No file selected');
             return;
         }
 
@@ -46,16 +53,16 @@ const Home = () => {
                 setValidationResults(data);
                 setProgress(100);  // Ensure progress bar reaches 100%
             } else {
-                console.error('Upload error:', data.error);
+                addMessage(`!! Upload error: ${data.error}`);
             }
         } catch (error) {
-            console.error('Error during upload:', error);
+            addMessage(`!! Error during upload: ${error.message}`);
         }
     };
 
     const handleExport = async () => {
         if (!validationResults) {
-            console.log('No validation results to export');
+            addMessage('!! No validation results to export');
             return;
         }
 
@@ -75,7 +82,7 @@ const Home = () => {
 
             if (!response.ok) {
                 const data = await response.json();
-                console.error('Export error:', data.error);
+                addMessage(`!! Export error: ${data.error}`);
                 return;
             }
 
@@ -89,7 +96,7 @@ const Home = () => {
             document.body.removeChild(a);
             setProgress(100);  // Ensure progress bar reaches 100%
         } catch (error) {
-            console.error('Error during export:', error);
+            addMessage(`!! Error during export: ${error.message}`);
         }
     };
 
