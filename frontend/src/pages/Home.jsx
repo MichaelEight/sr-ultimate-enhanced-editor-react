@@ -6,8 +6,7 @@ const socket = io('http://localhost:5000');
 
 const Home = () => {
     const [file, setFile] = useState(null);
-    const [extractedText, setExtractedText] = useState('');
-    const [downloadUrl, setDownloadUrl] = useState(null);
+    const [validationResults, setValidationResults] = useState(null);
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
 
@@ -44,7 +43,7 @@ const Home = () => {
 
             const data = await response.json();
             if (response.ok) {
-                setExtractedText(data.first_line);
+                setValidationResults(data);
                 setProgress(100);  // Ensure progress bar reaches 100%
             } else {
                 console.error('Upload error:', data.error);
@@ -54,27 +53,54 @@ const Home = () => {
         }
     };
 
-    const handleProcessFile = async () => {
+    const handleExport = async () => {
+        if (!validationResults) {
+            console.log('No validation results to export');
+            return;
+        }
+
         setProgress(0);  // Reset progress
 
         try {
-            const response = await fetch('http://localhost:5000/process', {
+            const response = await fetch('http://localhost:5000/export', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    scenario_name: file.name.split('.')[0],
+                    structure: validationResults,
+                }),
             });
 
             if (!response.ok) {
                 const data = await response.json();
-                console.error('Process error:', data.error);
+                console.error('Export error:', data.error);
                 return;
             }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
-            setDownloadUrl(url);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${file.name.split('.')[0]}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             setProgress(100);  // Ensure progress bar reaches 100%
         } catch (error) {
-            console.error('Error during file processing:', error);
+            console.error('Error during export:', error);
         }
+    };
+
+    const handleCheckboxChange = (path) => {
+        setValidationResults(prevState => ({
+            ...prevState,
+            [path]: {
+                ...prevState[path],
+                required: !prevState[path].required
+            }
+        }));
     };
 
     return (
@@ -83,17 +109,36 @@ const Home = () => {
             <input type="file" onChange={handleFileChange} />
             <button onClick={handleUpload}>Upload</button>
             <div>
-                <label>Sample Text Box:</label>
-                <input type="text" value={extractedText} readOnly />
-            </div>
-            <button onClick={handleProcessFile}>Sample Button</button>
-            {downloadUrl && (
-                <a href={downloadUrl} download="processed_file.zip">Download Processed File</a>
-            )}
-            <div>
                 <progress value={progress} max="100"></progress>
                 <p>{progressMessage}</p>
             </div>
+            {validationResults && (
+                <div>
+                    <h2>Validation Results</h2>
+                    <textarea
+                        rows="10"
+                        cols="50"
+                        value={Object.entries(validationResults).map(([key, value]) =>
+                            `${key}: required=${value.required}, exists=${value.exists}`
+                        ).join('\n')}
+                        readOnly
+                    />
+                    <h3>Set Required Files</h3>
+                    <ul>
+                        {Object.entries(validationResults).map(([key, value]) => (
+                            <li key={key}>
+                                <input
+                                    type="checkbox"
+                                    checked={value.required}
+                                    onChange={() => handleCheckboxChange(key)}
+                                />
+                                {key}
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={handleExport}>Export</button>
+                </div>
+            )}
         </div>
     );
 };
