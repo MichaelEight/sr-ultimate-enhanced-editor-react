@@ -52,9 +52,10 @@ def upload_file():
 
         # Parse the .SCENARIO file
         scenario_file_path = os.path.join(base_dir, f"{scenario_name}.SCENARIO")
-        scenario_data = parse_scenario_file(scenario_file_path)
+        scenario_file_data = parse_scenario_file(scenario_file_path)
 
-        print(json.dumps(scenario_data, indent=4))  # Print the JSON data for debugging
+        print(json.dumps(scenario_file_data['scenario_data'], indent=4))  # Print the JSON data for debugging
+        print(json.dumps(scenario_file_data['settings_data'], indent=4))  # Print the JSON data for debugging
 
         send_progress(100, "File uploaded and validated")
         return jsonify(structure), 200

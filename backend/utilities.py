@@ -23,7 +23,7 @@ def parse_scenario_file(file_path):
     with open(file_path, 'r') as file:
         content = file.read()
 
-    data = {
+    scenario_data = {
         "cvp": [],
         "regionincl": [],
         "unit": [],
@@ -37,9 +37,10 @@ def parse_scenario_file(file_path):
         "precache": [],
         "postcache": [],
         "savfile": [],
-        "mapfile": [],
-        "settings_data": {}
+        "mapfile": []
     }
+
+    settings_data = {}
 
     include_pattern = re.compile(r'#include\s+"([^"]+)",\s*"([^"]+)"')
     savfile_pattern = re.compile(r'savfile\s+"([^"]+)"')
@@ -50,33 +51,33 @@ def parse_scenario_file(file_path):
     for match in include_pattern.finditer(content):
         filename = match.group(1)
         if filename.endswith('.CVP'):
-            data['cvp'].append(filename)
+            scenario_data['cvp'].append(filename)
         elif filename.endswith('.REGIONINCL'):
-            data['regionincl'].append(filename)
+            scenario_data['regionincl'].append(filename)
         elif filename.endswith('.UNIT'):
-            data['unit'].append(filename)
+            scenario_data['unit'].append(filename)
         elif filename.endswith('.PPLX'):
-            data['pplx'].append(filename)
+            scenario_data['pplx'].append(filename)
         elif filename.endswith('.TTRX'):
-            data['ttrx'].append(filename)
+            scenario_data['ttrx'].append(filename)
         elif filename.endswith('.TERX'):
-            data['terx'].append(filename)
+            scenario_data['terx'].append(filename)
         elif filename.endswith('.WMData'):
-            data['wmdata'].append(filename)
+            scenario_data['wmdata'].append(filename)
         elif filename.endswith('.NEWSITEMS'):
-            data['newsitems'].append(filename)
+            scenario_data['newsitems'].append(filename)
         elif filename.endswith('.PRF'):
-            data['profile'].append(filename)
+            scenario_data['profile'].append(filename)
         elif filename.endswith('.OOB'):
-            data['oob'].append(filename)
+            scenario_data['oob'].append(filename)
 
     savfile_match = savfile_pattern.search(content)
     if savfile_match:
-        data['savfile'].append(savfile_match.group(1))
+        scenario_data['savfile'].append(savfile_match.group(1))
 
     mapfile_match = mapfile_pattern.search(content)
     if mapfile_match:
-        data['mapfile'].append(mapfile_match.group(1))
+        scenario_data['mapfile'].append(mapfile_match.group(1))
 
     gmc_match = gmc_pattern.search(content)
     if gmc_match:
@@ -88,19 +89,22 @@ def parse_scenario_file(file_path):
             value = value.strip()
             if ":" in value:
                 parts = value.split(":", 1)
-                data['settings_data'][key] = None
+                settings_data[key] = None
                 key_values.insert(i + 1, (parts[0].strip(), parts[1].strip()))
             else:
                 if not value:
-                    data['settings_data'][key] = None
+                    settings_data[key] = None
                 elif key == "startymd":
-                    data['settings_data'][key] = [int(v) for v in value.split(",") if v]
+                    settings_data[key] = [int(v) for v in value.split(",") if v]
                 elif key == "difficulty":
-                    data['settings_data'][key] = [int(v) for v in value.split(",") if v]
+                    settings_data[key] = [int(v) for v in value.split(",") if v]
                 elif key == "victoryhex":
-                    data['settings_data'][key] = [int(v) if v else None for v in value.split(",") if v]
+                    settings_data[key] = [int(v) if v else None for v in value.split(",") if v]
                 else:
-                    data['settings_data'][key] = int(value) if value.isdigit() else value
+                    settings_data[key] = int(value) if value.isdigit() else value
             i += 1
 
-    return data
+    return {
+        "scenario_data": scenario_data,
+        "settings_data": settings_data
+    }
