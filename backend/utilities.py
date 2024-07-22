@@ -19,3 +19,8 @@ def find_scenario_file(extract_path):
             if file.endswith('.SCENARIO'):
                 return os.path.splitext(file)[0], root
     raise ValueError("No .SCENARIO file found")
+
+def read_first_three_lines(file_path):
+    with open(file_path, 'r') as file:
+        lines = [next(file).strip() for _ in range(3)]
+    return lines
