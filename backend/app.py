@@ -47,12 +47,12 @@ def upload_file():
             send_message(f"!! No .SCENARIO file found: {str(e)}")
             return jsonify({'error': str(e)}), 500
 
-        # Validate the file structure
-        structure = validate_file_structure(base_dir, scenario_name)
-
         # Parse the .SCENARIO file
         scenario_file_path = os.path.join(base_dir, f"{scenario_name}.SCENARIO")
         scenario_file_data = parse_scenario_file(scenario_file_path)
+
+        # Validate the file structure
+        structure = validate_file_structure(base_dir, scenario_name, scenario_file_data['scenario_data'])
 
         print(json.dumps(scenario_file_data['scenario_data'], indent=4))  # Print the JSON data for debugging
         print(json.dumps(scenario_file_data['settings_data'], indent=4))  # Print the JSON data for debugging

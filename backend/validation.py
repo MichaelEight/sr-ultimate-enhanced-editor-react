@@ -2,7 +2,7 @@
 import os
 from message import send_message
 
-def validate_file_structure(base_dir, scenario_name):
+def validate_file_structure(base_dir, scenario_name, scenario_data):
     structure = {
         f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
         f"{scenario_name}/MAPS/{scenario_name}.CVP".lower(): {'required': False, 'exists': False},
@@ -18,6 +18,26 @@ def validate_file_structure(base_dir, scenario_name):
         f"{scenario_name}/MAPS/DATA/{scenario_name}.NEWSITEMS".lower(): {'required': False, 'exists': False},
         f"{scenario_name}/MAPS/DATA/{scenario_name}.PRF".lower(): {'required': False, 'exists': False},
     }
+
+    # Check for specific files in the scenario data
+    file_checks = {
+        "cvp": "MAPS",
+        "regionincl": "MAPS",
+        "unit": "MAPS/DATA",
+        "pplx": "MAPS/DATA",
+        "ttrx": "MAPS/DATA",
+        "terx": "MAPS/DATA",
+        "wmdata": "MAPS/DATA",
+        "newsitems": "MAPS/DATA",
+        "profile": "MAPS/DATA",
+        "oob": "MAPS/ORBATS"
+    }
+
+    for key, folder in file_checks.items():
+        for filename in scenario_data[key]:
+            if filename.upper() != f"DEFAULT.{key.upper()}":
+                relative_path = f"{scenario_name}/{folder}/{filename}".lower()
+                structure[relative_path] = {'required': True, 'exists': False}
 
     for root, _, files in os.walk(base_dir):
         for file in files:
