@@ -1,0 +1,29 @@
+/* src/assets/styles/App.css */
+
+/* Ensure the body and html elements have no margin or padding */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Ensure the main content is not hidden under the navbar and there is no unwanted shift */
+main {
+    padding-top: 60px; /* Height of the navbar */
+    padding-bottom: 150px; /* Combined height of the progress bar and message box */
+    margin: 0;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+/* Additional style resets */
+* {
+    box-sizing: border-box;
+}
+
+/* Style for full-width fixed elements */
+.navbar, .progress-bar-container, .message-box {
+    left: 0;
+    right: 0;
+    margin: 0;
+}

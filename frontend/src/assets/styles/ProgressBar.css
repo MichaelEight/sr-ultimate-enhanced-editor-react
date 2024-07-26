@@ -1,0 +1,40 @@
+/* src/assets/styles/ProgressBar.css */
+.progress-bar-container {
+    width: 100%;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-top: 1px solid #ccc;
+    position: fixed;
+    bottom: 100px; /* Above the message box */
+    z-index: 999;
+    left: 0;
+    right: 0;
+    margin: 0;
+}
+
+.progress-bar {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    background-color: #007bff;
+    transition: width 0.25s;
+    color: white;
+}
+
+.progress-bar-text {
+    font-size: 12px;
+}
+
+.progress-bar-message {
+    margin-top: 5px;
+    font-size: 14px;
+    text-align: center;
+}

@@ -7,8 +7,6 @@ const MessageBox = () => {
     const { messages, clearMessages } = useMessage();
 
     return (
-        <>
-        <h2>Log</h2>
         <div className="message-box">
             <button onClick={clearMessages} className="clear-button">Clear Log</button>
             {messages.map((msg, index) => (
@@ -17,7 +15,6 @@ const MessageBox = () => {
                 </div>
             ))}
         </div>
-        </>
     );
 };
 

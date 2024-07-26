@@ -1,5 +1,5 @@
-// src/App.jsx
-import React from 'react';
+// src/App.js
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Navbar from './components/Navbar';
@@ -11,13 +11,17 @@ import RegionPage from './pages/RegionPage';
 import TheaterPage from './pages/TheaterPage';
 import ResourcePage from './pages/ResourcePage';
 import MessageBox from './components/MessageBox';
+import ProgressBar from './components/Progressbar';
 import { MessageProvider } from './contexts/MessageContext';
+import './assets/styles/App.css'; // Add a CSS file for global styles
 
 const App = () => {
+    const [progress, setProgress] = useState(0);
+    const [progressMessage, setProgressMessage] = useState('');
+
     return (
         <MessageProvider>
             <Router>
-                <Header />
                 <Navbar />
                 <main>
                     <Routes>
@@ -29,6 +33,7 @@ const App = () => {
                         <Route path="/resources" element={<ResourcePage />} />
                     </Routes>
                 </main>
+                <ProgressBar progress={progress} message={progressMessage} />
                 <MessageBox />
                 <Footer />
             </Router>
