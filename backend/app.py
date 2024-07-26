@@ -11,9 +11,28 @@ import io
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+@app.route('/load_default_project/<project_name>', methods=['GET'])
+def load_default_project(project_name):
+    try:
+        # Assuming project data is stored in a JSON file named after the project
+        project_file_path = os.path.join(EXTRACT_FOLDER, f"{project_name}.json")
+        
+        if not os.path.exists(project_file_path):
+            return jsonify({'error': 'Project not found'}), 404
+        
+        with open(project_file_path, 'r') as project_file:
+            project_data = project_file.read()
+            return jsonify(project_data), 200
+        
+    except Exception as e:
+        send_message(f"!! Internal server error: {str(e)}")
+        add_to_log(f"!! Internal server error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
+        print("Received upload request")  # Log request received
         if 'file' not in request.files:
             send_message("!! No file part")
             add_to_log("!! No file part")
@@ -62,7 +81,9 @@ def upload_file():
         add_to_log("** File structure validated")
 
         send_progress(100, "File uploaded and validated")
-        return jsonify(structure), 200
+        # Return both scenario and structure data
+        combined_data = {**scenario_file_data, **structure}
+        return jsonify(combined_data), 200
 
     except Exception as e:
         send_message(f"!! Internal server error: {str(e)}")

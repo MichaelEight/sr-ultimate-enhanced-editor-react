@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useState } from 'react';
 import useFileUpload from '../hooks/useFileUpload';
 import useSocket from '../hooks/useSocket';
@@ -7,15 +6,18 @@ import '../assets/styles/Home.css'; // Import the CSS file for Home styles
 
 const Home = () => {
     const {
-        file,
         validationResults,
-        handleFileChange,
-        handleUpload,
+        handleFileChangeAndUpload,
         handleExport,
-        handleCheckboxChange
+        handleCheckboxChange,
+        progress,
+        setProgress,
+        setProgressMessage
     } = useFileUpload();
     const [project, setProject] = useState(null);
     const [defaultProjects] = useState(["Project1", "Project2", "Project3"]); // Example default projects
+
+    useSocket(setProgress, setProgressMessage);
 
     const handleCreateEmptyProject = () => {
         setProject({
@@ -37,26 +39,18 @@ const Home = () => {
         });
     };
 
-    const handleLoadDefaultProject = (projectName) => {
-        // Fetch and load the default project data
-        // This is a placeholder, replace with actual data fetching logic
-        setProject({
-            scenarioName: projectName,
-            cacheName: 'Cache for ' + projectName,
-            mapName: 'Map for ' + projectName,
-            oof: 'OOF for ' + projectName,
-            unit: 'Unit for ' + projectName,
-            pplx: 'PPLX for ' + projectName,
-            ttrx: 'TTRX for ' + projectName,
-            terx: 'TERX for ' + projectName,
-            newsitems: 'NewsItems for ' + projectName,
-            profile: 'Profile for ' + projectName,
-            cvp: 'CVP for ' + projectName,
-            wmdata: 'WMData for ' + projectName,
-            oob: 'OOB for ' + projectName,
-            preCache: 'Pre-Cache for ' + projectName,
-            postCache: 'Post-Cache for ' + projectName
-        });
+    const handleLoadDefaultProject = async (projectName) => {
+        try {
+            const response = await fetch(`http://localhost:5000/load_default_project/${projectName}`);
+            if (response.ok) {
+                const projectData = await response.json();
+                setProject(projectData.scenario_data);
+            } else {
+                console.error("Failed to load project data");
+            }
+        } catch (error) {
+            console.error("Error loading project data:", error);
+        }
     };
 
     const handleCloseProject = () => {
@@ -67,9 +61,8 @@ const Home = () => {
         <div className="home-container">
             <div className="sidebar">
                 <button onClick={handleCreateEmptyProject}>Create Empty Project</button>
-                <input type="file" onChange={handleFileChange} style={{ display: 'none' }} id="fileInput"/>
+                <input type="file" onChange={handleFileChangeAndUpload} style={{ display: 'none' }} id="fileInput"/>
                 <button onClick={() => document.getElementById('fileInput').click()}>Upload Project</button>
-                <button onClick={handleUpload}>Upload</button>
                 <div className="default-projects">
                     <h3>Load Default Project</h3>
                     {defaultProjects.map((project, index) => (
@@ -78,6 +71,7 @@ const Home = () => {
                 </div>
                 <button disabled>Load Last Project</button>
                 <button onClick={handleCloseProject} disabled={!project}>Close Current Project</button>
+                <button onClick={handleExport} disabled={!project}>Export</button>
             </div>
             <div className="content">
                 {project ? (
@@ -156,7 +150,6 @@ const Home = () => {
                                 ))}
                             </tbody>
                         </table>
-                        <button onClick={handleExport}>Export</button>
                     </div>
                 )}
             </div>
