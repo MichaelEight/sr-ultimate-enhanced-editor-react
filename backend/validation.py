@@ -1,5 +1,5 @@
 import os
-from message import send_message
+from message import send_message, add_to_log
 
 def validate_file_structure(base_dir, scenario_name, scenario_data):
     structure = {
@@ -28,7 +28,7 @@ def validate_file_structure(base_dir, scenario_name, scenario_data):
         "terx": "maps/data",
         "wmdata": "maps/data",
         "newsitems": "maps/data",
-        "profile": "maps/data",
+        "prf": "maps/data",
         "oob": "maps/orbats"
     }
 
@@ -45,9 +45,9 @@ def validate_file_structure(base_dir, scenario_name, scenario_data):
             existing_files.add(relative_path)
             if relative_path in structure:
                 structure[relative_path]['exists'] = True
-                send_message(f"** Found existing file: {relative_path}")
+                add_to_log(f"** Found existing file: {relative_path}")
             else:
-                send_message(f"?? Unexpected file: {relative_path}")
+                add_to_log(f"?? Unexpected file: {relative_path}")
                 expected_folder = '/'.join(relative_path.split('/')[:-1])
                 for key in structure.keys():
                     if key.startswith(expected_folder) and file in key:

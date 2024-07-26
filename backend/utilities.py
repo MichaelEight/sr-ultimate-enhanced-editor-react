@@ -34,7 +34,7 @@ def parse_scenario_file(file_path):
         "terx": [],
         "wmdata": [],
         "newsitems": [],
-        "profile": [],
+        "prf": [],
         "oob": [],
         "precache": [],
         "postcache": [],
@@ -69,7 +69,7 @@ def parse_scenario_file(file_path):
         elif filename.endswith('.NEWSITEMS'):
             scenario_data['newsitems'].append(filename)
         elif filename.endswith('.PRF'):
-            scenario_data['profile'].append(filename)
+            scenario_data['prf'].append(filename)
         elif filename.endswith('.OOB'):
             scenario_data['oob'].append(filename)
 

@@ -10,8 +10,12 @@ export const MessageProvider = ({ children }) => {
         setMessages((prevMessages) => [...prevMessages, message]);
     };
 
+    const clearMessages = () => {
+        setMessages([]);
+    };
+
     return (
-        <MessageContext.Provider value={{ messages, addMessage }}>
+        <MessageContext.Provider value={{ messages, addMessage, clearMessages }}>
             {children}
         </MessageContext.Provider>
     );
