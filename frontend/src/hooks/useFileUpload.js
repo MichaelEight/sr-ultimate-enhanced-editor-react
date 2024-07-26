@@ -5,6 +5,7 @@ import { useMessage } from '../contexts/MessageContext';
 const useFileUpload = () => {
     const [file, setFile] = useState(null);
     const [validationResults, setValidationResults] = useState(null);
+    const [project, setProject] = useState(null); // Add project state
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
     const { addMessage } = useMessage();
@@ -26,6 +27,7 @@ const useFileUpload = () => {
             const data = await uploadFile(formData);
             console.log('Upload successful:', data); // Log successful upload
             setValidationResults(data.structure);
+            setProject(data.scenario_data); // Set the project with the received scenario data
             setProgress(100); // Ensure progress bar reaches 100%
         } catch (error) {
             console.error('Error during upload:', error.message); // Log error
@@ -69,6 +71,8 @@ const useFileUpload = () => {
     return {
         file,
         validationResults,
+        project, // Return project state
+        setProject, // Return setProject function
         progress,
         setProgress,
         setProgressMessage,

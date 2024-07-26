@@ -82,7 +82,16 @@ def upload_file():
 
         send_progress(100, "File uploaded and validated")
         # Return both scenario and structure data
-        combined_data = {**scenario_file_data, **structure}
+        combined_data = {
+            'scenario_data': {
+                **scenario_file_data['scenario_data'],
+                'scenarioName': scenario_name,  # Ensure these keys exist
+                'cacheName': f'Cache for {scenario_name}',
+                'mapName': scenario_file_data['mapfile'][0] if scenario_file_data['mapfile'] else '',
+                'oof': 'OOF for ' + scenario_name,
+            },
+            'structure': structure
+        }
         return jsonify(combined_data), 200
 
     except Exception as e:

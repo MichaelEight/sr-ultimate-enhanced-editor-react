@@ -50,6 +50,12 @@ def parse_scenario_file(file_path):
     gmc_pattern = re.compile(r'&&GMC(.*?)&&END', re.DOTALL)
     key_value_pattern = re.compile(r'(\w+):\s*(.*)')
 
+    # Patterns for the missing labels
+    scenario_name_pattern = re.compile(r'scenarioName\s+"([^"]+)"')
+    cache_name_pattern = re.compile(r'cacheName\s+"([^"]+)"')
+    map_name_pattern = re.compile(r'mapName\s+"([^"]+)"')
+    oof_pattern = re.compile(r'oof\s+"([^"]+)"')
+
     for match in include_pattern.finditer(content):
         filename = match.group(1)
         if filename.endswith('.CVP'):
@@ -79,7 +85,26 @@ def parse_scenario_file(file_path):
 
     mapfile_match = mapfile_pattern.search(content)
     if mapfile_match:
-        scenario_data['mapfile'].append(mapfile_match.group(1))
+        mapfile_value = mapfile_match.group(1)
+        scenario_data['mapfile'].append(mapfile_value)
+        print(f"** Extracted mapfile: {mapfile_value}")  # Debug log
+
+    # Extracting missing labels
+    scenario_name_match = scenario_name_pattern.search(content)
+    if scenario_name_match:
+        scenario_data['scenarioName'] = scenario_name_match.group(1)
+
+    cache_name_match = cache_name_pattern.search(content)
+    if cache_name_match:
+        scenario_data['cacheName'] = cache_name_match.group(1)
+
+    map_name_match = map_name_pattern.search(content)
+    if map_name_match:
+        scenario_data['mapName'] = map_name_match.group(1)
+
+    oof_match = oof_pattern.search(content)
+    if oof_match:
+        scenario_data['oof'] = oof_match.group(1)
 
     gmc_match = gmc_pattern.search(content)
     if gmc_match:
