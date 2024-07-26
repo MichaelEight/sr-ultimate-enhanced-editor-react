@@ -17,6 +17,7 @@
 # used files (import, export)
 /backend/extracted/*
 /backend/uploads/*
+/backend/log.txt
 
 # testing
 /coverage

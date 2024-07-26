@@ -19,6 +19,7 @@ FRONTEND
 MISCELLANEOUS
 !! Add 'close project' button, which resets all data and backend
 !!! split code into files
+!! Button to download server's log
 
 
 WARNINGS to add:
@@ -36,4 +37,4 @@ PRIORITY:
   - you can make it as a separate scan i.e. it is done in the background while user plays with other files... unless they can't be loaded because of something. Maybe try...catch to load, and if an error happened, throw an error, propose a deep scan of the file and if user agrees, point out everything, what is wrong with it. Remember to limit, if the quantity of the same error is greater than 5 (or 10). Or write it as (quantity) [error]
 
 issue:
-- file validation with space in zip name
+- file validation with space in zip name (PATCH - force lowercase)
