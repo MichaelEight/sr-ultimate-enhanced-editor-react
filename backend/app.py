@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from message import send_progress, send_message, socketio
@@ -8,7 +7,6 @@ from validation import validate_file_structure
 import zipfile
 import os
 import io
-import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -28,6 +26,7 @@ def upload_file():
         # Save uploaded file
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
+        send_message(f"** File saved to {file_path}")
 
         # Extract the file
         extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(file.filename)[0])
@@ -36,6 +35,7 @@ def upload_file():
 
         try:
             extract_archive(file_path, extract_path)
+            send_message(f"** File extracted to {extract_path}")
         except ValueError as e:
             send_message(f"!! Extraction error: {str(e)}")
             return jsonify({'error': str(e)}), 500
@@ -43,6 +43,7 @@ def upload_file():
         # Find the scenario name and set the base directory
         try:
             scenario_name, base_dir = find_scenario_file(extract_path)
+            send_message(f"** Scenario name found: {scenario_name}, base directory: {base_dir}")
         except ValueError as e:
             send_message(f"!! No .SCENARIO file found: {str(e)}")
             return jsonify({'error': str(e)}), 500
@@ -50,12 +51,11 @@ def upload_file():
         # Parse the .SCENARIO file
         scenario_file_path = os.path.join(base_dir, f"{scenario_name}.SCENARIO")
         scenario_file_data = parse_scenario_file(scenario_file_path)
+        send_message(f"** Scenario file parsed: {scenario_file_path}")
 
         # Validate the file structure
         structure = validate_file_structure(base_dir, scenario_name, scenario_file_data['scenario_data'])
-
-        print(json.dumps(scenario_file_data['scenario_data'], indent=4))  # Print the JSON data for debugging
-        print(json.dumps(scenario_file_data['settings_data'], indent=4))  # Print the JSON data for debugging
+        send_message("** File structure validated")
 
         send_progress(100, "File uploaded and validated")
         return jsonify(structure), 200
@@ -74,6 +74,7 @@ def export_files():
 
         # Find the base directory of the scenario file
         _, base_dir = find_scenario_file(extract_path)
+        send_message(f"** Base directory found: {base_dir}")
 
         # Create any missing required files
         for path, info in structure.items():
@@ -82,22 +83,29 @@ def export_files():
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
                 with open(full_path, 'w') as f:
                     f.write(f"Placeholder for {path}")
+                send_message(f"** Created placeholder for missing file: {full_path}")
 
         # Create a ZIP file
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            send_message(f"Opened zip file")
             for root, _, files in os.walk(base_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    arcname = os.path.relpath(file_path, base_dir).replace("\\", "/")
+                    arcname = os.path.relpath(file_path, base_dir).replace("\\", "/").lower()
                     if arcname in structure:
                         zip_file.write(file_path, arcname=arcname)
+                        send_message(f"** Added file to ZIP: {file_path} as {arcname}")
+                    else:
+                        send_message(f"** Skipped file: {file_path}")
+            send_message(f"** ZIP file created")
 
         zip_buffer.seek(0)
         send_progress(100, "Export complete")
         return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name=f"{scenario_name}.zip")
 
     except Exception as e:
+        send_message(f"!! Internal server error during export: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
