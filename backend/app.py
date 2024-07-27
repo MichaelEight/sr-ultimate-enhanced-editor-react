@@ -7,6 +7,7 @@ from validation import validate_file_structure
 import zipfile
 import os
 import io
+import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -14,16 +15,12 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 @app.route('/load_default_project/<project_name>', methods=['GET'])
 def load_default_project(project_name):
     try:
-        # Assuming project data is stored in a JSON file named after the project
         project_file_path = os.path.join(EXTRACT_FOLDER, f"{project_name}.json")
-        
         if not os.path.exists(project_file_path):
             return jsonify({'error': 'Project not found'}), 404
-        
         with open(project_file_path, 'r') as project_file:
-            project_data = project_file.read()
+            project_data = json.load(project_file)
             return jsonify(project_data), 200
-        
     except Exception as e:
         send_message(f"!! Internal server error: {str(e)}")
         add_to_log(f"!! Internal server error: {str(e)}")
@@ -64,7 +61,7 @@ def upload_file():
 
         # Find the scenario name and set the base directory
         try:
-            scenario_name, base_dir = find_scenario_file(extract_path)
+            scenario_name, base_dir, scenario_file_name = find_scenario_file(extract_path)
             add_to_log(f"** Scenario name found: {scenario_name}, base directory: {base_dir}")
         except ValueError as e:
             send_message(f"!! No .SCENARIO file found: {str(e)}")
@@ -73,26 +70,17 @@ def upload_file():
 
         # Parse the .SCENARIO file
         scenario_file_path = os.path.join(base_dir, f"{scenario_name}.SCENARIO")
-        scenario_file_data = parse_scenario_file(scenario_file_path)
+        scenario_file_data = parse_scenario_file(scenario_file_path, scenario_file_name)
         add_to_log(f"** Scenario file parsed: {scenario_file_path}")
 
-        # Validate the file structure
-        structure = validate_file_structure(base_dir, scenario_name, scenario_file_data['scenario_data'])
-        add_to_log("** File structure validated")
+        # Cache the scenario data
+        cache_file_path = os.path.join(EXTRACT_FOLDER, f"{scenario_name}.json")
+        with open(cache_file_path, 'w') as cache_file:
+            json.dump(scenario_file_data, cache_file)
+        add_to_log(f"** Scenario data cached: {cache_file_path}")
 
         send_progress(100, "File uploaded and validated")
-        # Return both scenario and structure data
-        combined_data = {
-            'scenario_data': {
-                **scenario_file_data['scenario_data'],
-                'scenarioName': scenario_name,  # Ensure these keys exist
-                'cacheName': f'Cache for {scenario_name}',
-                'mapName': scenario_file_data['mapfile'][0] if scenario_file_data['mapfile'] else '',
-                'oof': 'OOF for ' + scenario_name,
-            },
-            'structure': structure
-        }
-        return jsonify(combined_data), 200
+        return jsonify(scenario_file_data), 200
 
     except Exception as e:
         send_message(f"!! Internal server error: {str(e)}")

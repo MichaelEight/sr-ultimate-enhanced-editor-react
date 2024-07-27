@@ -5,32 +5,26 @@ import { useMessage } from '../contexts/MessageContext';
 const useFileUpload = () => {
     const [file, setFile] = useState(null);
     const [validationResults, setValidationResults] = useState(null);
-    const [project, setProject] = useState(null); // Add project state
     const [progress, setProgress] = useState(0);
-    const [progressMessage, setProgressMessage] = useState('');
+    const [project, setProject] = useState(null);
     const { addMessage } = useMessage();
 
     const handleFileChangeAndUpload = async (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
 
-        console.log('File selected:', selectedFile.name); // Log file selection
-
         setFile(selectedFile);
-        setProgress(0); // Reset progress
-
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-
+        setProgress(0);  // Reset progress
         try {
-            console.log('Uploading file...'); // Log before uploading
-            const data = await uploadFile(formData);
-            console.log('Upload successful:', data); // Log successful upload
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const data = await uploadFile(formData);  // Pass the FormData object
+            console.log('Received data:', data);  // Log the received data
             setValidationResults(data.structure);
-            setProject(data.scenario_data); // Set the project with the received scenario data
-            setProgress(100); // Ensure progress bar reaches 100%
+            setProject(data.scenario_data);  // Set project data from scenario_data
+            setProgress(100);  // Ensure progress bar reaches 100%
         } catch (error) {
-            console.error('Error during upload:', error.message); // Log error
             addMessage(`!! Error during upload: ${error.message}`);
         }
     };
@@ -41,7 +35,7 @@ const useFileUpload = () => {
             return;
         }
 
-        setProgress(0); // Reset progress
+        setProgress(0);  // Reset progress
 
         try {
             const blob = await exportFile(file.name.split('.')[0], validationResults);
@@ -52,7 +46,7 @@ const useFileUpload = () => {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            setProgress(100); // Ensure progress bar reaches 100%
+            setProgress(100);  // Ensure progress bar reaches 100%
         } catch (error) {
             addMessage(`!! Error during export: ${error.message}`);
         }
@@ -71,11 +65,11 @@ const useFileUpload = () => {
     return {
         file,
         validationResults,
-        project, // Return project state
-        setProject, // Return setProject function
         progress,
         setProgress,
-        setProgressMessage,
+        setProgressMessage: addMessage,
+        project,
+        setProject,
         handleFileChangeAndUpload,
         handleExport,
         handleCheckboxChange

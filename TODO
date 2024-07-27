@@ -15,6 +15,7 @@ FRONTEND
 ! Styles
 ! Display green server online, yellow server busy, red server issue/inactive/refused connection etc.
 !! Progress bar (with steps)
+!! Log, add time 
 
 MISCELLANEOUS
 !! Add 'close project' button, which resets all data and backend
@@ -40,4 +41,6 @@ ISSUES:
 - file validation with space in zip name (PATCH - force lowercase)
 - (fixed) "Required file fourislands/maps/data/default.prf not found", always for default.prf. it was saved as profile, not prf
 
-- Mapfile (.mapx) is incorrectly sent / detected
+- (fixed) Mapfile (.mapx) is incorrectly sent / detected
+- settings have often more options than these listed in .scenario. make sure all labels are present, even if they are null
+- scenario name has label out of style (utilities + frontend)
