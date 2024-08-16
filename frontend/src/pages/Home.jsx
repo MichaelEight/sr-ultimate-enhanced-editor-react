@@ -20,9 +20,9 @@ const Home = () => {
 
     const handleCreateEmptyProject = () => {
         setProject({
-            scenarioFileName: '',
+            scenario: '',
             cacheName: '',
-            mapfile: '',
+            map: '',
             oof: '',
             unit: '',
             pplx: '',
@@ -82,14 +82,14 @@ const Home = () => {
                     <div className="project-content">
                         <h2>General Information</h2>
                         <label>Scenario Name*</label>
-                        <input type="text" value={project.scenarioFileName || ''} onChange={(e) => setProject({ ...project, scenarioFileName: e.target.value })} />
+                        <input type="text" value={removeFileExtension(project.scenario[0]) || ''} onChange={(e) => setProject({ ...project, scenario: e.target.value })} />
                         <label>Cache Name*</label>
                         <input type="text" value={project.cacheName || ''} onChange={(e) => setProject({ ...project, cacheName: e.target.value })} />
                         <input type="checkbox" /> Same as Scenario Name
 
                         <h2>Map Files</h2>
                         <label>Map Name*</label>
-                        <input type="text" value={removeFileExtension(project.mapfile[0])} onChange={(e) => setProject({ ...project, mapfile: [e.target.value] })} />
+                        <input type="text" value={removeFileExtension(project.mapx[0])} onChange={(e) => setProject({ ...project, mapx: [e.target.value] })} />
                         <input type="checkbox" /> Create New Map
                         <label>OOF*</label>
                         <input type="text" value={removeFileExtension(project.oof[0])} onChange={(e) => setProject({ ...project, oof: [e.target.value] })} />

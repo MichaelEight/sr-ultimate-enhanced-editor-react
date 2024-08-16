@@ -26,6 +26,7 @@ def parse_scenario_file(file_path, scenario_file_name):
         content = file.read()
 
     scenario_data = {
+        "scenario": [scenario_file_name],
         "cvp": [],
         "regionincl": [],
         "prf": [],
@@ -37,9 +38,8 @@ def parse_scenario_file(file_path, scenario_file_name):
         "newsitems": [],
         "oof": [],
         "oob": [],
-        "mapfile": [],
-        "savfile": [],
-        "scenarioFileName": scenario_file_name
+        "mapx": [],
+        "sav": []
     }
 
     settings_data = {}
@@ -58,11 +58,11 @@ def parse_scenario_file(file_path, scenario_file_name):
 
     savfile_match = savfile_pattern.search(content)
     if savfile_match:
-        scenario_data['savfile'].append(f"{savfile_match.group(1)}.SAV")
+        scenario_data['sav'].append(f"{savfile_match.group(1)}.SAV")
 
     mapfile_match = mapfile_pattern.search(content)
     if mapfile_match:
-        scenario_data['mapfile'].append(f"{mapfile_match.group(1)}.MAPX")
+        scenario_data['mapx'].append(f"{mapfile_match.group(1)}.MAPX")
 
     gmc_match = gmc_pattern.search(content)
     if gmc_match:
