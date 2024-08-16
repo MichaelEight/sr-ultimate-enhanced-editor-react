@@ -39,4 +39,4 @@ PRIORITY:
 ISSUES:
 - file validation with space in zip name (PATCH - force lowercase)
 - (fixed) "Required file fourislands/maps/data/default.prf not found", always for default.prf. it was saved as profile, not prf
-
+- new project can't be exported due to validation not found
