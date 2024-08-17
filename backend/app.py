@@ -73,6 +73,10 @@ def upload_file():
         scenario_file_data = parse_scenario_file(scenario_file_path, scenario_file_name)
         add_to_log(f"** Scenario file parsed: {scenario_file_path}")
 
+        # Validate the file structure and save the validation results
+        structure = validate_file_structure(base_dir, scenario_name, scenario_file_data['scenario_data'])
+        scenario_file_data['structure'] = structure  # Save structure data in scenario_file_data
+
         # Cache the scenario data
         cache_file_path = os.path.join(EXTRACT_FOLDER, f"{scenario_name}.json")
         with open(cache_file_path, 'w') as cache_file:
@@ -93,11 +97,17 @@ def export_files():
         data = request.json
         scenario_name = data['scenario_name']
         structure = data['structure']
+        new_project = data.get('new_project', False)  # Add a flag to determine if it's a new project
+
         extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
 
-        # Find the base directory of the scenario file
-        _, base_dir = find_scenario_file(extract_path)
-        add_to_log(f"** Base directory found: {base_dir}")
+        if not new_project:  # Only find base directory and validate structure if it's not a new project
+            # Find the base directory of the scenario file
+            _, base_dir = find_scenario_file(extract_path)
+            add_to_log(f"** Base directory found: {base_dir}")
+
+            # Validate file structure using the existing function (not needed for new projects)
+            structure = validate_file_structure(base_dir, scenario_name, data['scenario_data'])
 
         # Create any missing required files
         for path, info in structure.items():
