@@ -43,4 +43,5 @@ ISSUES:
 
 - (fixed) Mapfile (.mapx) is incorrectly sent / detected
 - settings have often more options than these listed in .scenario. make sure all labels are present, even if they are null
-- scenario name has label out of style (utilities + frontend)
+- (fixed) scenario name has label out of style (utilities + frontend)
+- new empty project export creates only .scenario and file in /maps without extension

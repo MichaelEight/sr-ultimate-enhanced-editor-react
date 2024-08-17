@@ -29,28 +29,56 @@ const useFileUpload = () => {
         }
     };
 
+    // Home.jsx
     const handleExport = async () => {
-        if (!validationResults) {
-            addMessage('!! No validation results to export');
-            return;
-        }
+        if (!project) return;
 
-        setProgress(0);  // Reset progress
+        const userInputs = {
+            cvp: project.cvp[0],
+            mapx: project.mapx[0],
+            oof: project.oof[0],
+            regionincl: project.regionincl[0],
+            oob: project.oob[0],
+            wmdata: project.wmdata[0],
+            unit: project.unit[0],
+            pplx: project.pplx[0],
+            ttrx: project.ttrx[0],
+            terx: project.terx[0],
+            newsitems: project.newsitems[0],
+            prf: project.prf[0],
+        };
 
         try {
-            const blob = await exportFile(file.name.split('.')[0], validationResults);
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${file.name.split('.')[0]}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setProgress(100);  // Ensure progress bar reaches 100%
+            const response = await fetch('http://localhost:5000/export', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    scenario_name: project.scenario[0],
+                    structure: project.structure,
+                    user_inputs: userInputs,
+                    new_project: project.new_project || false,
+                }),
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${project.scenario[0]}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                console.error('Export failed');
+            }
         } catch (error) {
-            addMessage(`!! Error during export: ${error.message}`);
+            console.error('Error during export:', error);
         }
     };
+
 
     const handleCheckboxChange = (path) => {
         setValidationResults(prevState => ({

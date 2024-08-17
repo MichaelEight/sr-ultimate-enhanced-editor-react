@@ -24,6 +24,7 @@ const Home = () => {
             cacheName: [''],
             map: [''],
             oof: [''],
+            regionincl: [''],
             unit: [''],
             pplx: [''],
             ttrx: [''],
@@ -33,8 +34,8 @@ const Home = () => {
             cvp: [''],
             wmdata: [''],
             oob: [''],
-            preCache: '',
-            postCache: '',
+            preCache: [''],
+            postCache: [''],
             new_project: true  // Indicate that this is a new project
         });
     };
@@ -178,13 +179,13 @@ const Home = () => {
                         <input 
                             type="text"
                             value={project.preCache && project.preCache[0] ? removeFileExtension(project.preCache[0]) : ''} 
-                            onChange={(e) => setProject({ ...project, preCache: e.target.value })}
+                            onChange={(e) => setProject({ ...project, preCache: [e.target.value] })}
                             />
                         <label>Post-Cache</label>
                         <input 
                             type="text"
                             value={project.postCache && project.postCache[0] ? removeFileExtension(project.postCache[0]) : ''} 
-                            onChange={(e) => setProject({ ...project, postCache: e.target.value })}
+                            onChange={(e) => setProject({ ...project, postCache: [e.target.value] })}
                             />
                     </div>
                 ) : (

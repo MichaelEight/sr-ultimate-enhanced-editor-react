@@ -91,25 +91,46 @@ def upload_file():
         add_to_log(f"!! Internal server error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+# app.py
 @app.route('/export', methods=['POST'])
 def export_files():
     try:
         data = request.json
         scenario_name = data['scenario_name']
-        structure = data['structure']
-        new_project = data.get('new_project', False)  # Add a flag to determine if it's a new project
+        user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
+        new_project = data.get('new_project', False)  # Flag to check if it's a new project
 
-        extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
+        # Define the structure as per the requirement
+        structure = {
+            f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
+            f"{scenario_name}/maps/{scenario_name}.cvp".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/{scenario_name}.mapx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/{scenario_name}.oof".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/{scenario_name}.regionincl".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/orbats/{scenario_name}.oob".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.wmdata".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.unit".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.pplx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.ttrx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.terx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.newsitems".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}/maps/data/{scenario_name}.prf".lower(): {'required': False, 'exists': False},
+        }
 
-        if not new_project:  # Only find base directory and validate structure if it's not a new project
-            # Find the base directory of the scenario file
+        # Mark the files as required if they do not contain 'default' and user has provided inputs
+        for key, value in user_inputs.items():
+            if value and 'default' not in value.lower():
+                if key in ['cvp', 'mapx', 'oof', 'regionincl', 'oob', 'wmdata', 'unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf']:
+                    structure[f"{scenario_name}/maps/{value}".lower()] = {'required': True, 'exists': False}
+
+        if not new_project:  # Only proceed with existing project validation
+            extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
             _, base_dir = find_scenario_file(extract_path)
-            add_to_log(f"** Base directory found: {base_dir}")
+            add_to_log(f"** Using validated structure for export")
+        else:
+            base_dir = os.path.join(EXTRACT_FOLDER, scenario_name)  # Use a simple base directory for new projects
 
-            # Validate file structure using the existing function (not needed for new projects)
-            structure = validate_file_structure(base_dir, scenario_name, data['scenario_data'])
-
-        # Create any missing required files
+        # Create any missing required files based on the validated or constructed structure
         for path, info in structure.items():
             if info['required'] and not info['exists']:
                 full_path = os.path.join(base_dir, path)
@@ -118,15 +139,14 @@ def export_files():
                     f.write(f"Placeholder for {path}")
                 add_to_log(f"** Created placeholder for missing file: {full_path}")
 
-        # Create a ZIP file
+        # Proceed with creating ZIP file and exporting
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            add_to_log(f"Opened zip file")
             for root, _, files in os.walk(base_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
                     arcname = os.path.relpath(file_path, base_dir).replace("\\", "/").lower()
-                    if arcname in structure:
+                    if arcname in structure or new_project:  # Allow export for new projects
                         zip_file.write(file_path, arcname=arcname)
                         add_to_log(f"** Added file to ZIP: {file_path} as {arcname}")
                     else:
