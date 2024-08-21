@@ -100,10 +100,9 @@ def export_files():
         user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
         new_project = data.get('new_project', False)  # Flag to check if it's a new project
         
-        print(f"Received export request for scenario: {scenario_name}")
-        print(f"User inputs: {user_inputs}")
-        print(f"New project: {new_project}")
-        print()
+        add_to_log(f"Received export request for scenario: {scenario_name}")
+        add_to_log(f"User inputs: {user_inputs}")
+        add_to_log(f"New project: {new_project}")
 
         # Define the structure as per the requirement
         structure = {
