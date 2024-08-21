@@ -46,3 +46,21 @@ ISSUES:
 - settings have often more options than these listed in .scenario. make sure all labels are present, even if they are null
 - (fixed) scenario name has label out of style (utilities + frontend)
 - new empty project export creates only .scenario and file in /maps without extension
+
+
+
+!!!! REDESIGN EXPORT / HANDLING FILES IN GENERAL
+export goal:
+ if new scenario then create default structure: required, modified, existing=false
+ if existing scenario then check structure: required, modified, existing=validate()
+  // for now only detect files in correct directory, ignore all other
+  // filenames from .scenario file
+  
+ validate()
+  check if .scenario exists
+  open .scenario
+  extract scenario_data (and settings_data)
+  
+  match scenario_data with corresponding labels in structure template
+  mark existing ones
+  // mark required, even if they don't exist

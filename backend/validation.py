@@ -4,38 +4,38 @@ from message import send_message, add_to_log
 def validate_file_structure(base_dir, scenario_name, scenario_data):
     structure = {
         f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
-        f"{scenario_name}/maps/{scenario_name}.cvp".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/{scenario_name}.mapx".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/{scenario_name}.oof".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/{scenario_name}.regionincl".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/orbats/{scenario_name}.oob".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.wmdata".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.unit".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.pplx".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.ttrx".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.terx".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.newsitems".lower(): {'required': False, 'exists': False},
-        f"{scenario_name}/maps/data/{scenario_name}.prf".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\{scenario_name}.cvp".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\{scenario_name}.mapx".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\{scenario_name}.oof".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\{scenario_name}.regionincl".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\orbats\{scenario_name}.oob".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.wmdata".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.unit".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.pplx".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.ttrx".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.terx".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.newsitems".lower(): {'required': False, 'exists': False},
+        f"{scenario_name}\maps\data\{scenario_name}.prf".lower(): {'required': False, 'exists': False},
     }
 
     # Check for specific files in the scenario data
     file_checks = {
         "cvp": "maps",
         "regionincl": "maps",
-        "unit": "maps/data",
-        "pplx": "maps/data",
-        "ttrx": "maps/data",
-        "terx": "maps/data",
-        "wmdata": "maps/data",
-        "newsitems": "maps/data",
-        "prf": "maps/data",
-        "oob": "maps/orbats"
+        "unit": "maps\data",
+        "pplx": "maps\data",
+        "ttrx": "maps\data",
+        "terx": "maps\data",
+        "wmdata": "maps\data",
+        "newsitems": "maps\data",
+        "prf": "maps\data",
+        "oob": "maps\orbats"
     }
 
     for key, folder in file_checks.items():
         for filename in scenario_data[key]:
             if filename.upper() != f"DEFAULT.{key.upper()}":
-                relative_path = f"{scenario_name}/{folder}/{filename}".lower()
+                relative_path = f"{scenario_name}\{folder}\{filename}".lower()
                 structure[relative_path] = {'required': True, 'exists': False}
 
     existing_files = set()

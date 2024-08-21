@@ -99,29 +99,36 @@ def export_files():
         scenario_name = data['scenario_name']
         user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
         new_project = data.get('new_project', False)  # Flag to check if it's a new project
+        
+        print(f"Received export request for scenario: {scenario_name}")
+        print(f"User inputs: {user_inputs}")
+        print(f"New project: {new_project}")
+        print()
 
         # Define the structure as per the requirement
         structure = {
             f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
-            f"{scenario_name}/maps/{scenario_name}.cvp".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/{scenario_name}.mapx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/{scenario_name}.oof".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/{scenario_name}.regionincl".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/orbats/{scenario_name}.oob".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.wmdata".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.unit".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.pplx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.ttrx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.terx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.newsitems".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}/maps/data/{scenario_name}.prf".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\{user_inputs['cvp']}.cvp".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\{user_inputs['mapx']}.mapx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\{user_inputs['oof']}.oof".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\{user_inputs['regionincl']}.regionincl".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\orbats\{user_inputs['oob']}.oob".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['wmdata']}.wmdata".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['unit']}.unit".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['pplx']}.pplx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['ttrx']}.ttrx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['terx']}.terx".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['newsitems']}.newsitems".lower(): {'required': False, 'exists': False},
+            f"{scenario_name}\maps\data\{user_inputs['prf']}.prf".lower(): {'required': False, 'exists': False},
         }
+
+        print(f"Structure: {structure}")
 
         # Mark the files as required if they do not contain 'default' and user has provided inputs
         for key, value in user_inputs.items():
             if value and 'default' not in value.lower():
                 if key in ['cvp', 'mapx', 'oof', 'regionincl', 'oob', 'wmdata', 'unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf']:
-                    structure[f"{scenario_name}/maps/{value}".lower()] = {'required': True, 'exists': False}
+                    structure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
 
         if not new_project:  # Only proceed with existing project validation
             extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
