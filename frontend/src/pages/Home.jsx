@@ -4,6 +4,8 @@ import useSocket from '../hooks/useSocket';
 import { useMessage } from '../contexts/MessageContext';
 import '../assets/styles/Home.css'; // Import the CSS file for Home styles
 
+// TODO make sidebar menu fixed and not scrollable
+
 const Home = () => {
     const {
         handleFileChangeAndUpload,
