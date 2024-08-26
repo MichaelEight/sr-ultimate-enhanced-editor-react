@@ -3,7 +3,7 @@ from flask_cors import CORS
 from message import send_progress, send_message, socketio, add_to_log
 from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER
 from utilities import extract_archive, find_scenario_file, parse_scenario_file
-from validation import validate_file_structure
+from validation import check_file_existance
 import zipfile
 import os
 import io
@@ -11,6 +11,103 @@ import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+# TODO make it null, empty or default unless project is created, uploaded or default project is used
+structure = {
+    'scenario': {
+        'dir': '\\',
+        'filename': "",
+        'isRequired': True,
+        'doesExist': False,
+        'isModified': False
+    },
+    'cvp': {
+        'dir': f"\\maps\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'mapx': {
+        'dir': f"\\maps\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'oof': {
+        'dir': f"\\maps\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'regionincl': {
+        'dir': f"\\maps\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'oob': {
+        'dir': f"\\maps\\orbats\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'wmdata': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'unit': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'pplx': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'ttrx': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'terx': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'newsitems': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    },
+    'prf': {
+        'dir': f"\\maps\\data\\",
+        'filename': "",
+        'isRequired': False,
+        'doesExist': False,
+        'isModified': False
+    }
+}
+
+# @app.route -- when creating empty scenario, create empty scenario with default values
 
 @app.route('/load_default_project/<project_name>', methods=['GET'])
 def load_default_project(project_name):
@@ -44,7 +141,7 @@ def upload_file():
         # Save uploaded file
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
-        add_to_log(f"** File saved to {file_path}")
+        add_to_log(f"** File received and saved to {file_path}")
 
         # Extract the file
         extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(file.filename)[0])
@@ -74,8 +171,13 @@ def upload_file():
         add_to_log(f"** Scenario file parsed: {scenario_file_path}")
 
         # Validate the file structure and save the validation results
-        structure = validate_file_structure(base_dir, scenario_name, scenario_file_data['scenario_data'])
+        # TODO MODIFY, INCLUDE UPDATED FUNCTION & OUTPUT
+        # TODO Make sure frontend loads new structure; it's easier to write filenames
+        structure = check_file_existance(base_dir, scenario_name, scenario_file_data['scenario_data'])
         scenario_file_data['structure'] = structure  # Save structure data in scenario_file_data
+        add_to_log(f"** Scenario structure validated")
+        add_to_log(f"base_dir: {base_dir}, scenario_name: {scenario_name}")
+        add_to_log(f"structure: {structure}")
 
         # Cache the scenario data
         cache_file_path = os.path.join(EXTRACT_FOLDER, f"{scenario_name}.json")
