@@ -12,7 +12,9 @@ import json
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# TODO add more log messages
+# TODO Add more log messages
+# TODO Add points of progress
+# TODO IMPORTANT! Specify, when app is using exported dir and when some other one
 
 # TODO make it null, empty or default unless project is created, uploaded or default project is used
 structure = {
@@ -35,7 +37,8 @@ structure = {
 isNewProject = True
 
 # Base directory of the project, just server-side info
-# TODO Clear folder unnamed and then create it in every launch, so it is a debug/safety feature
+# TODO Clear folder 'unnamed' and then create it in every launch, so it is a debug/safety feature
+# TODO Set to received if uploaded, otherwise to scenario_name 
 projectBaseDir = 'unnamed'
 
 # TODO @app.route -- when creating empty scenario, create empty scenario with default values
@@ -133,78 +136,64 @@ def upload_file():
 # Note for frontend - don't reload if filename didn't change, unless user presses "reload" button
 
 # app.py
-@app.route('/export', methods=['POST'])
+@app.route('/export')
 def export_files():
     try:
         # FIXME modify to include newest structure info
         # Assuming structure is updated right away, get data from currently existing structure
 
-        data = request.json
-        scenario_name = data['scenario_name']
-        user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
-        new_project = data.get('new_project', False)  # Flag to check if it's a new project
-        
-        add_to_log(f"Received export request for scenario: {scenario_name}")
-        add_to_log(f"User inputs: {user_inputs}")
-        add_to_log(f"New project: {new_project}")
+        # data = request.json
+        # scenario_name = data['scenario_name']
+        # user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
+        # new_project = data.get('new_project', False)  # Flag to check if it's a new project
+        # add_to_log(f"Received export request for scenario: {scenario_name}")
+        # add_to_log(f"User inputs: {user_inputs}")
+        # add_to_log(f"New project: {new_project}")
 
-        # FIXME Redesign this... or delete
-        # Define the structure as per the requirement
-        # structure = {
-        #     f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
-        #     f"{scenario_name}\maps\{user_inputs['cvp']}.cvp".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\{user_inputs['mapx']}.mapx".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\{user_inputs['oof']}.oof".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\{user_inputs['regionincl']}.regionincl".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\orbats\{user_inputs['oob']}.oob".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['wmdata']}.wmdata".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['unit']}.unit".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['pplx']}.pplx".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['ttrx']}.ttrx".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['terx']}.terx".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['newsitems']}.newsitems".lower(): {'required': False, 'exists': False},
-        #     f"{scenario_name}\maps\data\{user_inputs['prf']}.prf".lower(): {'required': False, 'exists': False},
-        # }
+        scenario_name = structure['scenario']['filename']
 
-        print(f"Structure: {structure}")
-
-        # Mark files as required, if nondefault name
+        # TODO Mark files as required, if nondefault name
         # TODO separate files, which don't have default name, rather they have a list of default files (e.g. gc2020, 1936...)
-        for key, value in user_inputs.items():
-            if value and 'default' not in value.lower():
-                if key in ['cvp', 'mapx', 'oof', 'regionincl', 'oob', 'wmdata', 'unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf']:
-                    structure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
+        # for key, value in user_inputs.items():
+        #     if value and 'default' not in value.lower():
+        #         if key in ['cvp', 'mapx', 'oof', 'regionincl', 'oob', 'wmdata', 'unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf']:
+        #             structure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
 
-        # FIXME app needs base project name to proceed. Use this var: projectBaseDir
-        if not new_project:  # Only proceed with existing project validation
-            extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
-            _, base_dir = find_scenario_file(extract_path)
-            add_to_log(f"** Using validated structure for export")
-        else:
-            base_dir = os.path.join(EXTRACT_FOLDER, scenario_name)  # Use a simple base directory for new projects
-
+        # Set base project name to proceed. Use this var: projectBaseDir
+        # if isNewProject: # DEBUG: TURNED OFF UNTIL NEEDED # FIXME
+        projectBaseDir = f'\{scenario_name}\'
+        
+        
         # Create any missing required files based on the structure
-        # FIXME modify this. It's not 'path, info in structure.items()' anymore
-        for path, info in structure.items():
-            if info['required'] and not info['exists']:
-                full_path = os.path.join(base_dir, path)
-                os.makedirs(os.path.dirname(full_path), exist_ok=True)
-                with open(full_path, 'w') as f:
-                    f.write(f"Placeholder for {path}")
-                add_to_log(f"** Created placeholder for missing file: {full_path}")
+        # for ext in structure:
+        #     if structure[ext]['isRequired'] and not structure[ext]['doesExist']:
+        #         path = projectBaseDir + structure[ext]['dir'] + structure[ext]['filename'] + '.' + ext
+        #         os.makedirs(os.path.dirname(path), exist_ok=True)
+        #         with open(path, 'w') as f:
+        #             f.write(f"Placeholder for {path}")
+        #         add_to_log(f"** Created placeholder for missing file: {path}")
 
         # Proceed with creating ZIP file and exporting
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for root, _, files in os.walk(base_dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    arcname = os.path.relpath(file_path, base_dir).replace("\\", "/").lower() # FIXME eliminate need of .lower()
-                    if arcname in structure or new_project:  # Allow export for new projects
-                        zip_file.write(file_path, arcname=arcname)
-                        add_to_log(f"** Added file to ZIP: {file_path} as {arcname}")
-                    else:
-                        add_to_log(f"** Skipped file: {file_path}")
+            for ext in structure:
+                pass
+                # TODO Export
+                # If !isRequired -- skip it
+                # If doesExist and !isModified -- copy from previous exported
+                # If (doesExist and isModified) or !doesExist  -- create new file
+                # REMEMBER to take correct path (export vs extracted)
+                # OR prepare everything in 'exported' and then ZIP it and send
+
+            # for root, _, files in os.walk(projectBaseDir):
+            #     for file in files:
+            #         filePath = os.path.join(root, file)
+            #         arcname = os.path.relpath(filePath, projectBaseDir).replace("\\", "/").lower() # FIXME eliminate need of .lower()
+            #         if arcname in structure or isNewProject:  # Allow export for new projects
+            #             zip_file.write(filePath, arcname=arcname)
+            #             add_to_log(f"** Added file to ZIP: {filePath} as {arcname}")
+            #         else:
+            #             add_to_log(f"** Skipped file: {filePath}")
             add_to_log(f"** ZIP file created")
 
         zip_buffer.seek(0)
