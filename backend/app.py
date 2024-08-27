@@ -12,103 +12,35 @@ import json
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# TODO add more log messages
+
 # TODO make it null, empty or default unless project is created, uploaded or default project is used
 structure = {
-    'scenario': {
-        'dir': '\\',
-        'filename': "",
-        'isRequired': True,
-        'doesExist': False,
-        'isModified': False
-    },
-    'cvp': {
-        'dir': f"\\maps\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'mapx': {
-        'dir': f"\\maps\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'oof': {
-        'dir': f"\\maps\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'regionincl': {
-        'dir': f"\\maps\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'oob': {
-        'dir': f"\\maps\\orbats\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'wmdata': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'unit': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'pplx': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'ttrx': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'terx': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'newsitems': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    },
-    'prf': {
-        'dir': f"\\maps\\data\\",
-        'filename': "",
-        'isRequired': False,
-        'doesExist': False,
-        'isModified': False
-    }
+    'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
+    'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+    'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+    'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+    'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+    'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\orbats\\', 'filename': ""},
+    'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+    'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+    'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+    'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+    'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+    'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+    'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
 }
 
-# @app.route -- when creating empty scenario, create empty scenario with default values
+# True -- new empty project; False -- user uploaded project or used default one
+isNewProject = True
 
+# Base directory of the project, just server-side info
+# TODO Clear folder unnamed and then create it in every launch, so it is a debug/safety feature
+projectBaseDir = 'unnamed'
+
+# TODO @app.route -- when creating empty scenario, create empty scenario with default values
+
+# TODO Prepare default projects
 @app.route('/load_default_project/<project_name>', methods=['GET'])
 def load_default_project(project_name):
     try:
@@ -193,10 +125,20 @@ def upload_file():
         add_to_log(f"!! Internal server error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+# TODO @app.route -- set isModified for given label in structure
+
+# TODO @app.route -- rename file in structure based on change in frontend (on lost focus or enter pressed)
+
+# TODO @app.route -- load file based on tab selected and current filename, send data to frontend
+# Note for frontend - don't reload if filename didn't change, unless user presses "reload" button
+
 # app.py
 @app.route('/export', methods=['POST'])
 def export_files():
     try:
+        # FIXME modify to include newest structure info
+        # Assuming structure is updated right away, get data from currently existing structure
+
         data = request.json
         scenario_name = data['scenario_name']
         user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
@@ -206,31 +148,34 @@ def export_files():
         add_to_log(f"User inputs: {user_inputs}")
         add_to_log(f"New project: {new_project}")
 
+        # FIXME Redesign this... or delete
         # Define the structure as per the requirement
-        structure = {
-            f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
-            f"{scenario_name}\maps\{user_inputs['cvp']}.cvp".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\{user_inputs['mapx']}.mapx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\{user_inputs['oof']}.oof".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\{user_inputs['regionincl']}.regionincl".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\orbats\{user_inputs['oob']}.oob".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['wmdata']}.wmdata".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['unit']}.unit".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['pplx']}.pplx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['ttrx']}.ttrx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['terx']}.terx".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['newsitems']}.newsitems".lower(): {'required': False, 'exists': False},
-            f"{scenario_name}\maps\data\{user_inputs['prf']}.prf".lower(): {'required': False, 'exists': False},
-        }
+        # structure = {
+        #     f"{scenario_name}.SCENARIO".lower(): {'required': True, 'exists': False},
+        #     f"{scenario_name}\maps\{user_inputs['cvp']}.cvp".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\{user_inputs['mapx']}.mapx".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\{user_inputs['oof']}.oof".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\{user_inputs['regionincl']}.regionincl".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\orbats\{user_inputs['oob']}.oob".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['wmdata']}.wmdata".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['unit']}.unit".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['pplx']}.pplx".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['ttrx']}.ttrx".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['terx']}.terx".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['newsitems']}.newsitems".lower(): {'required': False, 'exists': False},
+        #     f"{scenario_name}\maps\data\{user_inputs['prf']}.prf".lower(): {'required': False, 'exists': False},
+        # }
 
         print(f"Structure: {structure}")
 
-        # Mark the files as required if they do not contain 'default' and user has provided inputs
+        # Mark files as required, if nondefault name
+        # TODO separate files, which don't have default name, rather they have a list of default files (e.g. gc2020, 1936...)
         for key, value in user_inputs.items():
             if value and 'default' not in value.lower():
                 if key in ['cvp', 'mapx', 'oof', 'regionincl', 'oob', 'wmdata', 'unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf']:
                     structure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
 
+        # FIXME app needs base project name to proceed. Use this var: projectBaseDir
         if not new_project:  # Only proceed with existing project validation
             extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(scenario_name)[0])
             _, base_dir = find_scenario_file(extract_path)
@@ -238,7 +183,8 @@ def export_files():
         else:
             base_dir = os.path.join(EXTRACT_FOLDER, scenario_name)  # Use a simple base directory for new projects
 
-        # Create any missing required files based on the validated or constructed structure
+        # Create any missing required files based on the structure
+        # FIXME modify this. It's not 'path, info in structure.items()' anymore
         for path, info in structure.items():
             if info['required'] and not info['exists']:
                 full_path = os.path.join(base_dir, path)
@@ -253,7 +199,7 @@ def export_files():
             for root, _, files in os.walk(base_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    arcname = os.path.relpath(file_path, base_dir).replace("\\", "/").lower()
+                    arcname = os.path.relpath(file_path, base_dir).replace("\\", "/").lower() # FIXME eliminate need of .lower()
                     if arcname in structure or new_project:  # Allow export for new projects
                         zip_file.write(file_path, arcname=arcname)
                         add_to_log(f"** Added file to ZIP: {file_path} as {arcname}")

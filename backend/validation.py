@@ -39,6 +39,10 @@ def check_file_existance(base_dir, scenario_name, scenario_data):
     # TODO Check if each file exists
     # directory = dir + label + filename
 
+    # DEBUG, set all exists to true
+    for label in structure:
+        structure[label]['doesExist'] = True
+
     # existing_files = set()
     # for root, _, files in os.walk(base_dir):
     #     for file in files:
