@@ -6,6 +6,11 @@ def check_file_existance(base_dir, scenario_name, scenario_data):
     print(f'scenario_name: {scenario_name}')
     print(f'scenario_data: {scenario_data}')
 
+    add_to_log(f"Checking file existance for scenario: {scenario_name}")
+    add_to_log(f'base_dir: {base_dir}')
+    add_to_log(f'scenario_name: {scenario_name}')
+    add_to_log(f'scenario_data: {scenario_data}')
+
     structure = {
         'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
         'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
@@ -72,4 +77,6 @@ def check_file_existance(base_dir, scenario_name, scenario_data):
     #         if not found:
     #             send_message(f"!! Required file {path} not found")
 
+
+    add_to_log("** Check complete, returning structure: " + str(structure))
     return structure

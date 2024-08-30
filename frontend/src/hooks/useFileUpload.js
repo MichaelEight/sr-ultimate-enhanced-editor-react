@@ -49,19 +49,11 @@ const useFileUpload = () => {
         };
 
         try {
+            // Sending a GET request since no data is needed from the frontend
             const response = await fetch('http://localhost:5000/export', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    scenario_name: project.scenario[0],
-                    structure: project.structure,
-                    user_inputs: userInputs,
-                    new_project: project.new_project || false,
-                }),
+                method: 'GET',
             });
-
+        
             if (response.ok) {
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -73,10 +65,13 @@ const useFileUpload = () => {
                 a.remove();
             } else {
                 console.error('Export failed');
+                const errorData = await response.json();
+                console.error('Error details:', errorData);
             }
         } catch (error) {
             console.error('Error during export:', error);
         }
+        
     };
 
 

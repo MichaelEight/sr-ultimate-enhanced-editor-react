@@ -8,6 +8,7 @@ import zipfile
 import os
 import io
 import json
+import shutil
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -17,6 +18,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # TODO IMPORTANT! Specify, when app is using exported dir and when some other one
 
 # TODO make it null, empty or default unless project is created, uploaded or default project is used
+# IMPORTANT - dir other than .scenario must have {scenario}\\ ... at the beginning
 structure = {
     'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
     'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
@@ -60,6 +62,7 @@ def load_default_project(project_name):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    global structure # This freaking keyword costed me weeks of my life. I FORGOT IT AAAAHHHH 2024/08/30 14:41, few weeks wasted
     try:
         print("Received upload request")  # Log request received
         if 'file' not in request.files:
@@ -135,9 +138,37 @@ def upload_file():
 # TODO @app.route -- load file based on tab selected and current filename, send data to frontend
 # Note for frontend - don't reload if filename didn't change, unless user presses "reload" button
 
+def copyFile(sourceDir, targetDir, filename):
+    """
+    Copies a file from the source directory to the target directory.
+
+    Parameters:
+    sourceDir (str): The relative path to the source directory.
+    targetDir (str): The relative path to the target directory.
+    filename (str): The name of the file to copy.
+    """
+    # Construct the full relative path to the source file
+    source_path = os.path.join(sourceDir, filename)
+    
+    # Construct the full relative path to the destination directory
+    destination_path = os.path.join(targetDir, filename)
+    
+    # Ensure the destination directory exists
+    os.makedirs(targetDir, exist_ok=True)
+    
+    try:
+        # Copy the file from source to destination
+        shutil.copy(source_path, destination_path)
+        print(f"Copied {source_path} to {destination_path}")
+    except FileNotFoundError:
+        print(f"Error: {source_path} not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 # app.py
 @app.route('/export')
 def export_files():
+    global structure
     try:
         # FIXME modify to include newest structure info
         # Assuming structure is updated right away, get data from currently existing structure
@@ -160,40 +191,77 @@ def export_files():
         #             structure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
 
         # Set base project name to proceed. Use this var: projectBaseDir
-        # if isNewProject: # DEBUG: TURNED OFF UNTIL NEEDED # FIXME
-        projectBaseDir = f'\{scenario_name}\'
+        # if isNewProject: # FIXME DEBUG: TURNED OFF UNTIL NEEDED
+        projectBaseDir = f"\\{scenario_name}\\"
         
-        
-        # Create any missing required files based on the structure
-        # for ext in structure:
-        #     if structure[ext]['isRequired'] and not structure[ext]['doesExist']:
-        #         path = projectBaseDir + structure[ext]['dir'] + structure[ext]['filename'] + '.' + ext
-        #         os.makedirs(os.path.dirname(path), exist_ok=True)
-        #         with open(path, 'w') as f:
-        #             f.write(f"Placeholder for {path}")
-        #         add_to_log(f"** Created placeholder for missing file: {path}")
+        #
+        # TODO Copy / create missing file in EXPORTED
+        #
+
+        for ext in structure:
+            filename = structure[ext]['filename']
+            if filename == "":
+                add_to_log(f"Filename is empty for {ext}")
+                add_to_log(f"structure[ext] = {structure[ext]}")
+                add_to_log(f"structure[ext]['filename'] = {structure[ext]['filename']}")
+            isRequired, doesExist, isModified = structure[ext]['isRequired'], structure[ext]['doesExist'], structure[ext]['isModified']
+            
+            # filedir e.g. exported/scenarioA/scenarioA.scenario
+            if ext == 'scenario':
+                filedir = projectBaseDir + structure[ext]['dir']
+            else:
+                filedir = projectBaseDir + structure['scenario']['filename'] + structure[ext]['dir']
+
+            add_to_log(f"Checking file: {filename}.{ext}")
+            add_to_log(f"Filedir: {filedir}")
+
+            # If !isRequired -- skip it
+            if not isRequired:
+                add_to_log(f"Skipping file (not required): {filename}.{ext}")
+                continue
+
+            # If doesExist and !isModified -- copy from previous exported
+            if doesExist and not isModified:
+                # Copy from extracted to exported
+                copyFile(EXTRACT_FOLDER + filedir, EXPORT_FOLDER + filedir, filename + '.' + ext)
+                add_to_log(f"** Copied from extracted to exported: {EXPORT_FOLDER + filedir + filename + '.' + ext}")
+                pass
+
+            # If (doesExist and isModified) or !doesExist  -- create new file
+            if (doesExist and isModified) or not doesExist:
+                # TODO Create non-placeholder new file
+                
+                fullPath = EXPORT_FOLDER + filedir + filename + '.' + ext
+                os.makedirs(os.path.dirname(fullPath), exist_ok=True) # Create dir if it doesn't exist
+                with open(fullPath, 'w') as f:
+                    f.write(f"Placeholder for {fullPath}")
+
+                add_to_log(f"** Created placeholder for missing file: {fullPath}")
+
+        # TODO for modified files, figure out how to get info from frontend (maybe live update?)
+        # and then write a function for creating file content with this data
+
+        #
+        # TODO Create ZIP file from project in EXPORTED folder
+        #
 
         # Proceed with creating ZIP file and exporting
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for ext in structure:
-                pass
-                # TODO Export
-                # If !isRequired -- skip it
-                # If doesExist and !isModified -- copy from previous exported
-                # If (doesExist and isModified) or !doesExist  -- create new file
-                # REMEMBER to take correct path (export vs extracted)
-                # OR prepare everything in 'exported' and then ZIP it and send
-
-            # for root, _, files in os.walk(projectBaseDir):
-            #     for file in files:
-            #         filePath = os.path.join(root, file)
-            #         arcname = os.path.relpath(filePath, projectBaseDir).replace("\\", "/").lower() # FIXME eliminate need of .lower()
-            #         if arcname in structure or isNewProject:  # Allow export for new projects
-            #             zip_file.write(filePath, arcname=arcname)
-            #             add_to_log(f"** Added file to ZIP: {filePath} as {arcname}")
-            #         else:
-            #             add_to_log(f"** Skipped file: {filePath}")
+            # Walk through the exported folder to gather all files for zipping
+            for root, _, files in os.walk(EXPORT_FOLDER + projectBaseDir):
+                for file in files:
+                    filePath = os.path.join(root, file)
+                    # Generate arcname by making the file path relative to EXPORT_FOLDER and normalizing it
+                    arcname = os.path.relpath(filePath, EXPORT_FOLDER).replace("\\", "/")
+                    
+                    # Check if the file should be included in the ZIP
+                    if arcname.startswith(projectBaseDir.strip("\\")) or isNewProject:
+                        # Include the file in the ZIP archive
+                        zip_file.write(filePath, arcname=arcname)
+                        add_to_log(f"** Added file to ZIP: {filePath} as {arcname}")
+                    else:
+                        add_to_log(f"** Skipped file: {filePath}")
             add_to_log(f"** ZIP file created")
 
         zip_buffer.seek(0)
@@ -206,6 +274,6 @@ def export_files():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    add_to_log("Starting server")
+    add_to_log("===============================[ Starting server ]===============================")
     socketio.init_app(app)
     socketio.run(app, debug=True)

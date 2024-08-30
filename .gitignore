@@ -16,8 +16,9 @@
 .pnp.js
 
 # used files (import, export)
-/backend/extracted/*
 /backend/uploads/*
+/backend/extracted/*
+/backend/exported/*
 /backend/log.txt
 
 # testing
