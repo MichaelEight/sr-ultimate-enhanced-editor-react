@@ -40,6 +40,9 @@ const Home = () => {
             postCache: [''],
             new_project: true  // Indicate that this is a new project
         });
+
+        // Make a call to /create_empty_project endpoint
+        fetch('http://localhost:5000/create_empty_project');
     };
 
     useEffect(() => {

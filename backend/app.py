@@ -15,25 +15,29 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 # TODO Add more log messages
 # TODO Add points of progress
+# TODO Introduce autosave and backup, server-side (and client-side? cookies?)
+# TODO Optimize, use less API calls etc.
 # TODO IMPORTANT! Specify, when app is using exported dir and when some other one
 
-# TODO make it null, empty or default unless project is created, uploaded or default project is used
-# IMPORTANT - dir other than .scenario must have {scenario}\\ ... at the beginning
-structure = {
-    'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
-    'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-    'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-    'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-    'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-    'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\orbats\\', 'filename': ""},
-    'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-    'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-    'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-    'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-    'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-    'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-    'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
-}
+# NOTE - dir other than .scenario must have {scenario}\\ ... at the beginning
+def create_empty_structure():
+    global structure
+
+    structure = {
+        'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
+        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
+        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\orbats\\', 'filename': ""},
+        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
+    }
 
 # True -- new empty project; False -- user uploaded project or used default one
 isNewProject = True
@@ -43,7 +47,11 @@ isNewProject = True
 # TODO Set to received if uploaded, otherwise to scenario_name 
 projectBaseDir = 'unnamed'
 
-# TODO @app.route -- when creating empty scenario, create empty scenario with default values
+@app.route('/create_empty_project', methods=['GET'])
+def create_empty_project():
+    global isNewProject, structure
+    isNewProject = True
+    create_empty_structure()
 
 # TODO Prepare default projects
 @app.route('/load_default_project/<project_name>', methods=['GET'])
@@ -63,6 +71,7 @@ def load_default_project(project_name):
 @app.route('/upload', methods=['POST'])
 def upload_file():
     global structure # This freaking keyword costed me weeks of my life. I FORGOT IT AAAAHHHH 2024/08/30 14:41, few weeks wasted
+    global isNewProject
     try:
         print("Received upload request")  # Log request received
         if 'file' not in request.files:
@@ -109,13 +118,14 @@ def upload_file():
         add_to_log(f"** Scenario file parsed: {scenario_file_path}")
 
         # Validate the file structure and save the validation results
-        # TODO MODIFY, INCLUDE UPDATED FUNCTION & OUTPUT
         # TODO Make sure frontend loads new structure; it's easier to write filenames
         structure = check_file_existance(base_dir, scenario_name, scenario_file_data['scenario_data'])
         scenario_file_data['structure'] = structure  # Save structure data in scenario_file_data
         add_to_log(f"** Scenario structure validated")
         add_to_log(f"base_dir: {base_dir}, scenario_name: {scenario_name}")
         add_to_log(f"structure: {structure}")
+
+        isNewProject = False
 
         # Cache the scenario data
         cache_file_path = os.path.join(EXTRACT_FOLDER, f"{scenario_name}.json")
@@ -170,17 +180,6 @@ def copyFile(sourceDir, targetDir, filename):
 def export_files():
     global structure
     try:
-        # FIXME modify to include newest structure info
-        # Assuming structure is updated right away, get data from currently existing structure
-
-        # data = request.json
-        # scenario_name = data['scenario_name']
-        # user_inputs = data.get('user_inputs', {})  # This should be passed from the frontend containing user input values
-        # new_project = data.get('new_project', False)  # Flag to check if it's a new project
-        # add_to_log(f"Received export request for scenario: {scenario_name}")
-        # add_to_log(f"User inputs: {user_inputs}")
-        # add_to_log(f"New project: {new_project}")
-
         scenario_name = structure['scenario']['filename']
 
         # TODO Mark files as required, if nondefault name
@@ -240,10 +239,6 @@ def export_files():
 
         # TODO for modified files, figure out how to get info from frontend (maybe live update?)
         # and then write a function for creating file content with this data
-
-        #
-        # TODO Create ZIP file from project in EXPORTED folder
-        #
 
         # Proceed with creating ZIP file and exporting
         zip_buffer = io.BytesIO()

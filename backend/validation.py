@@ -44,7 +44,7 @@ def check_file_existance(base_dir, scenario_name, scenario_data):
     # TODO Check if each file exists
     # directory = dir + label + filename
 
-    # DEBUG, set all exists to true
+    # FIXME DEBUG, set all exists to true 
     for label in structure:
         structure[label]['doesExist'] = True
 
