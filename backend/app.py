@@ -18,6 +18,10 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # TODO Introduce autosave and backup, server-side (and client-side? cookies?)
 # TODO Optimize, use less API calls etc.
 # TODO IMPORTANT! Specify, when app is using exported dir and when some other one
+# TODO For all tabs, live update data; each tab should hold a JSON object with all data; during update name fields to change
+
+# NOTE modifying any filename -- set .scenario as modified
+# NOTE checking "modify" checkbox -- set this file as modified, no matter if changes were made or not
 
 # NOTE - dir other than .scenario must have {scenario}\\ ... at the beginning
 def create_empty_structure():
@@ -47,11 +51,15 @@ isNewProject = True
 # TODO Set to received if uploaded, otherwise to scenario_name 
 projectBaseDir = 'unnamed'
 
+extractedProjectBasePath = 'unnamed'
+
 @app.route('/create_empty_project', methods=['GET'])
 def create_empty_project():
     global isNewProject, structure
+    add_to_log("************ Creating Empty Project ************")
     isNewProject = True
     create_empty_structure()
+    add_to_log("** Created empty (default) structure")
 
 # TODO Prepare default projects
 @app.route('/load_default_project/<project_name>', methods=['GET'])
@@ -71,8 +79,10 @@ def load_default_project(project_name):
 @app.route('/upload', methods=['POST'])
 def upload_file():
     global structure # This freaking keyword costed me weeks of my life. I FORGOT IT AAAAHHHH 2024/08/30 14:41, few weeks wasted
-    global isNewProject
+    global isNewProject, extractedProjectBasePath
     try:
+        add_to_log("************ Uploading Project ************")
+
         print("Received upload request")  # Log request received
         if 'file' not in request.files:
             send_message("!! No file part")
@@ -91,7 +101,11 @@ def upload_file():
         add_to_log(f"** File received and saved to {file_path}")
 
         # Extract the file
-        extract_path = os.path.join(EXTRACT_FOLDER, os.path.splitext(file.filename)[0])
+        # FIXME if ZIP is nested, denest it
+        # Expected dir of scenario: extracted\FourIslands\FourIslands.SCENARIO
+        # Wrong dir of scenario: extracted\FourIslands\FourIslands\FourIslands.SCENARIO
+        uploadedZIPfilename = os.path.splitext(file.filename)[0]
+        extract_path = os.path.join(EXTRACT_FOLDER, uploadedZIPfilename)
         if not os.path.exists(extract_path):
             os.makedirs(extract_path)
 
@@ -106,7 +120,16 @@ def upload_file():
         # Find the scenario name and set the base directory
         try:
             scenario_name, base_dir, scenario_file_name = find_scenario_file(extract_path)
-            add_to_log(f"** Scenario name found: {scenario_name}, base directory: {base_dir}")
+
+            # Remove EXTRACT_FOLDER from base_dir
+            if base_dir.startswith(EXTRACT_FOLDER):
+                extractedProjectBasePath = base_dir.replace(EXTRACT_FOLDER, '', 1).lstrip(os.sep)
+                add_to_log(f"** ExtractedProjectBasePath (removed EXTRACT_FOLDER): {extractedProjectBasePath}")
+            else:
+                extractedProjectBasePath = base_dir  # If EXTRACT_FOLDER isn't found, keep base_dir as is
+                add_to_log(f"** ExtractedProjectBasePath (base_dir): {extractedProjectBasePath}")
+
+            add_to_log(f"** Scenario name found: {scenario_name}, base directory: {base_dir}, extractedProjectBasePath: {extractedProjectBasePath}")
         except ValueError as e:
             send_message(f"!! No .SCENARIO file found: {str(e)}")
             add_to_log(f"!! No .SCENARIO file found: {str(e)}")
@@ -119,7 +142,7 @@ def upload_file():
 
         # Validate the file structure and save the validation results
         # TODO Make sure frontend loads new structure; it's easier to write filenames
-        structure = check_file_existance(base_dir, scenario_name, scenario_file_data['scenario_data'])
+        structure = check_file_existance(base_dir, scenario_name, scenario_file_data['scenario_data'], extractedProjectBasePath)
         scenario_file_data['structure'] = structure  # Save structure data in scenario_file_data
         add_to_log(f"** Scenario structure validated")
         add_to_log(f"base_dir: {base_dir}, scenario_name: {scenario_name}")
@@ -134,6 +157,7 @@ def upload_file():
         add_to_log(f"** Scenario data cached: {cache_file_path}")
 
         send_progress(100, "File uploaded and validated")
+        add_to_log("************ Upload completed ************")
         return jsonify(scenario_file_data), 200
 
     except Exception as e:
@@ -170,16 +194,21 @@ def copyFile(sourceDir, targetDir, filename):
         # Copy the file from source to destination
         shutil.copy(source_path, destination_path)
         print(f"Copied {source_path} to {destination_path}")
+        add_to_log(f"Copied {source_path} to {destination_path}")
     except FileNotFoundError:
         print(f"Error: {source_path} not found.")
+        add_to_log(f"Error: {source_path} not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
+        add_to_log(f"An error occurred: {e}")
 
 # app.py
 @app.route('/export')
 def export_files():
     global structure
     try:
+        add_to_log("************ Exporting Project ************")
+
         scenario_name = structure['scenario']['filename']
 
         # TODO Mark files as required, if nondefault name
@@ -191,7 +220,9 @@ def export_files():
 
         # Set base project name to proceed. Use this var: projectBaseDir
         # if isNewProject: # FIXME DEBUG: TURNED OFF UNTIL NEEDED
-        projectBaseDir = f"\\{scenario_name}\\"
+        # projectBaseDir = f"\\{scenario_name}\\"
+        projectBaseDir = extractedProjectBasePath
+        add_to_log(f"projectBaseDir = {projectBaseDir}")
         
         #
         # TODO Copy / create missing file in EXPORTED
@@ -205,14 +236,20 @@ def export_files():
                 add_to_log(f"structure[ext]['filename'] = {structure[ext]['filename']}")
             isRequired, doesExist, isModified = structure[ext]['isRequired'], structure[ext]['doesExist'], structure[ext]['isModified']
             
+            # Ensure there is no leading backslash in the directory
+            dir_path = structure[ext]['dir'].lstrip(os.sep)
+
             # filedir e.g. exported/scenarioA/scenarioA.scenario
             if ext == 'scenario':
-                filedir = projectBaseDir + structure[ext]['dir']
+                extractedFileDir = os.path.join(EXTRACT_FOLDER, projectBaseDir, dir_path)
+                exportedFileDir = os.path.join(EXPORT_FOLDER, projectBaseDir, dir_path)
             else:
-                filedir = projectBaseDir + structure['scenario']['filename'] + structure[ext]['dir']
+                extractedFileDir = os.path.join(EXTRACT_FOLDER, projectBaseDir, structure['scenario']['filename'], dir_path)
+                exportedFileDir = os.path.join(EXPORT_FOLDER, projectBaseDir, structure['scenario']['filename'], dir_path)
 
             add_to_log(f"Checking file: {filename}.{ext}")
-            add_to_log(f"Filedir: {filedir}")
+            add_to_log(f"extractedFileDir: {extractedFileDir}")
+            add_to_log(f"exportedFileDir: {exportedFileDir}")
 
             # If !isRequired -- skip it
             if not isRequired:
@@ -222,15 +259,14 @@ def export_files():
             # If doesExist and !isModified -- copy from previous exported
             if doesExist and not isModified:
                 # Copy from extracted to exported
-                copyFile(EXTRACT_FOLDER + filedir, EXPORT_FOLDER + filedir, filename + '.' + ext)
-                add_to_log(f"** Copied from extracted to exported: {EXPORT_FOLDER + filedir + filename + '.' + ext}")
-                pass
+                copyFile(extractedFileDir, exportedFileDir, filename + '.' + ext)
+                add_to_log(f"** Copied {filename + '.' + ext} from extracted ({extractedFileDir}) to exported ({exportedFileDir})")
 
             # If (doesExist and isModified) or !doesExist  -- create new file
             if (doesExist and isModified) or not doesExist:
                 # TODO Create non-placeholder new file
                 
-                fullPath = EXPORT_FOLDER + filedir + filename + '.' + ext
+                fullPath = exportedFileDir + filename + '.' + ext
                 os.makedirs(os.path.dirname(fullPath), exist_ok=True) # Create dir if it doesn't exist
                 with open(fullPath, 'w') as f:
                     f.write(f"Placeholder for {fullPath}")
@@ -244,14 +280,22 @@ def export_files():
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             # Walk through the exported folder to gather all files for zipping
-            for root, _, files in os.walk(EXPORT_FOLDER + projectBaseDir):
+            folderPathToBeZIPped = os.path.join(EXPORT_FOLDER, projectBaseDir)
+            add_to_log(f"** Zipping files in {folderPathToBeZIPped}")
+            for root, _, files in os.walk(folderPathToBeZIPped):
                 for file in files:
                     filePath = os.path.join(root, file)
                     # Generate arcname by making the file path relative to EXPORT_FOLDER and normalizing it
                     arcname = os.path.relpath(filePath, EXPORT_FOLDER).replace("\\", "/")
                     
+                    # Extract the file extension
+                    _, file_extension = os.path.splitext(arcname)
+
+                    # Optionally, remove the leading dot
+                    file_extension = file_extension.lstrip('.')
+
                     # Check if the file should be included in the ZIP
-                    if arcname.startswith(projectBaseDir.strip("\\")) or isNewProject:
+                    if (structure[file_extension] and structure[file_extension]['isRequired']) or isNewProject:
                         # Include the file in the ZIP archive
                         zip_file.write(filePath, arcname=arcname)
                         add_to_log(f"** Added file to ZIP: {filePath} as {arcname}")
@@ -261,6 +305,7 @@ def export_files():
 
         zip_buffer.seek(0)
         send_progress(100, "Export complete")
+        add_to_log("************ Export complete ************")
         return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name=f"{scenario_name}.zip")
 
     except Exception as e:

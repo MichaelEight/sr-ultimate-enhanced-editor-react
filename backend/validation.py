@@ -1,30 +1,37 @@
 import os
 from message import send_message, add_to_log
+from config import EXTRACT_FOLDER
 
-def check_file_existance(base_dir, scenario_name, scenario_data):
+def check_file_existance(base_dir, scenario_name, scenario_data, extractedProjectBasePath):
+    add_to_log("************ Checking file existance ************")
+
     print(f'base_dir: {base_dir}')
     print(f'scenario_name: {scenario_name}')
     print(f'scenario_data: {scenario_data}')
+    print(f'extractedProjectName: {extractedProjectBasePath}')
 
-    add_to_log(f"Checking file existance for scenario: {scenario_name}")
+    add_to_log(f"** Checking file existance for scenario: {scenario_name}")
     add_to_log(f'base_dir: {base_dir}')
     add_to_log(f'scenario_name: {scenario_name}')
     add_to_log(f'scenario_data: {scenario_data}')
+    add_to_log(f'extractedProjectName: {extractedProjectBasePath}')
 
+    # TODO move it to separate function setting the structure
     structure = {
-        'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
-        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\orbats\\', 'filename': ""},
-        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
+        # Remove leading backslashes from structure[ext]['dir'], otherwise it treats it as absolute path
+        'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '',               'filename': ""},
+        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
+        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
+        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
+        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
+        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\orbats\\', 'filename': ""},
+        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
+        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
+        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
+        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
+        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
+        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
+        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""}
     }
 
     # Extract filenames and mark isRequired for each
@@ -41,12 +48,17 @@ def check_file_existance(base_dir, scenario_name, scenario_data):
             if not (filename in ['default', "DEFAULT"]):
                 structure[label]['isRequired'] = True
 
-    # TODO Check if each file exists
-    # directory = dir + label + filename
+    # Check if each file exists
+    for ext in structure:
+        if ext == 'scenario':
+            fullExtractedFilePath = os.path.join(extractedProjectBasePath, (structure[ext]['filename'] + '.' + ext))
+        else:
+            fullExtractedFilePath = os.path.join(extractedProjectBasePath, structure['scenario']['filename'], structure[ext]['dir'], (structure[ext]['filename'] + '.' + ext))
+        structure[ext]['doesExist'] = os.path.exists(fullExtractedFilePath)
+        add_to_log(f"{ext} doesExist: {structure[ext]['doesExist']} in {fullExtractedFilePath}")
 
-    # FIXME DEBUG, set all exists to true 
-    for label in structure:
-        structure[label]['doesExist'] = True
+    add_to_log(f"** Finished checking file existance for scenario: {scenario_name}")
+    add_to_log(f"** Structure: {structure}")
 
     # existing_files = set()
     # for root, _, files in os.walk(base_dir):
@@ -79,4 +91,5 @@ def check_file_existance(base_dir, scenario_name, scenario_data):
 
 
     add_to_log("** Check complete, returning structure: " + str(structure))
+    add_to_log("************ Checking file existance DONE ************")
     return structure
