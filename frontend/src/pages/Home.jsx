@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import useFileUpload from '../hooks/useFileUpload';
 import useSocket from '../hooks/useSocket';
 import { useMessage } from '../contexts/MessageContext';
 import '../assets/styles/Home.css'; // Import the CSS file for Home styles
+import debounce from 'lodash/debounce'; // Import debounce from lodash
 
 const Home = () => {
     const {
@@ -57,9 +58,9 @@ const Home = () => {
         });
     };
 
-    useEffect(() => {
-        console.log("Project state:", project);  // Log the current project state
-    }, [project]);
+    // useEffect(() => {
+    //     console.log("Project state:", project);  // Log the current project state
+    // }, [project]);
 
     const handleLoadDefaultProject = async (projectName) => {
         try {
@@ -77,30 +78,34 @@ const Home = () => {
     };
 
     // Function to handle input changes and send API request to rename the file
-    const handleInputChange = (ext, newFileName) => {
-        // Make a POST request to /rename_file with the required data
-        fetch('http://localhost:5000/rename_file', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ext: ext,
-                newFileName: newFileName
-            }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('[rename_file] Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('File renamed successfully:', data);
-        })
-        .catch(error => {
-            console.error('There was a problem with the rename operation:', error);
-        });
+    const handleInputChange = useCallback(
+        debounce((ext, newFileName) => {
+            fetch('http://localhost:5000/rename_file', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ext, newFileName }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('[rename_file] Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('File renamed successfully:', data);
+            })
+            .catch(error => {
+                console.error('There was a problem with the rename operation:', error);
+            });
+        }, 500), // Debounce time: 500ms
+        [] // Only re-create if any dependencies change (none in this case)
+    );
+
+    const handleInputFieldChange = (ext, newFileName) => {
+        setProject(prevProject => ({ ...prevProject, [ext]: [newFileName] }));
+        handleInputChange(ext, newFileName); // Call the debounced function
     };
 
     const handleCloseProject = () => {
@@ -135,21 +140,13 @@ const Home = () => {
                         <input
                             type="text"
                             value={project.scenario && project.scenario[0] ? removeFileExtension(project.scenario[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, scenario: [newValue] });
-                                handleInputChange('scenario', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('scenario', e.target.value)}
                         />
                         <label>Cache Name*</label>
                         <input
                             type="text"
                             value={project.sav && project.sav[0] ? removeFileExtension(project.sav[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, sav: [newValue] });
-                                handleInputChange('sav', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('sav', e.target.value)}
                         />
                         <input type="checkbox" /> Same as Scenario Name
 
@@ -158,22 +155,14 @@ const Home = () => {
                         <input
                             type="text"
                             value={project.mapx && project.mapx[0] ? removeFileExtension(project.mapx[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, mapx: [newValue] });
-                                handleInputChange('mapx', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('mapx', e.target.value)}
                         />
                         <input type="checkbox" /> Create New Map
                         <label>OOF*</label>
                         <input 
                             type="text"
                             value={project.oof && project.oof[0] ? removeFileExtension(project.oof[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, oof: [newValue] });
-                                handleInputChange('oof', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('oof', e.target.value)}
                         />
                         <input type="checkbox" /> Same as Map Name
 
@@ -183,61 +172,37 @@ const Home = () => {
                         <input 
                             type="text"
                             value={project.unit && project.unit[0] ? removeFileExtension(project.unit[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, unit: [newValue] });
-                                handleInputChange('unit', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('unit', e.target.value)}
                             />
                         <label>PPLX*</label>
                         <input 
                             type="text"
                             value={project.pplx && project.pplx[0] ? removeFileExtension(project.pplx[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, pplx: [newValue] });
-                                handleInputChange('pplx', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('pplx', e.target.value)}
                             />
                         <label>TTRX*</label>
                         <input 
                             type="text"
                             value={project.ttrx && project.ttrx[0] ? removeFileExtension(project.ttrx[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, ttrx: [newValue] });
-                                handleInputChange('ttrx', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('ttrx', e.target.value)}
                             />
                         <label>TERX*</label>
                         <input 
                             type="text"
                             value={project.terx && project.terx[0] ? removeFileExtension(project.terx[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, terx: [newValue] });
-                                handleInputChange('terx', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('terx', e.target.value)}
                             />
                         <label>NEWSITEMS*</label>
                         <input 
                             type="text"
                             value={project.newsitems && project.newsitems[0] ? removeFileExtension(project.newsitems[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, newsitems: [newValue] });
-                                handleInputChange('newsitems', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('newsitems', e.target.value)}
                             />
                         <label>PROFILE*</label>
                         <input 
                             type="text"
                             value={project.prf && project.prf[0] ? removeFileExtension(project.prf[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, prf: [newValue] });
-                                handleInputChange('prf', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('prf', e.target.value)}
                             />
 
                         <h2>Editable Data Files</h2>
@@ -245,51 +210,31 @@ const Home = () => {
                         <input 
                             type="text"
                             value={project.cvp && project.cvp[0] ? removeFileExtension(project.cvp[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, cvp: [newValue] });
-                                handleInputChange('cvp', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('cvp', e.target.value)}
                             />
                         <label>WMData*</label>
                         <input 
                             type="text"
                             value={project.wmdata && project.wmdata[0] ? removeFileExtension(project.wmdata[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, wmdata: [newValue] });
-                                handleInputChange('wmdata', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('wmdata', e.target.value)}
                             />
                         <label>OOB</label>
                         <input 
                             type="text"
                             value={project.oob && project.oob[0] ? removeFileExtension(project.oob[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, oob: [newValue] });
-                                handleInputChange('oob', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('oob', e.target.value)}
                             />
                         <label>Pre-Cache</label>
                         <input 
                             type="text"
                             value={project.preCache && project.preCache[0] ? removeFileExtension(project.preCache[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, preCache: [newValue] });
-                                handleInputChange('preCache', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('preCache', e.target.value)}
                             />
                         <label>Post-Cache</label>
                         <input 
                             type="text"
                             value={project.postCache && project.postCache[0] ? removeFileExtension(project.postCache[0]) : ''} 
-                            onChange={(e) => {
-                                const newValue = e.target.value;
-                                setProject({ ...project, postCache: [newValue] });
-                                handleInputChange('postCache', newValue); 
-                            }}
+                            onChange={(e) => handleInputFieldChange('postCache', e.target.value)}
                             />
                     </div>
                 ) : (

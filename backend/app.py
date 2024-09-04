@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from message import send_progress, send_message, socketio, add_to_log
-from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER
+from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER, DEFAULT_STRUCTURE
 from utilities import extract_archive, find_scenario_file, parse_scenario_file
 from validation import check_file_existance
 import zipfile
@@ -18,24 +18,7 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 def create_empty_structure():
     global structure
 
-    structure = {
-        'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
-        'sav':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
-        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
-        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\orbats\\', 'filename': ""},
-        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'preCache':    {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'postCache':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
-    }
+    structure = DEFAULT_STRUCTURE
 
 # True -- new empty project; False -- user uploaded project or used default one
 isNewProject = True
@@ -76,6 +59,9 @@ def upload_file():
     global isNewProject, extractedProjectBasePath
     try:
         add_to_log("************ Uploading Project ************")
+
+        create_empty_structure()
+        add_to_log("** Reseted structure to default")
 
         print("Received upload request")
         if 'file' not in request.files:
@@ -164,15 +150,20 @@ def rename_file():
     global structure
     try:
         data = request.get_json()
+        add_to_log(f"** Received rename request: {data}")
         ext = data['ext']
         newFileName = data['newFileName']
         currentFileName = structure[ext]['filename']
+
+        add_to_log(f"Data split: ext: {ext}, newFileName: {newFileName}, currentFileName: {currentFileName}")
 
         # Name can't be empty
         if newFileName == "":
             send_message("!! Name cannot be empty")
             add_to_log("!! Name cannot be empty")
             return jsonify({'error': 'Name cannot be empty'}), 400
+        
+        add_to_log("Name isn't empty, renaming file")
 
         structure[ext]['filename'] = newFileName
 

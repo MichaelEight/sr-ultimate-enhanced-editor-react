@@ -1,6 +1,6 @@
 import os
 from message import send_message, add_to_log
-from config import EXTRACT_FOLDER
+from config import EXTRACT_FOLDER, DEFAULT_STRUCTURE
 
 def check_file_existance(base_dir, scenario_name, scenario_data, extractedProjectBasePath):
     add_to_log("************ Checking file existance ************")
@@ -17,22 +17,7 @@ def check_file_existance(base_dir, scenario_name, scenario_data, extractedProjec
     add_to_log(f'extractedProjectName: {extractedProjectBasePath}')
 
     # TODO move it to separate function setting the structure
-    structure = {
-        # Remove leading backslashes from structure[ext]['dir'], otherwise it treats it as absolute path
-        'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '',               'filename': ""},
-        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
-        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
-        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
-        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\',         'filename': ""},
-        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\orbats\\', 'filename': ""},
-        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
-        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
-        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
-        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
-        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
-        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""},
-        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps\\data\\',   'filename': ""}
-    }
+    structure = DEFAULT_STRUCTURE
 
     # Extract filenames and mark isRequired for each
     # Loop through the scenario_data dictionary
