@@ -11,17 +11,8 @@ import json
 import shutil
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-
-# TODO Add more log messages
-# TODO Add points of progress
-# TODO Introduce autosave and backup, server-side (and client-side? cookies?)
-# TODO Optimize, use less API calls etc.
-# TODO IMPORTANT! Specify, when app is using exported dir and when some other one
-# TODO For all tabs, live update data; each tab should hold a JSON object with all data; during update name fields to change
-
-# NOTE modifying any filename -- set .scenario as modified
-# NOTE checking "modify" checkbox -- set this file as modified, no matter if changes were made or not
+# CORS(app, resources={r"/*": {"origins": "*"}}) # Debug only!
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 # NOTE - dir other than .scenario must have {scenario}\\ ... at the beginning
 def create_empty_structure():
@@ -29,6 +20,7 @@ def create_empty_structure():
 
     structure = {
         'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
+        'sav':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
         'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
         'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
         'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
@@ -40,17 +32,16 @@ def create_empty_structure():
         'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
         'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
         'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
-        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
+        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'preCache':    {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""},
+        'postCache':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\data\\',   'filename': ""}
     }
 
 # True -- new empty project; False -- user uploaded project or used default one
 isNewProject = True
 
 # Base directory of the project, just server-side info
-# TODO Clear folder 'unnamed' and then create it in every launch, so it is a debug/safety feature
-# TODO Set to received if uploaded, otherwise to scenario_name 
 projectBaseDir = 'unnamed'
-
 extractedProjectBasePath = 'unnamed'
 
 @app.route('/create_empty_project', methods=['GET'])
@@ -60,6 +51,9 @@ def create_empty_project():
     isNewProject = True
     create_empty_structure()
     add_to_log("** Created empty (default) structure")
+
+    # Return a JSON response
+    return jsonify({"message": "Empty project created successfully", "isNewProject": isNewProject, "structure": structure}), 200
 
 # TODO Prepare default projects
 @app.route('/load_default_project/<project_name>', methods=['GET'])
@@ -83,7 +77,7 @@ def upload_file():
     try:
         add_to_log("************ Uploading Project ************")
 
-        print("Received upload request")  # Log request received
+        print("Received upload request")
         if 'file' not in request.files:
             send_message("!! No file part")
             add_to_log("!! No file part")
@@ -101,9 +95,6 @@ def upload_file():
         add_to_log(f"** File received and saved to {file_path}")
 
         # Extract the file
-        # FIXME if ZIP is nested, denest it
-        # Expected dir of scenario: extracted\FourIslands\FourIslands.SCENARIO
-        # Wrong dir of scenario: extracted\FourIslands\FourIslands\FourIslands.SCENARIO
         uploadedZIPfilename = os.path.splitext(file.filename)[0]
         extract_path = os.path.join(EXTRACT_FOLDER, uploadedZIPfilename)
         if not os.path.exists(extract_path):
@@ -168,6 +159,32 @@ def upload_file():
 # TODO @app.route -- set isModified for given label in structure
 
 # TODO @app.route -- rename file in structure based on change in frontend (on lost focus or enter pressed)
+@app.route('/rename_file', methods=['POST'])
+def rename_file():
+    global structure
+    try:
+        data = request.get_json()
+        ext = data['ext']
+        newFileName = data['newFileName']
+        currentFileName = structure[ext]['filename']
+
+        # Name can't be empty
+        if newFileName == "":
+            send_message("!! Name cannot be empty")
+            add_to_log("!! Name cannot be empty")
+            return jsonify({'error': 'Name cannot be empty'}), 400
+
+        structure[ext]['filename'] = newFileName
+
+        #structure = rename_file(structure, old_name, new_name)
+        #send_progress(100, "File renamed")
+        # return jsonify(structure), 200
+        add_to_log(f"** File .{ext} renamed from ({currentFileName}) to ({newFileName})")
+        return jsonify({"message": "File renamed"}), 200
+    except Exception as e:
+        send_message(f"!! Internal server error: {str(e)}")
+        add_to_log(f"!! Internal server error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # TODO @app.route -- load file based on tab selected and current filename, send data to frontend
 # Note for frontend - don't reload if filename didn't change, unless user presses "reload" button
