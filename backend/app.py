@@ -1,6 +1,6 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from message import send_progress, send_message, socketio, add_to_log
+from message import send_progress, send_message, socketio, add_to_log, logLevel
 from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER, DEFAULT_STRUCTURE
 from utilities import extract_archive, find_scenario_file, parse_scenario_file
 from validation import check_file_existance
@@ -323,5 +323,12 @@ def export_files():
 
 if __name__ == '__main__':
     add_to_log("===============================[ Starting server ]===============================")
+    add_to_log("************ SETUP ************")
+    add_to_log(f"Logging level: {logLevel}", 'info')
+    add_to_log(f"DEFAULT_STRUCTURE: {DEFAULT_STRUCTURE}", 'debug')
+    add_to_log(f"UPLOAD_FOLDER: {UPLOAD_FOLDER}", 'debug')
+    add_to_log(f"EXTRACT_FOLDER: {EXTRACT_FOLDER}", 'debug')
+    add_to_log(f"EXPORT_FOLDER: {EXPORT_FOLDER}", 'debug')
+    
     socketio.init_app(app)
     socketio.run(app, debug=True)

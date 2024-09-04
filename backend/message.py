@@ -6,13 +6,24 @@ import inspect
 
 socketio = SocketIO(cors_allowed_origins="*")
 
+# Trace, Debug, Info
+LOGGING_LEVEL = 'info'
+LOG_LEVELS = {0: 'trace', 1: 'debug', 2: 'info'}
+
 def send_progress(progress, message):
     socketio.emit('progress', {'progress': progress, 'message': message})
 
 def send_message(message):
     socketio.emit('message', {'message': message})
 
-def add_to_log(message):
+def add_to_log(message, level='info'):
+    if level not in LOG_LEVELS:
+        message = f'Invalid log level: {level}; MSG: {message}'
+    else:
+        if LOGGING_LEVEL != 'trace':
+            # If logging is higher than limit, don't show it
+            pass
+
     # Use inspect to get the frame of the caller
     caller_frame = inspect.stack()[1]
     
