@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
 import ScenarioPage from './pages/ScenarioPage';
 import SettingsPage from './pages/SettingsPage';
 import RegionPage from './pages/RegionPage';
@@ -25,8 +24,7 @@ const App = () => {
                 <Navbar />
                 <main>
                     <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/scenario" element={<ScenarioPage />} />
+                        <Route path="/" element={<ScenarioPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/regions" element={<RegionPage />} />
                         <Route path="/theaters" element={<TheaterPage />} />
