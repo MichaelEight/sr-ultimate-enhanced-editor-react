@@ -1,6 +1,8 @@
 # config.py
 import os
 
+LOGGING_LEVEL = 'debug'
+
 UPLOAD_FOLDER = 'uploads'
 EXTRACT_FOLDER = 'extracted'
 EXPORT_FOLDER = 'exported'
