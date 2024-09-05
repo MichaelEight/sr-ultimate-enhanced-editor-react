@@ -1,6 +1,6 @@
 import os
 from message import send_message, add_to_log
-from config import EXTRACT_FOLDER, DEFAULT_STRUCTURE
+from config import EXTRACT_FOLDER, DEFAULT_PROJECT_FILE_STRUCTURE
 
 def check_file_existance(base_dir, scenario_name, scenario_data, extractedProjectBasePath):
     add_to_log("************ Checking file existance ************")
@@ -17,7 +17,7 @@ def check_file_existance(base_dir, scenario_name, scenario_data, extractedProjec
     add_to_log(f'extractedProjectName: {extractedProjectBasePath}')
 
     # TODO move it to separate function setting the structure
-    structure = DEFAULT_STRUCTURE
+    structure = DEFAULT_PROJECT_FILE_STRUCTURE
 
     # Extract filenames and mark isRequired for each
     # Loop through the scenario_data dictionary

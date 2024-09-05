@@ -5,7 +5,7 @@ UPLOAD_FOLDER = 'uploads'
 EXTRACT_FOLDER = 'extracted'
 EXPORT_FOLDER = 'exported'
 
-DEFAULT_STRUCTURE = {
+DEFAULT_PROJECT_FILE_STRUCTURE = {
     'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
     'sav':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\',               'filename': ""},
     'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '\\maps\\',         'filename': ""},
