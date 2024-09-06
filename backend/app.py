@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from message import send_progress, send_message, socketio, add_to_log
-from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER, DEFAULT_PROJECT_FILE_STRUCTURE, LOGGING_LEVEL
+from config import UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER, DEFAULT_PROJECT_FILE_STRUCTURE, LOGGING_LEVEL, DEFAULT_SETTINGS_STRUCTURE
 from utilities import extract_archive, find_scenario_file, parse_scenario_file
 from validation import check_file_existance
 import zipfile
@@ -26,6 +26,28 @@ isNewProject = True
 # Base directory of the project, just server-side info
 projectBaseDir = 'unnamed'
 extractedProjectBasePath = 'unnamed'
+
+settings_data = DEFAULT_SETTINGS_STRUCTURE
+
+# @app.route('/get_settings', methods=['GET'])
+
+# Set one setting
+@app.route('/set_setting', methods=['POST'])
+def set_setting():
+    global settings_data
+
+    add_to_log(f"** Received set_setting request", 'debug')
+
+    if request.method == 'POST':
+        add_to_log(f"Request is POST", 'trace')
+        data = request.get_json()
+        add_to_log(f"Received set_setting request: {data}", 'debug')
+
+        if 'key' in data and 'value' in data:
+            settings_data[data['key']] = data['value']
+            return jsonify({"message": "Setting set successfully"}), 200
+        else:
+            return jsonify({"message": "Missing key or value"}), 400
 
 @app.route('/create_empty_project', methods=['GET'])
 def create_empty_project():

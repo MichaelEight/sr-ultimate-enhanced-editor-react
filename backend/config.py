@@ -29,3 +29,12 @@ DEFAULT_PROJECT_FILE_STRUCTURE = {
 for folder in [UPLOAD_FOLDER, EXTRACT_FOLDER, EXPORT_FOLDER]:
     if not os.path.exists(folder):
         os.makedirs(folder)
+
+DEFAULT_SETTINGS_STRUCTURE = {
+    'startingDate': [2020, 1, 1], # Format: YYYY, MM, DD
+    'fastForward': False,
+    'militaryDifficulty': 0,
+    'economicDifficulty': 0,
+    'diplomaticDifficulty': 0
+    # ...
+}
