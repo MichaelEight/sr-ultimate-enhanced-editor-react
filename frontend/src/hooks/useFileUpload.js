@@ -6,55 +6,74 @@ const useFileUpload = () => {
     const [file, setFile] = useState(null);
     const [validationResults, setValidationResults] = useState(null);
     const [progress, setProgress] = useState(0);
-    const [progressMessage, setProgressMessage] = useState('');
+    const [project, setProject] = useState(null);
     const { addMessage } = useMessage();
 
     const handleFileChangeAndUpload = async (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
 
-        console.log('File selected:', selectedFile.name); // Log file selection
-
         setFile(selectedFile);
-        setProgress(0); // Reset progress
-
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-
+        setProgress(0);  // Reset progress
         try {
-            console.log('Uploading file...'); // Log before uploading
-            const data = await uploadFile(formData);
-            console.log('Upload successful:', data); // Log successful upload
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const data = await uploadFile(formData);  // Pass the FormData object
+            console.log('Received data:', data);  // Log the received data
             setValidationResults(data.structure);
-            setProgress(100); // Ensure progress bar reaches 100%
+            setProject(data.scenario_data);  // Set project data from scenario_data
+            setProgress(100);  // Ensure progress bar reaches 100%
         } catch (error) {
-            console.error('Error during upload:', error.message); // Log error
             addMessage(`!! Error during upload: ${error.message}`);
         }
     };
 
+    // Home.jsx
     const handleExport = async () => {
-        if (!validationResults) {
-            addMessage('!! No validation results to export');
-            return;
-        }
+        if (!project) return;
 
-        setProgress(0); // Reset progress
+        const userInputs = {
+            cvp: project.cvp[0],
+            mapx: project.mapx[0],
+            oof: project.oof[0],
+            regionincl: project.regionincl[0],
+            oob: project.oob[0],
+            wmdata: project.wmdata[0],
+            unit: project.unit[0],
+            pplx: project.pplx[0],
+            ttrx: project.ttrx[0],
+            terx: project.terx[0],
+            newsitems: project.newsitems[0],
+            prf: project.prf[0],
+        };
 
         try {
-            const blob = await exportFile(file.name.split('.')[0], validationResults);
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${file.name.split('.')[0]}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setProgress(100); // Ensure progress bar reaches 100%
+            // Sending a GET request since no data is needed from the frontend
+            const response = await fetch('http://localhost:5000/export', {
+                method: 'GET',
+            });
+        
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${project.scenario[0]}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } else {
+                console.error('Export failed');
+                const errorData = await response.json();
+                console.error('Error details:', errorData);
+            }
         } catch (error) {
-            addMessage(`!! Error during export: ${error.message}`);
+            console.error('Error during export:', error);
         }
+        
     };
+
 
     const handleCheckboxChange = (path) => {
         setValidationResults(prevState => ({
@@ -71,7 +90,9 @@ const useFileUpload = () => {
         validationResults,
         progress,
         setProgress,
-        setProgressMessage,
+        setProgressMessage: addMessage,
+        project,
+        setProject,
         handleFileChangeAndUpload,
         handleExport,
         handleCheckboxChange

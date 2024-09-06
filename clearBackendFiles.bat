@@ -9,3 +9,5 @@ rmdir /S /Q extracted
 mkdir extracted
 rmdir /S /Q uploads
 mkdir uploads
+rmdir /S /Q exported
+mkdir exported

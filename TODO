@@ -15,6 +15,7 @@ FRONTEND
 ! Styles
 ! Display green server online, yellow server busy, red server issue/inactive/refused connection etc.
 !! Progress bar (with steps)
+!! Log, add time 
 
 MISCELLANEOUS
 !! Add 'close project' button, which resets all data and backend
@@ -35,8 +36,35 @@ PRIORITY:
  - throw warning if the file written is empty (error if it's WMData)
  - validate files' content, if they match template, if the labels are correctly spelled, if there are no duplicates, incorrect values...
   - you can make it as a separate scan i.e. it is done in the background while user plays with other files... unless they can't be loaded because of something. Maybe try...catch to load, and if an error happened, throw an error, propose a deep scan of the file and if user agrees, point out everything, what is wrong with it. Remember to limit, if the quantity of the same error is greater than 5 (or 10). Or write it as (quantity) [error]
+- file structure should have: required, exists and *modified*, to see if it should be copied or overwriten/replaced
 
 ISSUES:
 - file validation with space in zip name (PATCH - force lowercase)
 - (fixed) "Required file fourislands/maps/data/default.prf not found", always for default.prf. it was saved as profile, not prf
-- new project can't be exported due to validation not found
+
+- (fixed) Mapfile (.mapx) is incorrectly sent / detected
+- settings have often more options than these listed in .scenario. make sure all labels are present, even if they are null
+- (fixed) scenario name has label out of style (utilities + frontend)
+- new empty project export creates only .scenario and file in /maps without extension
+
+
+
+!!!! REDESIGN EXPORT / HANDLING FILES IN GENERAL
+export goal:
+ if new scenario then create default structure: required, modified, existing=false
+ if existing scenario then check structure: required, modified, existing=validate()
+  // for now only detect files in correct directory, ignore all other
+  // filenames from .scenario file
+  
+ validate()
+  check if .scenario exists
+  open .scenario
+  extract scenario_data (and settings_data)
+  
+  match scenario_data with corresponding labels in structure template
+  mark existing ones
+  // mark required, even if they don't exist
+
+
+note:
+- only some files can be 'default'. others (cvp etc) are based on default game files
