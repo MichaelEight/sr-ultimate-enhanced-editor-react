@@ -13,7 +13,7 @@ export const uploadFile = async (formData) => {
     return data;
 };
 
-export const exportFile = async (scenarioName, structure) => {
+export const exportFile = async (scenarioName, projectFileStructure) => {
     const response = await fetch('http://localhost:5000/export', {
         method: 'POST',
         headers: {
@@ -21,7 +21,7 @@ export const exportFile = async (scenarioName, structure) => {
         },
         body: JSON.stringify({
             scenario_name: scenarioName,
-            structure: structure,
+            projectFileStructure: projectFileStructure,
         }),
     });
 

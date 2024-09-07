@@ -1,7 +1,7 @@
 import os
 
-# Define the structure
-structure = {
+# Define the projectFileStructure
+projectFileStructure = {
     "backend": {
         "__init__.py": "",
         "app.py": "",
@@ -111,9 +111,9 @@ structure = {
     "package.json": "",
 }
 
-# Function to create the structure
-def create_structure(base_path, structure):
-    for name, content in structure.items():
+# Function to create the projectFileStructure
+def create_structure(base_path, projectFileStructure):
+    for name, content in projectFileStructure.items():
         path = os.path.join(base_path, name)
         if isinstance(content, dict):
             if not os.path.exists(path):
@@ -124,5 +124,5 @@ def create_structure(base_path, structure):
                 with open(path, 'w') as f:
                     f.write(content)
 
-# Create the structure in the current directory
-create_structure(os.getcwd(), structure)
+# Create the projectFileStructure in the current directory
+create_structure(os.getcwd(), projectFileStructure)

@@ -51,7 +51,7 @@ const Home = () => {
         .then(data => {
             console.log('Success:', data);
             // Optionally update the state with data from the response
-            // setProject(data.structure);
+            // setProject(data.projectFileStructure);
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);

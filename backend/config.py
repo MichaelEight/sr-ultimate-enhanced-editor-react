@@ -1,7 +1,7 @@
 # config.py
 import os
 
-LOGGING_LEVEL = 'debug'
+LOGGING_LEVEL = 'trace'
 
 UPLOAD_FOLDER = 'uploads'
 EXTRACT_FOLDER = 'extracted'

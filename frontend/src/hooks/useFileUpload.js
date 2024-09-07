@@ -21,7 +21,7 @@ const useFileUpload = () => {
 
             const data = await uploadFile(formData);  // Pass the FormData object
             console.log('Received data:', data);  // Log the received data
-            setValidationResults(data.structure);
+            setValidationResults(data.projectFileStructure);
             setProject(data.scenario_data);  // Set project data from scenario_data
             setProgress(100);  // Ensure progress bar reaches 100%
         } catch (error) {

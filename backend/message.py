@@ -16,14 +16,14 @@ def send_message(message):
     socketio.emit('message', {'message': message})
 
 def add_to_log(message, level='info'):
-    if level not in LOG_LEVELS:
-        message = f'Invalid log level: {level}; MSG: {message}'
-    else:
-        if LOGGING_LEVEL != 'trace':
-            # If logging is higher than limit, don't show it
-            if ((LOGGING_LEVEL == 'debug' and level == 'trace') or
-                (LOGGING_LEVEL == 'info' and (level == 'debug' or level == 'trace'))):
-                return
+    # if level not in LOG_LEVELS:
+    #     message = f'Invalid log level: {level}; MSG: {message}'
+    # else:
+    #     if LOGGING_LEVEL != 'trace':
+    #         # If logging is higher than limit, don't show it
+    #         if ((LOGGING_LEVEL == 'debug' and level == 'trace') or
+    #             (LOGGING_LEVEL == 'info' and (level == 'debug' or level == 'trace'))):
+    #             return
 
     # Use inspect to get the frame of the caller
     caller_frame = inspect.stack()[1]

@@ -14,17 +14,19 @@ app = Flask(__name__)
 # CORS(app, resources={r"/*": {"origins": "*"}}) # Debug only!
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
+projectFileStructure = {}
+
 # NOTE - dir other than .scenario must have {scenario}\\ ... at the beginning
 def create_empty_structure():
-    global structure
+    global projectFileStructure
 
-    structure = DEFAULT_PROJECT_FILE_STRUCTURE
+    projectFileStructure = DEFAULT_PROJECT_FILE_STRUCTURE
 
 # True -- new empty project; False -- user uploaded project or used default one
-isNewProject = True
+newProjectFlag = True
 
 # Base directory of the project, just server-side info
-projectBaseDir = 'unnamed'
+projectRootDirectory = 'unnamed'
 extractedProjectBasePath = 'unnamed'
 
 settings_data = DEFAULT_SETTINGS_STRUCTURE
@@ -32,16 +34,16 @@ settings_data = DEFAULT_SETTINGS_STRUCTURE
 # @app.route('/get_settings', methods=['GET'])
 
 # Set one setting
-@app.route('/set_setting', methods=['POST'])
-def set_setting():
+@app.route('/updateSetting', methods=['POST'])
+def updateSetting():
     global settings_data
 
-    add_to_log(f"** Received set_setting request", 'debug')
+    add_to_log(f"** Received updateSetting request", 'debug')
 
     if request.method == 'POST':
         add_to_log(f"Request is POST", 'trace')
         data = request.get_json()
-        add_to_log(f"Received set_setting request: {data}", 'debug')
+        add_to_log(f"Received updateSetting request: {data}", 'debug')
 
         if 'key' in data and 'value' in data:
             settings_data[data['key']] = data['value']
@@ -51,14 +53,14 @@ def set_setting():
 
 @app.route('/create_empty_project', methods=['GET'])
 def create_empty_project():
-    global isNewProject, structure
+    global newProjectFlag, projectFileStructure
     add_to_log("************ Creating Empty Project ************")
-    isNewProject = True
+    newProjectFlag = True
     create_empty_structure()
-    add_to_log("** Created empty (default) structure")
+    add_to_log("** Created empty (default) projectFileStructure")
 
     # Return a JSON response
-    return jsonify({"message": "Empty project created successfully", "isNewProject": isNewProject, "structure": structure}), 200
+    return jsonify({"message": "Empty project created successfully", "newProjectFlag": newProjectFlag, "projectFileStructure": projectFileStructure}), 200
 
 # TODO Prepare default projects
 @app.route('/load_default_project/<project_name>', methods=['GET'])
@@ -76,14 +78,14 @@ def load_default_project(project_name):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/upload', methods=['POST'])
-def upload_file():
-    global structure # This freaking keyword costed me weeks of my life. I FORGOT IT AAAAHHHH 2024/08/30 14:41, few weeks wasted
-    global isNewProject, extractedProjectBasePath
+def handleProjectUpload():
+    global projectFileStructure # This freaking keyword costed me weeks of my life. I FORGOT IT AAAAHHHH 2024/08/30 14:41, few weeks wasted
+    global newProjectFlag, extractedProjectBasePath
     try:
         add_to_log("************ Uploading Project ************")
 
         create_empty_structure()
-        add_to_log("** Reseted structure to default")
+        add_to_log("** Reseted projectFileStructure to default")
 
         print("Received upload request")
         if 'file' not in request.files:
@@ -139,15 +141,15 @@ def upload_file():
         scenario_file_data = parse_scenario_file(scenario_file_path, scenario_file_name)
         add_to_log(f"** Scenario file parsed: {scenario_file_path}")
 
-        # Validate the file structure and save the validation results
-        # TODO Make sure frontend loads new structure; it's easier to write filenames
-        structure = check_file_existance(base_dir, scenario_name, scenario_file_data['scenario_data'], extractedProjectBasePath)
-        scenario_file_data['structure'] = structure  # Save structure data in scenario_file_data
-        add_to_log(f"** Scenario structure validated")
+        # Validate the file projectFileStructure and save the validation results
+        # TODO Make sure frontend loads new projectFileStructure; it's easier to write filenames
+        projectFileStructure = check_file_existance(base_dir, scenario_name, scenario_file_data['scenario_data'], extractedProjectBasePath)
+        scenario_file_data['projectFileStructure'] = projectFileStructure  # Save projectFileStructure data in scenario_file_data
+        add_to_log(f"** Scenario projectFileStructure validated")
         add_to_log(f"base_dir: {base_dir}, scenario_name: {scenario_name}")
-        add_to_log(f"structure: {structure}")
+        add_to_log(f"projectFileStructure: {projectFileStructure}")
 
-        isNewProject = False
+        newProjectFlag = False
 
         # Cache the scenario data
         cache_file_path = os.path.join(EXTRACT_FOLDER, f"{scenario_name}.json")
@@ -164,18 +166,18 @@ def upload_file():
         add_to_log(f"!! Internal server error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# TODO @app.route -- set isModified for given label in structure
+# TODO @app.route -- set isModified for given label in projectFileStructure
 
-# TODO @app.route -- rename file in structure based on change in frontend (on lost focus or enter pressed)
+# TODO @app.route -- rename file in projectFileStructure based on change in frontend (on lost focus or enter pressed)
 @app.route('/rename_file', methods=['POST'])
-def rename_file():
-    global structure
+def updateFileName():
+    global projectFileStructure
     try:
         data = request.get_json()
         add_to_log(f"** Received rename request: {data}")
         ext = data['ext']
         newFileName = data['newFileName']
-        currentFileName = structure[ext]['filename']
+        currentFileName = projectFileStructure[ext]['filename']
 
         add_to_log(f"Data split: ext: {ext}, newFileName: {newFileName}, currentFileName: {currentFileName}")
 
@@ -187,11 +189,11 @@ def rename_file():
         
         add_to_log("Name isn't empty, renaming file")
 
-        structure[ext]['filename'] = newFileName
+        projectFileStructure[ext]['filename'] = newFileName
 
-        #structure = rename_file(structure, old_name, new_name)
+        #projectFileStructure = rename_file(projectFileStructure, old_name, new_name)
         #send_progress(100, "File renamed")
-        # return jsonify(structure), 200
+        # return jsonify(projectFileStructure), 200
         add_to_log(f"** File .{ext} renamed from ({currentFileName}) to ({newFileName})")
         return jsonify({"message": "File renamed"}), 200
     except Exception as e:
@@ -234,48 +236,52 @@ def copyFile(sourceDir, targetDir, filename):
 
 # app.py
 @app.route('/export')
-def export_files():
-    global structure
+def exportProjectFiles():
+    global projectFileStructure
     try:
         add_to_log("************ Exporting Project ************")
 
-        scenario_name = structure['scenario']['filename']
+        add_to_log(f"Show projectFileStructure: {projectFileStructure}", "trace")
+
+        scenario_name = projectFileStructure['scenario']['filename']
+
+        add_to_log(f"scenario_name = {scenario_name}", "trace")
 
         # TODO Mark files as required, if nondefault name
         # TODO separate files, which don't have default name, rather they have a list of default files (e.g. gc2020, 1936...)
         # for key, value in user_inputs.items():
         #     if value and 'default' not in value.lower():
         #         if key in ['cvp', 'mapx', 'oof', 'regionincl', 'oob', 'wmdata', 'unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf']:
-        #             structure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
+        #             projectFileStructure[f"{scenario_name}\maps\{value}".lower()] = {'required': True, 'exists': False}
 
-        # Set base project name to proceed. Use this var: projectBaseDir
-        # if isNewProject: # FIXME DEBUG: TURNED OFF UNTIL NEEDED
-        # projectBaseDir = f"\\{scenario_name}\\"
-        projectBaseDir = extractedProjectBasePath
-        add_to_log(f"projectBaseDir = {projectBaseDir}")
+        # Set base project name to proceed. Use this var: projectRootDirectory
+        # if newProjectFlag: # FIXME DEBUG: TURNED OFF UNTIL NEEDED
+        # projectRootDirectory = f"\\{scenario_name}\\"
+        projectRootDirectory = extractedProjectBasePath
+        add_to_log(f"projectRootDirectory = {projectRootDirectory}")
         
         #
         # TODO Copy / create missing file in EXPORTED
         #
 
-        for ext in structure:
-            filename = structure[ext]['filename']
+        for ext in projectFileStructure:
+            filename = projectFileStructure[ext]['filename']
             if filename == "":
                 add_to_log(f"Filename is empty for {ext}")
-                add_to_log(f"structure[ext] = {structure[ext]}")
-                add_to_log(f"structure[ext]['filename'] = {structure[ext]['filename']}")
-            isRequired, doesExist, isModified = structure[ext]['isRequired'], structure[ext]['doesExist'], structure[ext]['isModified']
+                add_to_log(f"projectFileStructure[ext] = {projectFileStructure[ext]}")
+                add_to_log(f"projectFileStructure[ext]['filename'] = {projectFileStructure[ext]['filename']}")
+            isRequired, doesExist, isModified = projectFileStructure[ext]['isRequired'], projectFileStructure[ext]['doesExist'], projectFileStructure[ext]['isModified']
             
             # Ensure there is no leading backslash in the directory
-            dir_path = structure[ext]['dir'].lstrip(os.sep)
+            dir_path = projectFileStructure[ext]['dir'].lstrip(os.sep)
 
             # filedir e.g. exported/scenarioA/scenarioA.scenario
             if ext == 'scenario':
-                extractedFileDir = os.path.join(EXTRACT_FOLDER, projectBaseDir, dir_path)
-                exportedFileDir = os.path.join(EXPORT_FOLDER, projectBaseDir, dir_path)
+                extractedFileDir = os.path.join(EXTRACT_FOLDER, projectRootDirectory, dir_path)
+                exportedFileDir = os.path.join(EXPORT_FOLDER, projectRootDirectory, dir_path)
             else:
-                extractedFileDir = os.path.join(EXTRACT_FOLDER, projectBaseDir, structure['scenario']['filename'], dir_path)
-                exportedFileDir = os.path.join(EXPORT_FOLDER, projectBaseDir, structure['scenario']['filename'], dir_path)
+                extractedFileDir = os.path.join(EXTRACT_FOLDER, projectRootDirectory, projectFileStructure['scenario']['filename'], dir_path)
+                exportedFileDir = os.path.join(EXPORT_FOLDER, projectRootDirectory, projectFileStructure['scenario']['filename'], dir_path)
 
             add_to_log(f"Checking file: {filename}.{ext}")
             add_to_log(f"extractedFileDir: {extractedFileDir}")
@@ -310,7 +316,7 @@ def export_files():
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             # Walk through the exported folder to gather all files for zipping
-            folderPathToBeZIPped = os.path.join(EXPORT_FOLDER, projectBaseDir)
+            folderPathToBeZIPped = os.path.join(EXPORT_FOLDER, projectRootDirectory)
             add_to_log(f"** Zipping files in {folderPathToBeZIPped}")
             for root, _, files in os.walk(folderPathToBeZIPped):
                 for file in files:
@@ -325,7 +331,7 @@ def export_files():
                     file_extension = file_extension.lstrip('.')
 
                     # Check if the file should be included in the ZIP
-                    if (structure[file_extension] and structure[file_extension]['isRequired']) or isNewProject:
+                    if (projectFileStructure[file_extension] and projectFileStructure[file_extension]['isRequired']) or newProjectFlag:
                         # Include the file in the ZIP archive
                         zip_file.write(filePath, arcname=arcname)
                         add_to_log(f"** Added file to ZIP: {filePath} as {arcname}")
@@ -353,4 +359,4 @@ if __name__ == '__main__':
     add_to_log(f"EXPORT_FOLDER: {EXPORT_FOLDER}", 'debug')
     
     socketio.init_app(app)
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=False, extra_files=['app.py', 'config.py']) # NOTE debug=True causes reload on project upload
