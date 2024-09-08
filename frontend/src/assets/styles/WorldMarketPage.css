@@ -1,0 +1,40 @@
+/* src/assets/styles/WorldMarket.css */
+
+/* Main container for the page */
+.world-market-page {
+    padding: 20px;
+}
+
+/* Common styling for all tables */
+.table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Styling for individual tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 400px;
+}
+
+table td {
+    border: 1px solid #000;
+    padding: 10px;
+    text-align: left;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Group styling */
+.settings-group, .military-group, .economic-group, .weather-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}

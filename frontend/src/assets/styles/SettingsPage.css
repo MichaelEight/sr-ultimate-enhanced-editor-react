@@ -1,0 +1,70 @@
+/* src/assets/styles/Home.css */
+
+/* Main container for the page */
+.scenario-page-container {
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 1200px;
+}
+
+/* Styling for each group section */
+.scenario-group {
+    margin-bottom: 20px;
+}
+
+.scenario-group h3 {
+    margin-bottom: 15px;
+}
+
+/* Labels and inputs aligned inline */
+.scenario-group label,
+.scenario-group input,
+.scenario-group select {
+    display: inline-block;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    vertical-align: middle;
+}
+
+.scenario-group input[type="checkbox"] {
+    margin-left: 5px;
+}
+
+.scenario-group input[type="number"],
+.scenario-group input[type="text"],
+.scenario-group select {
+    padding: 5px;
+    width: 150px;
+}
+
+/* Styling for checkboxes and checkbox labels */
+.scenario-group label {
+    margin-right: 10px;
+}
+
+.scenario-group input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+/* Button group styling */
+.button-group {
+    margin-top: 20px;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.button-group button:hover {
+    background-color: #0056b3;
+}
+
+.button-group button:active {
+    background-color: #004080;
+}

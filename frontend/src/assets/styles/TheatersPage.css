@@ -1,0 +1,47 @@
+/* src/assets/styles/TheatersPage.css */
+
+/* Main container for the page */
+.theaters-page {
+    padding: 20px;
+}
+
+/* Button group */
+.theaters-page .button-group {
+    margin-bottom: 20px;
+}
+
+/* Checkbox option */
+.theaters-page .options {
+    margin-bottom: 20px;
+}
+
+/* Wrapper around the table to enable horizontal scroll */
+.theaters-page .theater-table-wrapper {
+    overflow-x: auto;  /* Enables horizontal scrolling */
+    width: 100%;       /* Takes up full width */
+    border: 1px solid #ccc; /* Optional border around the table container */
+}
+
+/* Styles for the table */
+.theaters-page .theater-table {
+    width: 100%;         /* Full width table */
+    min-width: 1000px;   /* Minimum width to force scrolling if needed */
+    border-collapse: collapse; /* Collapse borders */
+}
+
+/* Table header and cell styling */
+.theaters-page .theater-table th, 
+.theaters-page .theater-table td {
+    border: 1px solid #000; /* Border for table cells */
+    padding: 10px; /* Padding for cells */
+    text-align: left; /* Align text left */
+}
+
+.theaters-page .theater-table th {
+    border-width: 2px; /* Stronger border for header */
+    background-color: #f0f0f0; /* Header background */
+}
+
+.theaters-page .theater-table tr:nth-child(even) {
+    background-color: #f9f9f9; /* Alternate row background */
+}

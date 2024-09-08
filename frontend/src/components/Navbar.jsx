@@ -13,6 +13,8 @@ const Navbar = () => {
                 <li><NavLink to="/regions" className={({ isActive }) => isActive ? "active" : undefined}>Regions</NavLink></li>
                 <li><NavLink to="/theaters" className={({ isActive }) => isActive ? "active" : undefined}>Theaters</NavLink></li>
                 <li><NavLink to="/resources" className={({ isActive }) => isActive ? "active" : undefined}>Resources</NavLink></li>
+                <li><NavLink to="/worldmarket" className={({ isActive }) => isActive ? "active" : undefined}>World Market</NavLink></li>
+                <li><NavLink to="/orbat" className={({ isActive }) => isActive ? "active" : undefined}>Orbat</NavLink></li>
             </ul>
         </nav>
     );
