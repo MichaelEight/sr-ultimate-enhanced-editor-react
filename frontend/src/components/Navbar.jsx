@@ -6,7 +6,7 @@ import '../assets/styles/Navbar.css';
 const Navbar = () => {
     return (
         <nav className="navbar">
-            <div className="navbar-brand">MyApp</div>
+            <div className="navbar-brand">Supreme Ruler Enhanced Editor</div>
             <ul className="navbar-links">
                 <li><NavLink to="/" exact="true" className={({ isActive }) => isActive ? "active" : undefined}>Scenario</NavLink></li>
                 <li><NavLink to="/settings" className={({ isActive }) => isActive ? "active" : undefined}>Settings</NavLink></li>
