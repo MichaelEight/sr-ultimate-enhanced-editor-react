@@ -27,16 +27,15 @@ const RegionPage = () => {
 
     return (
         <div className="region-page">
-            <h2>Regions</h2>
-
             <div className="button-group">
                 <button onClick={handleCreateNewRegion}>Create New Region</button>
                 <button onClick={handleMergeFromCVP}>Merge from CVP</button>
             </div>
 
             <div className="search-box">
-                <label>Search for Region:</label>
+                <label htmlFor="regionSearch">Search for Region:</label>
                 <input 
+                    id="regionSearch"
                     type="text" 
                     value={searchTerm} 
                     onChange={handleSearchChange} 
