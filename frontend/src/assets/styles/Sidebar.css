@@ -78,7 +78,7 @@
 
 /* Button styling for "Load Last Project" and "Export" */
 .sidebar button:last-child {
-    margin-top: auto;  /* Push to the bottom */
+    margin-top: 0;
 }
 
 /* Scrollbar customization */
