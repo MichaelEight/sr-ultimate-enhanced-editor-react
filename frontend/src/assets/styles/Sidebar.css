@@ -1,21 +1,96 @@
-/* src/assets/styles/Sidebar.css */
-
-/* Sidebar styling */
+/* Sidebar container */
 .sidebar {
-    width: 250px;  /* Adjust width as needed */
-    background-color: #f8f9fa;
+    width: 250px;
+    background-color: #ffffff;  /* White background for a clean look */
     border-right: 1px solid #dee2e6;
     position: fixed;
-    top: 60px;  /* Ensure sidebar starts below the navbar */
+    top: 60px;
     bottom: 0;
-    overflow-y: auto; /* Allows sidebar to scroll if content overflows */
-    z-index: 999; /* Make sure the sidebar is above other content */
+    overflow-y: auto;
+    z-index: 999;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add slight shadow for depth */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Spacing between sections */
 }
 
-/* Styling for buttons in the sidebar */
+/* Headings for sections */
+.sidebar h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #007bff;  /* Use primary color for titles */
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 5px;
+}
+
+/* Buttons */
 .sidebar button {
     display: block;
-    margin: 10px;
+    margin: 0;
     padding: 10px;
-    width: calc(100% - 20px); /* Ensure buttons take full width with padding */
+    width: 100%;
+    background-color: #007bff;  /* Primary blue color */
+    color: #ffffff;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: left;  /* Align text to the left */
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1); /* Soft shadow */
+}
+
+/* Hover effect on buttons */
+.sidebar button:hover {
+    background-color: #0056b3;  /* Darker blue on hover */
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.2); /* Slightly larger shadow */
+}
+
+/* Disabled buttons */
+.sidebar button:disabled {
+    background-color: #ced4da;
+    color: #6c757d;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* File input button */
+.sidebar input[type="file"] {
+    display: none; /* Hide file input */
+}
+
+/* Spacing and layout for default projects */
+.sidebar .default-projects {
+    margin-top: 20px;
+}
+
+.sidebar .default-projects button {
+    background-color: #17a2b8; /* Info color for default project buttons */
+    box-shadow: 0 4px 6px rgba(23, 162, 184, 0.1);
+}
+
+/* Hover effect for default projects */
+.sidebar .default-projects button:hover {
+    background-color: #138496;  /* Darker info color on hover */
+    box-shadow: 0 6px 8px rgba(23, 162, 184, 0.2);
+}
+
+/* Button styling for "Load Last Project" and "Export" */
+.sidebar button:last-child {
+    margin-top: auto;  /* Push to the bottom */
+}
+
+/* Scrollbar customization */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
 }
