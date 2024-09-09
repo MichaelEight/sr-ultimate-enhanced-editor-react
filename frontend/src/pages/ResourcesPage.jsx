@@ -28,8 +28,6 @@ const ResourcesPage = () => {
 
     return (
         <div className="resources-page">
-            <h2>Resources</h2>
-
             {/* Resource Group */}
             <div className="resource-group">
                 <h3>Resources</h3>
@@ -135,9 +133,22 @@ const ResourcesPage = () => {
                         <tbody>
                             {producedFrom.map((item, index) => (
                                 <tr key={index}>
-                                    <td>{item.resource}</td>
-                                    <td>{item.value}</td>
-                                </tr>
+                                <td>{item.resource}</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        value={item.value}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            const updatedProducedFrom = [...producedFrom];
+                                            updatedProducedFrom[index].value = newValue;
+                                            setProducedFrom(updatedProducedFrom);
+                                        }}
+                                        min="0"
+                                        max="999999999"
+                                    />
+                                </td>
+                            </tr>
                             ))}
                         </tbody>
                     </table>
