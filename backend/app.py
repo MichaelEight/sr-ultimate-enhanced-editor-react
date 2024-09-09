@@ -234,7 +234,16 @@ def copyFile(sourceDir, targetDir, filename):
         print(f"An error occurred: {e}")
         add_to_log(f"An error occurred: {e}")
 
-# app.py
+
+# EXPORT
+# Split into steps, each step = function with return
+# Specify target directory - where will files be saved (both created and copied)
+# Specify source directory - for files, which will be copied
+# Loop through files
+#  Consider each file for isRequired, doesExist, isModified
+#  Function for creating code
+#  Function for copying file
+
 @app.route('/export')
 def exportProjectFiles():
     global projectFileStructure
