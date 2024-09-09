@@ -1,4 +1,4 @@
-/* src/assets/styles/Home.css */
+/* src/assets/styles/ScenarioPage.css */
 
 /* Main container for the page */
 .scenario-page-container {
@@ -67,4 +67,10 @@
 
 .button-group button:active {
     background-color: #004080;
+}
+
+.scenario-page-container {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+    max-width: 1200px;
 }

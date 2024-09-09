@@ -1,81 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import useFileUpload from '../hooks/useFileUpload';
+import useFileUpload from '../hooks/useProjectManagement';
 import useSocket from '../hooks/useSocket';
 import { useMessage } from '../contexts/MessageContext';
-import '../assets/styles/Home.css'; // Import the CSS file for Home styles
+import '../assets/styles/ScenarioPage.css';
 import debounce from 'lodash/debounce'; // Import debounce from lodash
 
-const Home = () => {
+const ScenarioPage = ({ project, setProject }) => {
     const {
         handleFileChangeAndUpload,
         handleExport,
         progress,
         setProgress,
-        setProgressMessage,
-        project,
-        setProject
-    } = useFileUpload();
+        setProgressMessage
+    } = useFileUpload(); // Do not destructure project and setProject here
+    
     const [defaultProjects] = useState(["Project1", "Project2", "Project3"]); // Example default projects
 
     useSocket(setProgress, setProgressMessage);
-
-    const handleCreateEmptyProject = () => {
-        setProject({
-            scenario: [''],
-            sav: [''],
-            map: [''],
-            oof: [''],
-            regionincl: [''],
-            unit: ['default'],
-            pplx: ['default'],
-            ttrx: ['default'],
-            terx: ['default'],
-            newsitems: ['default'],
-            prf: ['default'],
-            cvp: [''],
-            wmdata: [''],
-            oob: [''],
-            preCache: [''],
-            postCache: [''],
-            new_project: true  // Indicate that this is a new project
-        });
-
-        // Make a call to /create_empty_project endpoint
-        fetch('http://localhost:5000/create_empty_project')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('[create_empty_project] Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Success:', data);
-            // Optionally update the state with data from the response
-            // setProject(data.projectFileStructure);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-    };
-
-    // useEffect(() => {
-    //     console.log("Project state:", project);  // Log the current project state
-    // }, [project]);
-
-    const handleLoadDefaultProject = async (projectName) => {
-        try {
-            const response = await fetch(`http://localhost:5000/load_default_project/${projectName}`);
-            if (response.ok) {
-                const projectData = await response.json();
-                console.log('Loaded default project data:', projectData);  // Log the loaded project data
-                setProject(projectData.scenario_data);
-            } else {
-                console.error("Failed to load project data");
-            }
-        } catch (error) {
-            console.error("Error loading project data:", error);
-        }
-    };
 
     // Function to handle input changes and send API request to rename the file
     const handleInputChange = useCallback(
@@ -108,30 +49,12 @@ const Home = () => {
         handleInputChange(ext, newFileName); // Call the debounced function
     };
 
-    const handleCloseProject = () => {
-        setProject(null);
-    };
-
     const removeFileExtension = (filename) => {
         return typeof filename === 'string' ? filename.replace(/\.\w+$/, '') : '';
     };
 
     return (
-        <div className="home-container">
-            <div className="sidebar">
-                <button onClick={handleCreateEmptyProject}>Create Empty Project</button>
-                <input type="file" onChange={handleFileChangeAndUpload} style={{ display: 'none' }} id="fileInput"/>
-                <button onClick={() => document.getElementById('fileInput').click()}>Upload Project</button>
-                <div className="default-projects">
-                    <h3>Load Default Project</h3>
-                    {defaultProjects.map((project, index) => (
-                        <button key={index} onClick={() => handleLoadDefaultProject(project)}>{project}</button>
-                    ))}
-                </div>
-                <button disabled>Load Last Project</button>
-                <button onClick={handleCloseProject} disabled={!project}>Close Current Project</button>
-                <button onClick={handleExport} disabled={!project}>Export</button>
-            </div>
+        <div className="ScenarioPage-container">
             <div className="content">
                 {project ? (
                     <div className="project-content">
@@ -247,4 +170,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default ScenarioPage;

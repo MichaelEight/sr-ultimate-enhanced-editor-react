@@ -1,5 +1,5 @@
-/* src/assets/styles/Home.css */
-.home-container {
+/* src/assets/styles/ScenarioPage.css */
+.ScenarioPage-container {
     display: flex;
     margin: 0;
     padding: 0;
@@ -39,6 +39,7 @@
 .content {
     flex: 1;
     padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
     overflow: auto;
 }
 

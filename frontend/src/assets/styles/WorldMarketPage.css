@@ -38,3 +38,8 @@ label {
     display: block;
     margin-top: 10px;
 }
+
+.world-market-page {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+}

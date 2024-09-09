@@ -67,3 +67,8 @@ table tr:nth-child(even) {
     margin-right: 15px;
     vertical-align: middle;
 }
+
+.orbat-page {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+}

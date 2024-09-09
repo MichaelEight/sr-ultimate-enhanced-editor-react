@@ -10,8 +10,8 @@ const useSocket = (setProgress, setProgressMessage) => {
 
     useEffect(() => {
         socket.on('progress', (data) => {
-            setProgress(data.progress);
-            setProgressMessage(data.message);
+            // setProgress(data.progress);
+            // setProgressMessage(data.message);
         });
 
         socket.on('message', (data) => {

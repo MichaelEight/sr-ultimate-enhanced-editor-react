@@ -84,7 +84,7 @@ projectFileStructure = {
                 "useAuth.js": "",
             },
             "pages": {
-                "Home.jsx": "",
+                "ScenarioPage.jsx": "",
                 "ScenarioPage.jsx": "",
                 "RegionPage.jsx": "",
                 "ResourcePage.jsx": "",

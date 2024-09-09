@@ -45,3 +45,8 @@
 .theaters-page .theater-table tr:nth-child(even) {
     background-color: #f9f9f9; /* Alternate row background */
 }
+
+.theaters-page {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+}
