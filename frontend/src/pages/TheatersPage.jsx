@@ -29,6 +29,12 @@ const TheatersPage = () => {
         setTheaters(updatedTheaters);
     };
 
+    const handleInputChange = (index, field, value) => {
+        const updatedTheaters = [...theaters];
+        updatedTheaters[index][field] = value;
+        setTheaters(updatedTheaters);
+    };
+
     return (
         <div className="theaters-page">
             <div className="options">
@@ -64,9 +70,27 @@ const TheatersPage = () => {
                         {theaters.length > 0 ? (
                             theaters.map((theatre, index) => (
                                 <tr key={index}>
-                                    <td>{theatre.id}</td>
-                                    <td>{theatre.name}</td>
-                                    <td>{theatre.code}</td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            value={theatre.id}
+                                            onChange={(e) => handleInputChange(index, 'id', e.target.value)}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            value={theatre.name}
+                                            onChange={(e) => handleInputChange(index, 'name', e.target.value)}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            value={theatre.code}
+                                            onChange={(e) => handleInputChange(index, 'code', e.target.value)}
+                                        />
+                                    </td>
                                     <td>
                                         <select 
                                             value={theatre.culture} 
@@ -77,9 +101,27 @@ const TheatersPage = () => {
                                             {/* Add more predefined values as needed */}
                                         </select>
                                     </td>
-                                    <td>{theatre.transfer}</td>
-                                    <td>{theatre.xLocation}</td>
-                                    <td>{theatre.yLocation}</td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            value={theatre.transfer}
+                                            onChange={(e) => handleInputChange(index, 'transfer', e.target.value)}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            type="number"
+                                            value={theatre.xLocation}
+                                            onChange={(e) => handleInputChange(index, 'xLocation', e.target.value)}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            type="number"
+                                            value={theatre.yLocation}
+                                            onChange={(e) => handleInputChange(index, 'yLocation', e.target.value)}
+                                        />
+                                    </td>
                                 </tr>
                             ))
                         ) : (
