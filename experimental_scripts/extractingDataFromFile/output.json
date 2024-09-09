@@ -476,7 +476,8 @@
             "regionproducts": [
                 []
             ],
-            "regionsocials": []
+            "regionsocials": [],
+            "regionreligions": []
         },
         {
             "ID": 100,
@@ -557,7 +558,8 @@
             "regionproducts": [
                 []
             ],
-            "regionsocials": []
+            "regionsocials": [],
+            "regionreligions": []
         },
         {
             "ID": 101,
@@ -782,7 +784,8 @@
                     0.01,
                     null
                 ]
-            ]
+            ],
+            "regionreligions": []
         },
         {
             "ID": 102,
@@ -938,7 +941,8 @@
                     0.03,
                     null
                 ]
-            ]
+            ],
+            "regionreligions": []
         },
         {
             "ID": 103,
@@ -1095,7 +1099,8 @@
                     0.07,
                     null
                 ]
-            ]
+            ],
+            "regionreligions": []
         },
         {
             "ID": 104,
@@ -1243,7 +1248,8 @@
                     0.02,
                     null
                 ]
-            ]
+            ],
+            "regionreligions": []
         },
         {
             "ID": 105,
@@ -1390,20 +1396,7 @@
                     null
                 ]
             ],
-            "regionreligions": [
-                [
-                    4,
-                    0.0
-                ],
-                [
-                    5,
-                    0.9994
-                ],
-                [
-                    1,
-                    0.0006
-                ]
-            ]
+            "regionreligions": []
         }
     ]
 }
