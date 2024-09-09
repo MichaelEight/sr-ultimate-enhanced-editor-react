@@ -76,7 +76,7 @@ const ScenarioPage = () => {
 
     return (
         <div className="scenario-page-container">
-            <h2>Scenario Settings</h2>
+            {/* <h2>Scenario Settings</h2> */}
 
             <div className="scenario-group">
                 <h3>General Info</h3>
