@@ -56,10 +56,30 @@ def process_regionsocials(lines):
 def process_regionreligions(lines):
     regionreligions_data = []
     for line in lines:
-        # Process each line as an array of values (some null), keeping pairs of [int, float]
-        line_parts = [int(line.split(',')[0].strip()), float(line.split(',')[1].strip()) if line.split(',')[1].strip() != "" else 0.0]
-        regionreligions_data.append(line_parts)
+        # Split the line by commas and handle missing values
+        line_parts = line.split(',')
+        
+        # Ensure that the first part (integer) is valid
+        if line_parts[0].strip().isdigit():
+            first_part = int(line_parts[0].strip())
+        else:
+            first_part = None  # Set to None if it's not a valid integer
+        
+        # Handle the second part (float) or set it to 0.0 if missing/empty
+        if len(line_parts) > 1 and line_parts[1].strip():
+            try:
+                second_part = float(line_parts[1].strip())
+            except ValueError:
+                second_part = 0.0  # Default to 0.0 if the value is not a valid float
+        else:
+            second_part = 0.0  # Default to 0.0 if it's missing
+
+        # Only append if first_part is valid (None values can be skipped based on your preference)
+        if first_part is not None:
+            regionreligions_data.append([first_part, second_part])
+    
     return regionreligions_data
+
 
 # Define the required region properties
 REQUIRED_PROPERTIES = {
@@ -131,6 +151,21 @@ def extract_data(file_path):
 
             # Start of Regions_Data
             if stripped_line.startswith("&&CVP"):
+                # Ensure the last section is processed before jumping to the new region
+                if current_section and section_lines:
+                    if current_section == "grouping":
+                        region_data["grouping"] = process_grouping(section_lines)
+                    elif current_section == "regiontechs":
+                        region_data["regiontechs"] = process_regiontechs(section_lines)
+                    elif current_section == "regionunitdesigns":
+                        region_data["regionunitdesigns"] = process_regionunitdesigns(section_lines)
+                    elif current_section == "regionproducts":
+                        region_data["regionproducts"] = process_regionproducts(section_lines)
+                    elif current_section == "regionsocials":
+                        region_data["regionsocials"] = process_regionsocials(section_lines)
+                    elif current_section == "regionreligions":
+                        region_data["regionreligions"] = process_regionreligions(section_lines)
+
                 # Append previously processed region_data if any
                 if region_data:
                     # Ensure all required properties are present in each region
@@ -143,12 +178,13 @@ def extract_data(file_path):
                 # Initialize new region data
                 region_data = {"ID": int(stripped_line.split()[1]), "Properties": {}}
                 current_section = None
+                section_lines = []
                 continue
 
             # Collecting Regions_Data
             if stripped_line.startswith("&&"):
+                # Ensure the current section is processed when switching sections
                 if current_section and section_lines:
-                    # Process the last section before moving to a new one
                     if current_section == "grouping":
                         region_data["grouping"] = process_grouping(section_lines)
                     elif current_section == "regiontechs":
@@ -207,6 +243,21 @@ def extract_data(file_path):
             for key, default_value in REQUIRED_PROPERTIES.items():
                 if key not in region_data:
                     region_data[key] = default_value
+
+            if current_section and section_lines:
+                # Process the last section
+                if current_section == "grouping":
+                    region_data["grouping"] = process_grouping(section_lines)
+                elif current_section == "regiontechs":
+                    region_data["regiontechs"] = process_regiontechs(section_lines)
+                elif current_section == "regionunitdesigns":
+                    region_data["regionunitdesigns"] = process_regionunitdesigns(section_lines)
+                elif current_section == "regionproducts":
+                    region_data["regionproducts"] = process_regionproducts(section_lines)
+                elif current_section == "regionsocials":
+                    region_data["regionsocials"] = process_regionsocials(section_lines)
+                elif current_section == "regionreligions":
+                    region_data["regionreligions"] = process_regionreligions(section_lines)
 
             data["Regions_Data"].append(region_data)
 
