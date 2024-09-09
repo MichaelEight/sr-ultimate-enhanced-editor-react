@@ -1,52 +1,133 @@
-/* src/assets/styles/TheatersPage.css */
-
 /* Main container for the page */
 .theaters-page {
     padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+    background-color: #f4f7fa; /* Light background */
+    min-height: 100vh; /* Ensure full height */
 }
 
-/* Button group */
+/* Button group styling */
 .theaters-page .button-group {
+    display: flex;
+    gap: 15px; /* Space between buttons */
     margin-bottom: 20px;
 }
 
-/* Checkbox option */
+/* Button styling */
+.theaters-page .button-group button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1); /* Soft shadow */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.theaters-page .button-group button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.2);
+}
+
+.theaters-page .button-group button:active {
+    background-color: #004080;
+}
+
+/* Checkbox options styling */
 .theaters-page .options {
+    display: flex;
+    align-items: center;
     margin-bottom: 20px;
+    gap: 10px;
+}
+
+.theaters-page .options label {
+    font-size: 14px;
+    color: #333;
+}
+
+.theaters-page .options input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 10px;
+    cursor: pointer;
 }
 
 /* Wrapper around the table to enable horizontal scroll */
 .theaters-page .theater-table-wrapper {
-    overflow-x: auto;  /* Enables horizontal scrolling */
+    overflow-x: auto;
     width: 100%;       /* Takes up full width */
-    border: 1px solid #ccc; /* Optional border around the table container */
+    border: 1px solid #dee2e6; /* Subtle border around the table container */
+    border-radius: 10px;
+    background-color: #ffffff; /* White background for contrast */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Soft shadow */
 }
 
 /* Styles for the table */
 .theaters-page .theater-table {
     width: 100%;         /* Full width table */
     min-width: 1000px;   /* Minimum width to force scrolling if needed */
-    border-collapse: collapse; /* Collapse borders */
+    border-collapse: collapse;
+    font-size: 14px;
 }
 
 /* Table header and cell styling */
 .theaters-page .theater-table th, 
 .theaters-page .theater-table td {
-    border: 1px solid #000; /* Border for table cells */
-    padding: 10px; /* Padding for cells */
-    text-align: left; /* Align text left */
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    text-align: left;
 }
 
+/* Table header styling */
 .theaters-page .theater-table th {
-    border-width: 2px; /* Stronger border for header */
-    background-color: #f0f0f0; /* Header background */
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    font-weight: bold;
 }
 
+/* Alternate row background for readability */
 .theaters-page .theater-table tr:nth-child(even) {
-    background-color: #f9f9f9; /* Alternate row background */
+    background-color: #f9f9f9;
 }
 
-.theaters-page {
-    padding: 20px;
-    margin-left: 250px; /* Space for the sidebar */
+/* Select dropdown styling for the table */
+.theaters-page .theater-table select {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease;
+}
+
+.theaters-page .theater-table select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .theaters-page .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .theaters-page .options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .theaters-page .button-group button {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .theaters-page .theater-table th, 
+    .theaters-page .theater-table td {
+        font-size: 12px;
+    }
 }

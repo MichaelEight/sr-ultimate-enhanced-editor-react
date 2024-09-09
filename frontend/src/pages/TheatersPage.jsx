@@ -31,8 +31,6 @@ const TheatersPage = () => {
 
     return (
         <div className="theaters-page">
-            <h2>Theaters</h2>
-
             <div className="options">
                 <label>
                     <input 
