@@ -1,0 +1,44 @@
+SETTINGS:
+Starting date: 
+Fast Foward: 0-99999999999 days
+[] Difficulty: Very Easy, Easy, Normal, Hard, Very Hard
+ in file: 0-4
+Map splash: 0-9999
+Game length (months): None, 6, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120
+Victory: Complete, Capital, Capture, Unification, Total Score, Diplomatic Score, Economic Score, Technology Score, Approval Score, Military Score, Sphere, Victory Points
+Global AI Stance: Normal, Passive, Aggressive, Unpredictable, None
+Nuke Effect/Approval: Low, Medium High
+Funds: No New Bonds, Low, Medium, High
+
+Default MAPX (and OOF):
+    ColdWar
+    GC2020
+    Islands 3B (mod?)
+    SR1914
+    SR1936
+Default Scenarios:
+    1914-Brinkmanship.scenario - Sandbox
+    1914- The Great War.scenario - Sandbox
+    1917-The Great War.scenario - Sandbox
+    Cold War.scenario - Sandbox
+    Divided States.scenario - Sandbox
+    GlobalCrisis.scenario - Sandbox
+    MakeAmerica2021.SCENARIO - Sandbox
+    Shattered World.scenario - Sandbox
+    SR1936.scenario - Sandbox
+    SR1940.scenario - Sandbox
+    SR1941.scenario - Sandbox
+    SR1942.scenario - Sandbox
+    Trump Rising.scenario - Sandbox
+    Trump Rising 2018.scenario - Sandbox
+    World2020.scenario - Sandbox
+
+Default Cache (all .SAV files)
+
+Default CVP
+
+Default WMDATA
+
+Default OOB
+
+Default Non Editable Files, for each category

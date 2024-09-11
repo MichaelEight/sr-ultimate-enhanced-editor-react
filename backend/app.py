@@ -77,6 +77,9 @@ def load_default_project(project_name):
         add_to_log(f"!! Internal server error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+
+# Handle project upload
+# TODO If project is nested, denest it. It will solve future issues with export
 @app.route('/upload', methods=['POST'])
 def handleProjectUpload():
     global projectFileStructure # This freaking keyword costed me weeks of my life. I FORGOT IT AAAAHHHH 2024/08/30 14:41, few weeks wasted
@@ -236,6 +239,7 @@ def copyFile(sourceDir, targetDir, filename):
 
 
 # EXPORT
+# TODO
 # Split into steps, each step = function with return
 # Specify target directory - where will files be saved (both created and copied)
 # Specify source directory - for files, which will be copied
