@@ -106,6 +106,12 @@ def handle_project_upload():
         # Extract the file
         uploaded_zip_name = file_path.stem
         extract_path = EXTRACTS_PATH / uploaded_zip_name
+
+        # If the extract directory already exists, delete it
+        if extract_path.exists():
+            add_to_log(f"** Extract directory {extract_path} already exists. Deleting it.")
+            shutil.rmtree(extract_path)
+
         extract_path.mkdir(parents=True, exist_ok=True)
 
         try:
@@ -228,7 +234,6 @@ def create_zip_archive():
     return zip_buffer
 
 @app.route('/export')
-@app.route('/export')
 def export_project_files():
     try:
         add_to_log("************ Exporting Project ************")
@@ -236,6 +241,14 @@ def export_project_files():
         # Use the extracted base path as the root directory for export
         project.root_directory = project.extracted_base_path
         add_to_log(f"** Project root directory: {project.root_directory}")
+
+        # Determine the export base directory
+        export_base_dir = EXPORTS_PATH / project.root_directory
+
+        # If the export directory already exists, delete it
+        if export_base_dir.exists():
+            add_to_log(f"** Export directory {export_base_dir} already exists. Deleting it.")
+            shutil.rmtree(export_base_dir)
 
         # Process each file in the modified structure
         for ext, file_info in project.modified_structure.items():
