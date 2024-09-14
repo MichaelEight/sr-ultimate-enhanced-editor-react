@@ -195,7 +195,7 @@ def update_file_name():
         project.modified_structure[ext]['isRequired'] = True
         add_to_log(f"** File .{ext} renamed from ({current_file_name}) to ({new_file_name})")
 
-        return jsonify({"message": "File renamed"}), 200
+        return jsonify({"message": "File renamed: " + new_file_name + "." + ext}), 200
     except Exception as e:
         add_to_log(f"!! Internal server error: {e}", 'error')
         return jsonify({'error': str(e)}), 500

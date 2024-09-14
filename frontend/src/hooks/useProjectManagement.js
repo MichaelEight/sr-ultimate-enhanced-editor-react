@@ -28,24 +28,15 @@ const useProjectManagement = () => {
         }
     };
     
-
     // Handle creating an empty project
     const handleCreateEmptyProject = async () => {
         try {
             const response = await fetch('http://localhost:5000/create_empty_project', {
                 method: 'GET',
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
-
-                // Assuming the backend returns an object with the structure:
-                // {
-                //   "message": "Empty project created successfully",
-                //   "newProjectFlag": true,
-                //   "projectFileStructure": { ... }
-                // }
-
                 setProject(data.projectFileStructure);
             } else {
                 console.error("Failed to create empty project");
@@ -54,7 +45,6 @@ const useProjectManagement = () => {
             console.error("Error creating empty project:", error);
         }
     };
-
 
     // Handle loading a default project
     const handleLoadDefaultProject = async (projectName) => {
