@@ -34,7 +34,9 @@ project = Project()
 
 def create_empty_structure():
     project.original_structure = {}
-    project.modified_structure = DEFAULT_PROJECT_FILE_STRUCTURE.copy()
+    project.modified_structure = {}
+    for ext, info in DEFAULT_PROJECT_FILE_STRUCTURE.items():
+        project.modified_structure[ext] = info.copy()
     project.new_project = True
     project.root_directory = Path('unnamed')
     project.extracted_base_path = Path('unnamed')
@@ -61,6 +63,8 @@ def create_empty_project():
     try:
         create_empty_structure()
         add_to_log("************ Creating Empty Project ************")
+
+        # Return the default project structure
         return jsonify({
             "message": "Empty project created successfully",
             "newProjectFlag": project.new_project,
@@ -176,20 +180,26 @@ def update_file_name():
 
         ext = data['ext']
         new_file_name = data['newFileName']
-        current_file_name = project.modified_structure[ext]['filename']
+
+        if ext not in project.modified_structure:
+            add_to_log(f"!! File type .{ext} not found in project structure", 'error')
+            return jsonify({'error': f'File type .{ext} not found in project structure'}), 400
 
         if not new_file_name:
             add_to_log("!! Name cannot be empty", 'error')
             return jsonify({'error': 'Name cannot be empty'}), 400
 
+        current_file_name = project.modified_structure[ext]['filename']
         project.modified_structure[ext]['filename'] = new_file_name
         project.modified_structure[ext]['isModified'] = True
+        project.modified_structure[ext]['isRequired'] = True
         add_to_log(f"** File .{ext} renamed from ({current_file_name}) to ({new_file_name})")
 
         return jsonify({"message": "File renamed"}), 200
     except Exception as e:
         add_to_log(f"!! Internal server error: {e}", 'error')
         return jsonify({'error': str(e)}), 500
+
 
 def copy_file(source: Path, destination: Path) -> bool:
     """
@@ -238,6 +248,16 @@ def export_project_files():
     try:
         add_to_log("************ Exporting Project ************")
 
+        # Ensure 'scenario' file exists in modified_structure
+        if 'scenario' not in project.modified_structure:
+            add_to_log("!! 'scenario' key missing in project.modified_structure", 'error')
+            return jsonify({'error': "'scenario' key missing in project structure"}), 400
+
+        # Ensure 'filename' is set for 'scenario'
+        if not project.modified_structure['scenario']['filename']:
+            add_to_log("!! 'filename' for 'scenario' is empty", 'error')
+            return jsonify({'error': "Filename for 'scenario' is empty"}), 400
+
         # Use the extracted base path as the root directory for export
         project.root_directory = project.extracted_base_path
         add_to_log(f"** Project root directory: {project.root_directory}")
@@ -271,9 +291,9 @@ def export_project_files():
 def process_file_for_export(ext, file_info):
     modified_filename = file_info['filename']
     is_required = file_info['isRequired']
-    does_exist = file_info['doesExist']
-    is_modified = file_info['isModified']
-    modified_dir_path = Path(file_info['dir'])
+    does_exist = file_info.get('doesExist', False)
+    is_modified = file_info.get('isModified', False)
+    modified_dir_path = Path(file_info.get('dir', ''))
 
     if not modified_filename or not is_required:
         add_to_log(f"** Skipping file: {modified_filename}.{ext} (Not required or filename empty)")
@@ -281,8 +301,8 @@ def process_file_for_export(ext, file_info):
 
     # Determine original file info
     original_file_info = project.original_structure.get(ext, {})
-    original_filename = original_file_info.get('filename', '')
-    original_dir_path = Path(original_file_info.get('dir', ''))
+    original_filename = original_file_info.get('filename', modified_filename)
+    original_dir_path = Path(original_file_info.get('dir', modified_dir_path))
 
     # Determine base directories
     extracted_base_dir = EXTRACTS_PATH / project.extracted_base_path
@@ -308,7 +328,7 @@ def process_file_for_export(ext, file_info):
         if not success:
             add_to_log(f"!! Failed to copy file: {extracted_file_path} to {exported_file_path}", 'error')
     else:
-        # Create a new placeholder file or handle file creation logic
+        # Create a new placeholder file
         try:
             exported_file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(exported_file_path, 'w') as f:
@@ -327,4 +347,4 @@ if __name__ == '__main__':
     add_to_log(f"EXPORT_FOLDER: {EXPORTS_PATH}", 'debug')
     
     socketio.init_app(app)
-    socketio.run(app, debug=False)
+    socketio.run(app, debug=True)

@@ -12,46 +12,49 @@ const useProjectManagement = () => {
     const handleFileChangeAndUpload = async (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
-
+    
         setFile(selectedFile);
-        // setProgress(0);  // Reset progress
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
-
-            const data = await uploadFile(formData);  // Pass the FormData object
-            console.log('Received data:', data);  // Log the received data
-            setValidationResults(data.projectFileStructure);
-            setProject(data.scenario_data);  // Set project data from scenario_data
-            // setProgress(100);  // Ensure progress bar reaches 100%
+    
+            const data = await uploadFile(formData);
+            console.log('Received data:', data);
+    
+            // Assuming the backend returns data with 'projectFileStructure'
+            setProject(data.projectFileStructure);
         } catch (error) {
-            // addMessage(`Error during upload: ${error.message}`);
-            console.log('Error during upload:', error.message);  // Log the error message
+            console.log('Error during upload:', error.message);
+        }
+    };
+    
+
+    // Handle creating an empty project
+    const handleCreateEmptyProject = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/create_empty_project', {
+                method: 'GET',
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Assuming the backend returns an object with the structure:
+                // {
+                //   "message": "Empty project created successfully",
+                //   "newProjectFlag": true,
+                //   "projectFileStructure": { ... }
+                // }
+
+                setProject(data.projectFileStructure);
+            } else {
+                console.error("Failed to create empty project");
+            }
+        } catch (error) {
+            console.error("Error creating empty project:", error);
         }
     };
 
-    // Handle creating an empty project
-    const handleCreateEmptyProject = () => {
-        setProject({
-            scenario: [''],
-            sav: [''],
-            map: [''],
-            oof: [''],
-            regionincl: [''],
-            unit: ['default'],
-            pplx: ['default'],
-            ttrx: ['default'],
-            terx: ['default'],
-            newsitems: ['default'],
-            prf: ['default'],
-            cvp: [''],
-            wmdata: [''],
-            oob: [''],
-            preCache: [''],
-            postCache: [''],
-            new_project: true
-        });
-    };
 
     // Handle loading a default project
     const handleLoadDefaultProject = async (projectName) => {
