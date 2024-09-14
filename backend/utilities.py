@@ -2,16 +2,33 @@ import zipfile
 import os
 import re
 import json
+import shutil
+import zipfile
+from pathlib import Path
 
-def extract_archive(file_path, extract_path):
-    if file_path.endswith('.zip'):
-        with zipfile.ZipFile(file_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_path)
-        print(f"** Extracted ZIP archive: {file_path}")
-    elif file_path.endswith('.rar'):
-        raise ValueError("Convert to ZIP. RAR is not supported. Never will.")
-    else:
-        raise ValueError("Unsupported archive format")
+def extract_archive(zip_file_path: str, extract_to_path: str):
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        for member in zip_ref.namelist():
+            # Skip directories
+            if member.endswith('/'):
+                continue
+
+            member_path = Path(member)
+            parts = member_path.parts
+
+            # Remove the top-level directory if it exists
+            if len(parts) > 1:
+                # Skip the first part (top-level directory)
+                parts = parts[1:]
+            else:
+                # File is at the root of the ZIP archive
+                parts = parts  # Keep as is
+
+            target_path = Path(extract_to_path).joinpath(*parts)
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            with zip_ref.open(member) as source_file, open(target_path, 'wb') as target_file:
+                shutil.copyfileobj(source_file, target_file)
+
 
 def find_scenario_file(extract_path):
     for root, _, files in os.walk(extract_path):
@@ -90,3 +107,4 @@ def parse_scenario_file(file_path, scenario_file_name):
         "scenario_data": scenario_data,
         "settings_data": settings_data
     }
+

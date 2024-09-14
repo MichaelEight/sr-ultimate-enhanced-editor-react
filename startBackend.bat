@@ -1,14 +1,10 @@
 @echo off
 
+REM Clear backend from existing project files
+start cmd /c "call clearBackendFiles.bat"
+
 REM Navigate to the backend directory
 cd backend
-
-REM Clear the content of extracted and uploads directories
-echo Clearing extracted and uploads directories...
-rmdir /S /Q extracted
-mkdir extracted
-rmdir /S /Q uploads
-mkdir uploads
 
 REM Start the Flask app
 echo Starting backend...

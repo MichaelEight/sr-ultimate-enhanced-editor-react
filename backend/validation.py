@@ -1,80 +1,45 @@
-import os
+# validation.py
+from pathlib import Path
 from message import send_message, add_to_log
-from config import EXTRACT_FOLDER, DEFAULT_PROJECT_FILE_STRUCTURE
+from config import DEFAULT_PROJECT_FILE_STRUCTURE
 
-def check_file_existance(base_dir, scenario_name, scenario_data, extractedProjectBasePath):
-    add_to_log("************ Checking file existance ************")
+def check_file_existence(base_dir: Path, scenario_name: str, scenario_data: dict, extracted_base_path: Path):
+    add_to_log("************ Checking file existence ************")
 
-    print(f'base_dir: {base_dir}')
-    print(f'scenario_name: {scenario_name}')
-    print(f'scenario_data: {scenario_data}')
-    print(f'extractedProjectName: {extractedProjectBasePath}')
+    add_to_log(f"** Checking file existence for scenario: {scenario_name}")
+    add_to_log(f'Base directory: {base_dir}')
+    add_to_log(f'Scenario data: {scenario_data}')
+    add_to_log(f'Extracted base path: {extracted_base_path}')
 
-    add_to_log(f"** Checking file existance for scenario: {scenario_name}")
-    add_to_log(f'base_dir: {base_dir}')
-    add_to_log(f'scenario_name: {scenario_name}')
-    add_to_log(f'scenario_data: {scenario_data}')
-    add_to_log(f'extractedProjectName: {extractedProjectBasePath}')
-
-    # TODO move it to separate function setting the projectFileStructure
-    projectFileStructure = DEFAULT_PROJECT_FILE_STRUCTURE
+    # Initialize projectFileStructure
+    project_file_structure = DEFAULT_PROJECT_FILE_STRUCTURE.copy()
 
     # Extract filenames and mark isRequired for each
-    # Loop through the scenario_data dictionary
-    for label, file_list in scenario_data.items():        
-        # Split the filename to remove the extension and get the base name
-        filename = file_list[0].split('.')[0]
+    for label, file_list in scenario_data.items():
+        # Get the filename without extension
+        filename = Path(file_list[0]).stem
 
-        if label in projectFileStructure:
-            projectFileStructure[label]['filename'] = filename
-        
-            # If filename == 'default' OR is listed as game default files (cvp etc) then mark it as non required
-            # TODO write full list of names also based on label
-            if not (filename in ['default', "DEFAULT"]):
-                projectFileStructure[label]['isRequired'] = True
+        if label in project_file_structure:
+            project_file_structure[label]['filename'] = filename
 
-    # Check if each file exists
-    for ext in projectFileStructure:
-        if ext == 'scenario':
-            fullExtractedFilePath = os.path.join(extractedProjectBasePath, (projectFileStructure[ext]['filename'] + '.' + ext))
-        else:
-            fullExtractedFilePath = os.path.join(extractedProjectBasePath, projectFileStructure['scenario']['filename'], projectFileStructure[ext]['dir'], (projectFileStructure[ext]['filename'] + '.' + ext))
-        projectFileStructure[ext]['doesExist'] = os.path.exists(fullExtractedFilePath)
-        add_to_log(f"{ext} doesExist: {projectFileStructure[ext]['doesExist']} in {fullExtractedFilePath}")
+            # Mark as required if filename is not 'default' or 'DEFAULT'
+            if filename.lower() != 'default':
+                project_file_structure[label]['isRequired'] = True
 
-    add_to_log(f"** Finished checking file existance for scenario: {scenario_name}")
-    add_to_log(f"** projectFileStructure: {projectFileStructure}")
+    for ext, file_info in project_file_structure.items():
+        filename = file_info['filename']
+        directory = file_info.get('dir', '')
+        dir_path = Path(directory)
 
-    # existing_files = set()
-    # for root, _, files in os.walk(base_dir):
-    #     for file in files:
-    #         relative_path = os.path.relpath(os.path.join(root, file), base_dir).replace("\\", "/").lower()
-    #         existing_files.add(relative_path)
-    #         if relative_path in projectFileStructure:
-    #             projectFileStructure[relative_path]['exists'] = True
-    #             add_to_log(f"** Found existing file: {relative_path}")
-    #         else:
-    #             add_to_log(f"?? Unexpected file: {relative_path}")
-    #             expected_folder = '/'.join(relative_path.split('/')[:-1])
-    #             for key in projectFileStructure.keys():
-    #                 if key.startswith(expected_folder) and file in key:
-    #                     send_message(f"?? File out of place: {relative_path}")
-    #                     break
+        # Construct the full path to the file
+        full_extracted_file_path = base_dir / dir_path / f"{filename}.{ext}"
 
-    # TODO Additional validation
-    # for path, info in projectFileStructure.items():
-    #     if info['required'] and not info['exists']:
-    #         # Check for file in the correct destination but different name
-    #         found = False
-    #         for existing_file in existing_files:
-    #             if existing_file.endswith(path.split('/')[-1]):
-    #                 send_message(f"!! Required file {path} not found, but found similar file {existing_file}")
-    #                 found = True
-    #                 break
-    #         if not found:
-    #             send_message(f"!! Required file {path} not found")
+        # Check if the file exists
+        does_exist = full_extracted_file_path.exists()
+        project_file_structure[ext]['doesExist'] = does_exist
+        add_to_log(f"{ext} doesExist: {does_exist} in {full_extracted_file_path}")
 
-
-    add_to_log("** Check complete, returning projectFileStructure: " + str(projectFileStructure))
-    add_to_log("************ Checking file existance DONE ************")
-    return projectFileStructure
+    add_to_log(f"** Finished checking file existence for scenario: {scenario_name}")
+    add_to_log(f"** Project file structure: {project_file_structure}")
+    add_to_log("************ Checking file existence DONE ************")
+    return project_file_structure
