@@ -27,7 +27,7 @@ const ScenarioPage = ({ project, setProject }) => {
 
     if (!debouncedHandleInputChange.current) {
         debouncedHandleInputChange.current = debounce((ext, newFileName) => {
-            console.log(`handleInputChange called with ext: ${ext}, newFileName: ${newFileName}`);
+            console.log(`handleInputChange ${ext} : ${newFileName}`);
             fetch('http://localhost:5000/rename_file', {
                 method: 'POST',
                 headers: {
@@ -64,7 +64,7 @@ const ScenarioPage = ({ project, setProject }) => {
 
     // Update handleInputFieldChange to include logging
     const handleInputFieldChange = (ext, newFileName) => {
-        console.log(`handleInputFieldChange called with ext: ${ext}, newFileName: ${newFileName}`);
+        console.log(`handleInputFieldChange ${ext} : ${newFileName}`);
         let extsToUpdate = [ext]; // Keep track of which exts need to send API calls
     
         setProject((prevProject) => {
