@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../assets/styles/Sidebar.css'; // Import the Sidebar CSS
 
 const Sidebar = ({ 
@@ -7,9 +7,14 @@ const Sidebar = ({
     handleLoadDefaultProject, 
     handleCloseProject, 
     handleExport, 
-    handleCreateEmptyProject, // Pass this prop from App.js 
-    handleFileChangeAndUpload // Pass this prop from App.js 
+    handleCreateEmptyProject,
+    handleFileChangeAndUpload 
 }) => {
+    const [selectedProject, setSelectedProject] = useState(''); // State for selected project in dropdown
+
+    const handleDropdownChange = (e) => {
+        setSelectedProject(e.target.value); // Update selected project
+    };
 
     return (
         <div className="sidebar">
@@ -19,9 +24,18 @@ const Sidebar = ({
 
             <div className="default-projects">
                 <h3>Load Default Project</h3>
-                {defaultProjects.map((project, index) => (
-                    <button key={index} onClick={() => handleLoadDefaultProject(project)}>{project}</button>
-                ))}
+                <select value={selectedProject} onChange={handleDropdownChange}>
+                    <option value="">Not selected</option> {/* Default "Not selected" option */}
+                    {defaultProjects.map((project, index) => (
+                        <option key={index} value={project}>{project}</option>
+                    ))}
+                </select>
+                <button 
+                    onClick={() => handleLoadDefaultProject(selectedProject)} 
+                    disabled={!selectedProject} // Disable if "Not selected"
+                >
+                    Load Selected
+                </button>
             </div>
 
             <button disabled>Load Last Project</button>
