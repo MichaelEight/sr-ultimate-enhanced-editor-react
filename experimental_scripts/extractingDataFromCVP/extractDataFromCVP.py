@@ -262,7 +262,7 @@ def extract_data(file_path):
             data["Regions_Data"].append(region_data)
 
     # Save the resulting JSON to a file
-    with open('output.json', 'w') as json_file:
+    with open('output_cvp.json', 'w') as json_file:
         json.dump(data, json_file, indent=4)
 
     return data
