@@ -1,0 +1,129 @@
+// WMDATA
+// Created using Scenario Creator V2,3 - 18.09.2024 22:07:22
+
+&&WMDATA 0
+dayswmlevel, 201
+unitgarrison, 206,207,208,209,210,211,
+//            , Inf   , Rec   , Tank  , AT    , Art   , AA    , Trp   , Helo  , Miss , Int   , Fig   , Multi , Bomb  , Rec  , A-Trp , 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000 
+battstrdefault, 237,		238,		239,		240,		241,		242,		243,		244,		245,		246,		247,		248,		249,		250,		251,		252,		253,		254,		255,		256,		257,		258,		259,		
+gdpcbase, 0
+hexresmults, 212,213,214,215,216,217,218,219,
+primerate, 20,0
+socadj, 20,
+socialdefaults, 260,261,262,263,264,265,266,267,
+wmrelrate, 20,5
+weatheroffy, 221,222,223,,225, ,227,228,
+weatherspeed, 229,230,231,232,233,234,235,236,
+weatheryear, -220
+&&END
+
+&&WMPRODDATA, 0
+producefrom, 1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,
+wmbasecost, 1000
+wmfullcost, 1
+wmmargin, 2
+wmnodeproduction, 3
+wmprodperpersonmax, 4
+wmprodperpersonmin, 5
+wmurbanproduction, 6
+&&END
+&&WMPRODDATA, 1
+producefrom, 2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,
+wmbasecost, 10
+wmfullcost, 11
+wmmargin, 12
+wmnodeproduction, 13
+wmprodperpersonmax, 14
+wmprodperpersonmin, 15
+wmurbanproduction, 16
+&&END
+&&WMPRODDATA, 2
+producefrom, 3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,
+wmbasecost, 20
+wmfullcost, 21
+wmmargin, 22
+wmnodeproduction, 23
+wmprodperpersonmax, 24
+wmprodperpersonmin, 25
+wmurbanproduction, 26
+&&END
+&&WMPRODDATA, 3
+producefrom, 4001,4002,4003,4004,4005,4006,4007,4008,4009,4010,4011,
+wmbasecost, 30
+wmfullcost, 31
+wmmargin, 32
+wmnodeproduction, 33
+wmprodperpersonmax, 34
+wmprodperpersonmin, 35
+wmurbanproduction, 36
+&&END
+&&WMPRODDATA, 4
+producefrom, 5001,5002,5003,5004,5005,5006,5007,5008,5009,5010,5011,
+wmbasecost, 40
+wmfullcost, 41
+wmmargin, 42
+wmnodeproduction, 43
+wmprodperpersonmax, 44
+wmprodperpersonmin, 45
+wmurbanproduction, 46
+&&END
+&&WMPRODDATA, 5
+producefrom, 6001,6002,6003,6004,6005,6006,6007,6008,6009,6010,6011,
+wmbasecost, 50
+wmfullcost, 51
+wmmargin, 52
+wmnodeproduction, 53
+wmprodperpersonmax, 54
+wmprodperpersonmin, 55
+wmurbanproduction, 56
+&&END
+&&WMPRODDATA, 6
+producefrom, 7001,7002,7003,7004,7005,7006,7007,7008,7009,7010,7011,
+wmbasecost, 60
+wmfullcost, 61
+wmmargin, 62
+wmnodeproduction, 63
+wmprodperpersonmax, 64
+wmprodperpersonmin, 65
+wmurbanproduction, 66
+&&END
+&&WMPRODDATA, 7
+producefrom, 8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011,
+wmbasecost, 70
+wmfullcost, 71
+wmmargin, 72
+wmnodeproduction, 73
+wmprodperpersonmax, 74
+wmprodperpersonmin, 75
+wmurbanproduction, 76
+&&END
+&&WMPRODDATA, 8
+producefrom, 9001,9002,9003,9004,9005,9006,9007,9008,9009,9010,9011,
+wmbasecost, 80
+wmfullcost, 81
+wmmargin, 82
+wmnodeproduction, 83
+wmprodperpersonmax, 84
+wmprodperpersonmin, 85
+wmurbanproduction, 86
+&&END
+&&WMPRODDATA, 9
+producefrom, 10001,10002,10003,10004,10005,10006,10007,10008,10009,10010,10011,
+wmbasecost, 90
+wmfullcost, 91
+wmmargin, 92
+wmnodeproduction, 93
+wmprodperpersonmax, 94
+wmprodperpersonmin, 95
+wmurbanproduction, 96
+&&END
+&&WMPRODDATA, 10
+producefrom, 11001,11002,11003,11004,11005,11006,11007,11008,11009,11010,11011,
+wmbasecost, 100
+wmfullcost, 101
+wmmargin, 102
+wmnodeproduction, 103
+wmprodperpersonmax, 104
+wmprodperpersonmin, 105
+wmurbanproduction, 106
+&&END
