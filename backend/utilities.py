@@ -3,10 +3,11 @@ import os
 import re
 import json
 import shutil
-import zipfile
 from pathlib import Path
+from message import add_to_log, LogLevel
 
 def extract_archive(zip_file_path: str, extract_to_path: str):
+    add_to_log(f"Starting extraction of '{zip_file_path}' to '{extract_to_path}'", LogLevel.INFO)
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
         for member in zip_ref.namelist():
             # Skip directories
@@ -18,27 +19,30 @@ def extract_archive(zip_file_path: str, extract_to_path: str):
 
             # Remove the top-level directory if it exists
             if len(parts) > 1:
-                # Skip the first part (top-level directory)
                 parts = parts[1:]
             else:
-                # File is at the root of the ZIP archive
-                parts = parts  # Keep as is
+                parts = parts
 
             target_path = Path(extract_to_path).joinpath(*parts)
             target_path.parent.mkdir(parents=True, exist_ok=True)
             with zip_ref.open(member) as source_file, open(target_path, 'wb') as target_file:
                 shutil.copyfileobj(source_file, target_file)
+            add_to_log(f"Extracted '{member}' to '{target_path}'", LogLevel.TRACE)
 
+    add_to_log(f"Extraction completed for '{zip_file_path}'", LogLevel.INFO)
 
 def find_scenario_file(extract_path):
+    add_to_log(f"Searching for .SCENARIO file in {extract_path}", LogLevel.INFO)
     for root, _, files in os.walk(extract_path):
         for file in files:
             if file.endswith('.SCENARIO'):
-                print(f"** Found scenario file: {file} in {root}")
+                add_to_log(f"Found scenario file: {file} in {root}", LogLevel.INFO)
                 return os.path.splitext(file)[0], root, file
+    add_to_log(f"No .SCENARIO file found in {extract_path}", LogLevel.ERROR)
     raise ValueError("No .SCENARIO file found")
 
 def parse_scenario_file(file_path, scenario_file_name):
+    add_to_log(f"Parsing scenario file: {file_path}", LogLevel.INFO)
     with open(file_path, 'r') as file:
         content = file.read()
 
@@ -93,18 +97,17 @@ def parse_scenario_file(file_path, scenario_file_name):
             if key_value_match:
                 key = key_value_match.group(1)
                 value = key_value_match.group(2).strip()
-                if key == "startymd" or key == "difficulty" or key == "victoryhex":
+                if key in ["startymd", "difficulty", "victoryhex"]:
                     settings_data[key] = [int(v) if v else None for v in value.split(",") if v]
                 elif key == "fastfwddays":
                     settings_data[key] = float(value) if value else None
                 else:
                     settings_data[key] = int(value) if value.isdigit() else value
 
-    print(f"** Scenario data: {json.dumps(scenario_data, indent=4)}")
-    print(f"** Settings data: {json.dumps(settings_data, indent=4)}")
+    add_to_log(f"Parsed scenario data: {json.dumps(scenario_data, indent=4)}", LogLevel.DEBUG)
+    add_to_log(f"Parsed settings data: {json.dumps(settings_data, indent=4)}", LogLevel.DEBUG)
 
     return {
         "scenario_data": scenario_data,
         "settings_data": settings_data
     }
-

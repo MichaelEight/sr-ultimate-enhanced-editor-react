@@ -20,7 +20,7 @@
 /backend/extracted/*
 /backend/exported/*
 /backend/log.txt
-/backend/logs
+/backend/logs/*
 
 # testing
 /coverage
