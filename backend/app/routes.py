@@ -11,6 +11,8 @@ from .services.project_services import process_file_for_export
 from .parsing.parsers import extract_archive, parse_scenario_file
 from .validation.validators import check_file_existence
 
+from .tab_handlers.settings_handler import settings_handler
+
 main_blueprint = Blueprint('main', __name__)
 
 # Initialize base directories using pathlib
