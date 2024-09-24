@@ -1,6 +1,6 @@
 // src/App.js
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -15,8 +15,8 @@ import OrbatPage from './pages/OrbatPage';
 import MessageBox from './components/MessageBox';
 import ProgressBar from './components/Progressbar';
 import { MessageProvider } from './contexts/MessageContext';
-import useProjectManagement from './hooks/useProjectManagement'; // Updated import
-import './assets/styles/App.css'; // Add a CSS file for global styles
+import useProjectManagement from './hooks/useProjectManagement';
+import './assets/styles/App.css';
 
 const App = () => {
     const {
@@ -31,39 +31,76 @@ const App = () => {
         handleLoadDefaultProject,
         handleCloseProject,
         handleExport
-    } = useProjectManagement(); // Use the consolidated hook
+    } = useProjectManagement();
 
-    const defaultProjects = ["Project1", "Project2", "Project3"];  // Ensure it's defined
+    const defaultProjects = ["Project1", "Project2", "Project3"];
 
     return (
         <MessageProvider>
             <Router>
-                <Navbar />
-                <Sidebar 
+                <AppContent
                     defaultProjects={defaultProjects}
                     project={project}
+                    setProject={setProject}
                     handleLoadDefaultProject={handleLoadDefaultProject}
                     handleCloseProject={handleCloseProject}
                     handleExport={handleExport}
                     handleCreateEmptyProject={handleCreateEmptyProject}
                     handleFileChangeAndUpload={handleFileChangeAndUpload}
+                    progress={progress}
+                    progressMessage={progressMessage}
                 />
-                <main>
-                    <Routes>
-                        <Route path="/" element={<ScenarioPage project={project} setProject={setProject} />} />
-                        <Route path="/settings" element={<SettingsPage />} />
-                        <Route path="/regions" element={<RegionsPage />} />
-                        <Route path="/theaters" element={<TheatersPage />} />
-                        <Route path="/resources" element={<ResourcesPage />} />
-                        <Route path="/worldmarket" element={<WorldMarketPage />} />
-                        <Route path="/orbat" element={<OrbatPage />} />
-                    </Routes>
-                </main>
-                <ProgressBar progress={progress} message={progressMessage} />
-                <MessageBox />
-                <Footer />
             </Router>
         </MessageProvider>
+    );
+};
+
+const AppContent = ({
+    defaultProjects,
+    project,
+    setProject,
+    handleLoadDefaultProject,
+    handleCloseProject,
+    handleExport,
+    handleCreateEmptyProject,
+    handleFileChangeAndUpload,
+    progress,
+    progressMessage,
+}) => {
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.pathname);
+
+    useEffect(() => {
+        setActiveTab(location.pathname);
+    }, [location]);
+
+    return (
+        <>
+            <Navbar />
+            <Sidebar
+                defaultProjects={defaultProjects}
+                project={project}
+                handleLoadDefaultProject={handleLoadDefaultProject}
+                handleCloseProject={handleCloseProject}
+                handleExport={handleExport}
+                handleCreateEmptyProject={handleCreateEmptyProject}
+                handleFileChangeAndUpload={handleFileChangeAndUpload}
+            />
+            <main>
+                <Routes>
+                    <Route path="/" element={<ScenarioPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                    <Route path="/settings" element={<SettingsPage activeTab={activeTab} />} />
+                    <Route path="/regions" element={<RegionsPage activeTab={activeTab} />} />
+                    <Route path="/theaters" element={<TheatersPage activeTab={activeTab} />} />
+                    <Route path="/resources" element={<ResourcesPage activeTab={activeTab} />} />
+                    <Route path="/worldmarket" element={<WorldMarketPage activeTab={activeTab} />} />
+                    <Route path="/orbat" element={<OrbatPage activeTab={activeTab} />} />
+                </Routes>
+            </main>
+            <ProgressBar progress={progress} message={progressMessage} />
+            <MessageBox />
+            <Footer />
+        </>
     );
 };
 

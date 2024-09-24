@@ -21,6 +21,32 @@ UPLOADS_PATH = Path(Config.UPLOAD_FOLDER)
 EXTRACTS_PATH = Path(Config.EXTRACT_FOLDER)
 EXPORTS_PATH = Path(Config.EXPORT_FOLDER)
 
+@main_blueprint.route('/check_seen_since_last_update', methods=['POST'])
+def check_seen_since_last_update():
+    try:
+        add_to_log("Received check_seen_since_last_update request", LogLevel.INFO)
+        data = request.get_json()
+        add_to_log(f"Request data: {data}", LogLevel.DEBUG)
+
+        tab_name = data.get('tab')
+        if not tab_name or tab_name not in project.seen_since_last_update:
+            add_to_log("Invalid or missing tab name in request", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid or missing tab name'}), 400
+
+        seen_flag = project.seen_since_last_update[tab_name]
+        add_to_log(f"Seen flag for '{tab_name}': {seen_flag}", LogLevel.DEBUG)
+
+        if not seen_flag:
+            # Set the flag to True now that the data will be fetched
+            project.seen_since_last_update[tab_name] = True
+            add_to_log(f"Updated seen flag for '{tab_name}' to True", LogLevel.DEBUG)
+
+        return jsonify({'seenSinceLastUpdate': seen_flag}), 200
+    except Exception as e:
+        add_to_log(f"Error in check_seen_since_last_update: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+
 @main_blueprint.route('/updateSetting', methods=['POST'])
 def update_setting():
     try:
@@ -199,6 +225,11 @@ def handle_project_upload():
                 else:
                     add_to_log(f"File not found: {file_full_path}", LogLevel.WARNING)
 
+        # After successful upload and data loading
+        # Reset all seen flags to False
+        project.seen_since_last_update = {key: False for key in project.seen_since_last_update}
+        add_to_log("Reset seen_since_last_update flags after upload", LogLevel.DEBUG)
+
         send_progress(100, "File uploaded and validated")
         add_to_log("=== Finished: Uploading Project ===", LogLevel.INFO)
 
@@ -218,6 +249,7 @@ def handle_project_upload():
 
 @main_blueprint.route('/load_default_project/<project_name>', methods=['GET'])
 def load_default_project(project_name):
+    # TODO add seen_since_last_update logic
     try:
         add_to_log(f"Loading default project: {project_name}", LogLevel.INFO)
         project_file_path = EXTRACTS_PATH / f"{project_name}.json"

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../assets/styles/SettingsPage.css';
 
-const SettingsPage = () => {
+const SettingsPage = ({ activeTab }) => {
     const [scenarioSettings, setScenarioSettings] = useState({
         // General Info
         startingDate: '',
@@ -62,9 +62,9 @@ const SettingsPage = () => {
         const { name, value, type, checked } = e.target;
         const newValue = type === 'checkbox' ? checked : value;
 
-        setScenarioSettings(prevState => ({
+        setScenarioSettings((prevState) => ({
             ...prevState,
-            [name]: newValue
+            [name]: newValue,
         }));
 
         // Send updated value to backend
@@ -78,17 +78,31 @@ const SettingsPage = () => {
             },
             body: JSON.stringify({ key: backendKey, value: backendValue }),
         })
-            .then(response => {
+            .then((response) => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
-            .then(data => {
+            .then((data) => {
                 console.log('Setting updated successfully:', data);
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error('Error updating setting:', error);
+            });
+    };
+
+    const fetchSettingsData = () => {
+        fetch('http://localhost:5000/get_data')
+            .then((response) => response.json())
+            .then((data) => {
+                if (data && data.settings_data) {
+                    const backendSettings = data.settings_data;
+                    setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching settings:', error);
             });
     };
 
@@ -160,20 +174,75 @@ const SettingsPage = () => {
     };
 
     useEffect(() => {
-        // Fetch initial settings from backend
-        fetch('http://localhost:5000/get_data')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.settings_data) {
-                    const backendSettings = data.settings_data;
-                    // Map backend settings to frontend state
-                    setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
+        // Function to check seenSinceLastUpdate and fetch data if needed
+        const checkAndFetchSettings = () => {
+            fetch('http://localhost:5000/check_seen_since_last_update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tab: 'settings' }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.seenSinceLastUpdate === false) {
+                        // Data has changed, fetch latest settings
+                        fetchSettingsData();
+                    } else {
+                        // Data has not changed, do nothing
+                        console.log('Settings data is up to date.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking seenSinceLastUpdate:', error);
+                });
+        };
+
+        const fetchSettingsData = () => {
+            fetch('http://localhost:5000/get_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.settings_data) {
+                        const backendSettings = data.settings_data;
+                        // Map backend settings to frontend state
+                        setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
+                        console.log('Fetched latest settings data.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching settings:', error);
+                });
+        };
+
+        // Call the function when the component mounts
+        checkAndFetchSettings();
+    }, []); // Empty dependency array ensures this runs on mount
+
+    const checkAndFetchSettings = useCallback(() => {
+        fetch('http://localhost:5000/check_seen_since_last_update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tab: 'settings' }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data && data.seenSinceLastUpdate === false) {
+                    fetchSettingsData();
                 }
             })
-            .catch(error => {
-                console.error('Error fetching settings:', error);
+            .catch((error) => {
+                console.error('Error checking seenSinceLastUpdate:', error);
             });
     }, []);
+
+    // Ensure that useEffect runs after the function has been initialized
+    useEffect(() => {
+        if (activeTab === '/settings') {
+            checkAndFetchSettings();
+        }
+    }, [activeTab, checkAndFetchSettings]);
 
     const mapBackendSettingsToFrontend = (backendSettings) => {
         return {
