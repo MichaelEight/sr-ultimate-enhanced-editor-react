@@ -92,20 +92,6 @@ const SettingsPage = ({ activeTab }) => {
             });
     };
 
-    const fetchSettingsData = () => {
-        fetch('http://localhost:5000/get_data')
-            .then((response) => response.json())
-            .then((data) => {
-                if (data && data.settings_data) {
-                    const backendSettings = data.settings_data;
-                    setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching settings:', error);
-            });
-    };
-
     const mapFrontendKeyToBackendKey = (frontendKey) => {
         const keyMapping = {
             // General Info
@@ -173,50 +159,20 @@ const SettingsPage = ({ activeTab }) => {
         // Logic to undo reset
     };
 
-    useEffect(() => {
-        // Function to check seenSinceLastUpdate and fetch data if needed
-        const checkAndFetchSettings = () => {
-            fetch('http://localhost:5000/check_seen_since_last_update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ tab: 'settings' }),
+    const fetchSettingsData = useCallback(() => {
+        fetch('http://localhost:5000/get_data')
+            .then((response) => response.json())
+            .then((data) => {
+                if (data && data.settings_data) {
+                    const backendSettings = data.settings_data;
+                    setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
+                    console.log('Fetched latest settings data.');
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.seenSinceLastUpdate === false) {
-                        // Data has changed, fetch latest settings
-                        fetchSettingsData();
-                    } else {
-                        // Data has not changed, do nothing
-                        console.log('Settings data is up to date.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking seenSinceLastUpdate:', error);
-                });
-        };
-
-        const fetchSettingsData = () => {
-            fetch('http://localhost:5000/get_data')
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.settings_data) {
-                        const backendSettings = data.settings_data;
-                        // Map backend settings to frontend state
-                        setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
-                        console.log('Fetched latest settings data.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching settings:', error);
-                });
-        };
-
-        // Call the function when the component mounts
-        checkAndFetchSettings();
-    }, []); // Empty dependency array ensures this runs on mount
+            .catch((error) => {
+                console.error('Error fetching settings:', error);
+            });
+    }, []);
 
     const checkAndFetchSettings = useCallback(() => {
         fetch('http://localhost:5000/check_seen_since_last_update', {
@@ -230,12 +186,14 @@ const SettingsPage = ({ activeTab }) => {
             .then((data) => {
                 if (data && data.seenSinceLastUpdate === false) {
                     fetchSettingsData();
+                } else {
+                    console.log('Settings data is up to date.');
                 }
             })
             .catch((error) => {
                 console.error('Error checking seenSinceLastUpdate:', error);
             });
-    }, []);
+    }, [fetchSettingsData]);
 
     // Ensure that useEffect runs after the function has been initialized
     useEffect(() => {
@@ -245,9 +203,17 @@ const SettingsPage = ({ activeTab }) => {
     }, [activeTab, checkAndFetchSettings]);
 
     const mapBackendSettingsToFrontend = (backendSettings) => {
+        const formatDate = (dateArray) => {
+            if (!dateArray || dateArray.length !== 3) return ''; // Return empty if date is invalid
+            const [year, month, day] = dateArray;
+            const formattedMonth = month.toString().padStart(2, '0'); // Ensure two digits for month
+            const formattedDay = day.toString().padStart(2, '0');     // Ensure two digits for day
+            return `${year}-${formattedMonth}-${formattedDay}`;
+        };
+
         return {
             // General Info
-            startingDate: backendSettings.startymd ? backendSettings.startymd.join('-') : '',
+            startingDate: backendSettings.startymd ? formatDate(backendSettings.startymd) : '',
             scenarioId: backendSettings.scenarioid || 0,
             fastForwardDays: backendSettings.fastfwddays || 0,
             defaultRegion: backendSettings.defaultregion || 0,
