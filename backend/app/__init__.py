@@ -19,7 +19,7 @@ def create_app():
     # Logging and initializations
     log_system_info()
     add_to_log("===============================[ Starting server ]===============================", LogLevel.INFO)
-    add_to_log(f"Logging level: {app.config['LOGGING_LEVEL']}", LogLevel.DEBUG)
+    # add_to_log(f"Logging level: {app.config['LOGGING_LEVEL']}", LogLevel.DEBUG)
     add_to_log(f"UPLOAD_FOLDER: {app.config['UPLOAD_FOLDER']}", LogLevel.DEBUG)
     add_to_log(f"EXTRACT_FOLDER: {app.config['EXTRACT_FOLDER']}", LogLevel.DEBUG)
     add_to_log(f"EXPORT_FOLDER: {app.config['EXPORT_FOLDER']}", LogLevel.DEBUG)
