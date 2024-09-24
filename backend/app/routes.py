@@ -2,16 +2,17 @@ from flask import Blueprint, request, jsonify, send_file
 from pathlib import Path
 import shutil
 import json
+import os
 
-from .models import project, create_empty_structure
-from .utils.file_utils import copy_file, create_zip_archive
+from .models import project
 from .utils.logging_utils import add_to_log, LogLevel, send_progress
 from .config import Config
 from .services.project_services import process_file_for_export
-from .parsing.parsers import extract_archive, parse_scenario_file
 from .validation.validators import check_file_existence
 
-from .tab_handlers.settings_handler import settings_handler
+from .utils.file_utils import create_zip_archive, extract_archive
+
+from .importers.scenario_importer import extract_scenario_file_data
 
 main_blueprint = Blueprint('main', __name__)
 
@@ -28,7 +29,8 @@ def update_setting():
         add_to_log(f"Request data: {data}", LogLevel.DEBUG)
 
         if 'key' in data and 'value' in data:
-            project.settings_data[data['key']] = data['value']
+            label = f"settings_data.{data['key']}"
+            project.change_value(label, data['value'])
             add_to_log(f"Updated setting {data['key']} to {data['value']}", LogLevel.DEBUG)
             return jsonify({"message": "Setting set successfully"}), 200
         else:
@@ -42,7 +44,14 @@ def update_setting():
 def create_empty_project_route():
     try:
         add_to_log("=== Starting: Creating Empty Project ===", LogLevel.INFO)
-        create_empty_structure()
+        project.create_empty()
+        project.original_structure = {}
+        project.modified_structure = {}
+        for ext, info in Config.DEFAULT_PROJECT_FILE_STRUCTURE.items():
+            project.modified_structure[ext] = info.copy()
+        project.new_project = True
+        project.root_directory = Path('unnamed')
+        project.extracted_base_path = Path('unnamed')
         add_to_log("Project structure initialized", LogLevel.TRACE)
 
         return jsonify({
@@ -54,28 +63,48 @@ def create_empty_project_route():
         add_to_log(f"Error creating empty project: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
-@main_blueprint.route('/load_default_project/<project_name>', methods=['GET'])
-def load_default_project(project_name):
+@main_blueprint.route('/load_data_from_file', methods=['POST'])
+def load_data_from_file_route():
     try:
-        add_to_log(f"Loading default project: {project_name}", LogLevel.INFO)
-        project_file_path = EXTRACTS_PATH / f"{project_name}.json"
-        if not project_file_path.exists():
-            add_to_log(f"Project not found: {project_name}", LogLevel.ERROR)
-            return jsonify({'error': 'Project not found'}), 404
-
-        with open(project_file_path, 'r') as project_file:
-            project_data = json.load(project_file)
-        add_to_log(f"Loaded project: {project_name}", LogLevel.DEBUG)
-        return jsonify(project_data), 200
+        data = request.get_json()
+        file_path = data.get('file_path')
+        if not file_path:
+            return jsonify({'error': 'No file path provided'}), 400
+        project.load_data_from_file(file_path)
+        return jsonify({'message': f'Data loaded from {file_path}'}), 200
     except Exception as e:
-        add_to_log(f"Error loading project: {e}", LogLevel.ERROR)
+        add_to_log(f"Error loading data from file: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/get_data', methods=['GET'])
+def get_data():
+    try:
+        data = project.get_data()
+        return jsonify(data), 200
+    except Exception as e:
+        add_to_log(f"Error getting data: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/change_value', methods=['POST'])
+def change_value():
+    try:
+        data = request.get_json()
+        label = data.get('label')
+        new_value = data.get('value')
+        if label is None or new_value is None:
+            return jsonify({'error': 'Missing label or value'}), 400
+        project.change_value(label, new_value)
+        return jsonify({'message': 'Value changed successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error changing value: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
 @main_blueprint.route('/upload', methods=['POST'])
 def handle_project_upload():
     try:
         add_to_log("=== Starting: Uploading Project ===", LogLevel.INFO)
-        create_empty_structure()
+        project.create_empty()
+        add_to_log("Project data reset with create_empty()", LogLevel.TRACE)
 
         if 'file' not in request.files:
             add_to_log("No file part in request", LogLevel.ERROR)
@@ -96,6 +125,7 @@ def handle_project_upload():
         # Extract the file
         uploaded_zip_name = file_path.stem
         extract_path = EXTRACTS_PATH / uploaded_zip_name
+        add_to_log(f"Starting file extraction to {extract_path}", LogLevel.TRACE)
 
         if extract_path.exists():
             add_to_log(f"Extract directory {extract_path} already exists. Deleting it.", LogLevel.DEBUG)
@@ -111,8 +141,9 @@ def handle_project_upload():
             add_to_log(f"Extraction error: {e}", LogLevel.ERROR)
             return jsonify({'error': str(e)}), 500
 
-        # Find the scenario file
+        # Find the .scenario file
         try:
+            add_to_log(f"Searching for .scenario file in {extract_path}", LogLevel.TRACE)
             scenario_file_path = next(extract_path.rglob('*.SCENARIO'))
             scenario_name = scenario_file_path.stem
             base_dir = scenario_file_path.parent
@@ -123,35 +154,85 @@ def handle_project_upload():
             add_to_log("No .SCENARIO file found", LogLevel.ERROR)
             return jsonify({'error': 'No .SCENARIO file found'}), 500
 
-        # Parse and validate the .SCENARIO file
-        scenario_file_data = parse_scenario_file(str(scenario_file_path), scenario_file_path.name)
-        add_to_log(f"Parsed scenario file: {scenario_file_path}", LogLevel.DEBUG)
+        # Parse and validate the .scenario file
+        add_to_log(f"Parsing .scenario file: {scenario_file_path}", LogLevel.TRACE)
+        scenario_file_data = extract_scenario_file_data(str(scenario_file_path))
+        add_to_log(f"Parsed .scenario file data: {scenario_file_data}", LogLevel.TRACE)
 
+        # Update project data with scenario data and settings
+        project.scenario_data = scenario_file_data['scenario_data']
+        project.settings_data = scenario_file_data['settings_data']
+        add_to_log(f"Loaded scenario_data: {project.scenario_data}", LogLevel.TRACE)
+        add_to_log(f"Loaded settings_data: {project.settings_data}", LogLevel.TRACE)
+
+        # Determine which files exist based on the .scenario file
+        add_to_log(f"Checking file existence based on .scenario file", LogLevel.TRACE)
         project.original_structure = check_file_existence(
             base_dir=base_dir,
             scenario_name=scenario_name,
-            scenario_data=scenario_file_data['scenario_data'],
+            scenario_data=project.scenario_data,
             extracted_base_path=project.extracted_base_path
         )
+        add_to_log(f"File existence check complete. Original structure: {project.original_structure}", LogLevel.TRACE)
+
         project.modified_structure = project.original_structure.copy()
-        scenario_file_data['projectFileStructure'] = project.modified_structure
-        add_to_log("Scenario file structure validated", LogLevel.INFO)
+        add_to_log(f"Scenario file structure validated: {project.modified_structure}", LogLevel.INFO)
 
         project.new_project = False
 
-        # Cache the scenario data
-        cache_file_path = EXTRACTS_PATH / f"{scenario_name}.json"
-        with open(cache_file_path, 'w') as cache_file:
-            json.dump(scenario_file_data, cache_file)
-        add_to_log(f"Scenario data cached at {cache_file_path}", LogLevel.DEBUG)
+        # Load data from existing files as specified in the .scenario file
+        for ext, file_info in project.modified_structure.items():
+            if ext not in ['scenario', 'cvp', 'wmdata', 'oof', 'oob', 'regionincl']:
+                add_to_log(f"Skipping unsupported file type: {ext}", LogLevel.WARNING)
+                continue
+
+            if file_info['doesExist']:
+                filename = file_info['filename']
+                directory = file_info.get('dir', '')
+                dir_path = Path(directory)
+                file_full_path = base_dir / dir_path / f"{filename}.{ext}"
+
+                add_to_log(f"Loading data from file: {file_full_path}", LogLevel.TRACE)
+                if file_full_path.exists():
+                    project.load_data_from_file(str(file_full_path))
+                    add_to_log(f"Data loaded from file: {file_full_path}", LogLevel.DEBUG)
+                else:
+                    add_to_log(f"File not found: {file_full_path}", LogLevel.WARNING)
 
         send_progress(100, "File uploaded and validated")
         add_to_log("=== Finished: Uploading Project ===", LogLevel.INFO)
-        return jsonify(scenario_file_data), 200
+
+        # Prepare response data
+        response_data = {
+            "message": "Project uploaded and data loaded successfully",
+            "settings_data": project.settings_data,
+            "projectFileStructure": project.modified_structure
+        }
+
+        return jsonify(response_data), 200
 
     except Exception as e:
         add_to_log(f"Internal server error: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
+
+
+@main_blueprint.route('/load_default_project/<project_name>', methods=['GET'])
+def load_default_project(project_name):
+    try:
+        add_to_log(f"Loading default project: {project_name}", LogLevel.INFO)
+        project_file_path = EXTRACTS_PATH / f"{project_name}.json"
+        if not project_file_path.exists():
+            add_to_log(f"Project not found: {project_name}", LogLevel.ERROR)
+            return jsonify({'error': 'Project not found'}), 404
+
+        with open(project_file_path, 'r') as project_file:
+            project_data = json.load(project_file)
+        add_to_log(f"Loaded project: {project_name}", LogLevel.DEBUG)
+        return jsonify(project_data), 200
+    except Exception as e:
+        add_to_log(f"Error loading project: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
 
 @main_blueprint.route('/rename_file', methods=['POST'])
 def update_file_name():
@@ -218,3 +299,4 @@ def export_project_files():
     except Exception as e:
         add_to_log(f"Internal server error during export: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
+

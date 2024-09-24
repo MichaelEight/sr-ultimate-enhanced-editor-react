@@ -7,6 +7,25 @@ from ..utils.logging_utils import add_to_log, LogLevel
 from ..config import Config
 from ..models import project
 
+def extract_archive(zip_file_path: str, extract_to_path: str):
+    add_to_log(f"Starting extraction of '{zip_file_path}' to '{extract_to_path}'", LogLevel.INFO)
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        for member in zip_ref.namelist():
+            if member.endswith('/'):
+                continue
+            member_path = Path(member)
+            parts = member_path.parts
+            if len(parts) > 1:
+                parts = parts[1:]
+            else:
+                parts = parts
+            target_path = Path(extract_to_path).joinpath(*parts)
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            with zip_ref.open(member) as source_file, open(target_path, 'wb') as target_file:
+                shutil.copyfileobj(source_file, target_file)
+            add_to_log(f"Extracted '{member}' to '{target_path}'", LogLevel.TRACE)
+    add_to_log(f"Extraction completed for '{zip_file_path}'", LogLevel.INFO)
+
 def copy_file(source: Path, destination: Path) -> bool:
     try:
         destination.parent.mkdir(parents=True, exist_ok=True)

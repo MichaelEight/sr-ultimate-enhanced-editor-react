@@ -31,33 +31,57 @@ class Config:
         'postCache':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': ""}
     }
 
-    # TODO Check for missing properties
     DEFAULT_SETTINGS_STRUCTURE = {
-        'startymd': [2022, 8, 22],  # Format: [YYYY, MM, DD]
-        'defaultregion': None, 
-        'difficulty': [2, 2, 2],  # [military, economic, diplomatic]
-        'resources': 2,
-        'initialfunds': 2,
-        'aistance': 0,
-        'limitdareffect': 0,
-        'limitmareffect': 0,
-        'reservelimit': 0,
-        'missilenolimit': 0,
-        'wminvolve': 0,
-        'wmduse': 0,
-        'grouployaltymerge': 0,
-        'groupresearchmerge': 0,
-        'alliedvictory': 0,
-        'debtfree': 1,
-        'noloypenalty': 0,
-        'mapgui': 2,
-        'approvaleff': 0,
-        'wmdeff': 2,
-        'svictorycond': 0,
-        'victoryhex': [],  # Empty list, can be filled as needed
-        'gamelength': 0,
-        'fastfwddays': 0,
-        'mapsplash': 0
+        # General Info
+        'startymd': [2022, 8, 22],  # 'startingDate' in frontend
+        'scenarioid': 0,            # 'scenarioId'
+        'fastfwddays': 0,           # 'fastForwardDays'
+        'defaultregion': 0,         # 'defaultRegion'
+        # Difficulties
+        'difficulty': [2, 2, 2],    # [military, economic, diplomatic]
+        # Victory Conditions
+        'gamelength': '',           # 'gameLength'
+        'svictorycond': '',         # 'victory'
+        'victoryhex': [0, 0],       # 'victoryHexX', 'victoryHexY'
+        'victorytech': 0,           # 'victoryTech'
+        # Starting Conditions
+        'resources': '',            # 'resourcesLevel'
+        'initialfunds': '',         # 'initialFunds'
+        # AI Settings
+        'aistance': '',             # 'globalAIStance'
+        'wmduse': '',               # 'nukeEffect'
+        'approvaleff': '',          # 'approvalEffect'
+        # Graphics Options
+        'mapgui': '',               # 'guiLevel'
+        'mapsplash': 0,             # 'mapSplash'
+        'mapmusic': 0,              # 'mapMusic'
+        # Miscellaneous
+        'startingyear': 0,          # 'startingYear'
+        'techtreedefault': '',      # 'techTreeDefault'
+        'regionalallies': '',       # 'regionAllies'
+        'regionalaxis': '',         # 'regionAxis'
+        'spherenn': '',             # 'sphereNN'
+        # Scenario Options (Checkboxes)
+        'fixedcapitals': 0,                 # 'fixedCapitals'
+        'criticalun': 0,                    # 'criticalUN'
+        'allownukes': 0,                    # 'allowNukes'
+        'alliedvictory': 0,                 # 'alliedVictory'
+        'debtfree': 0,                      # 'noStartingDebt'
+        'limitdareffect': 0,                # 'limitDarEffect'
+        'limitregionsinscenario': 0,        # 'limitRegionsInScenario'
+        'restricttechtrade': 0,             # 'restrictTechTrade'
+        'regionequip': 0,                   # 'regionEquip'
+        'fastbuild': 0,                     # 'fastBuild'
+        'noloypenalty': 0,                  # 'noLoyaltyPenalty'
+        'missilenolimit': 0,                # 'missileLimit'
+        'reservelimit': 0,                  # 'reserveLimit'
+        'grouployaltymerge': 0,             # 'groupLoyaltyMerge'
+        'groupresearchmerge': 0,            # 'groupResearchMerge'
+        'limitmareffect': 0,                # 'limitMarEffect'
+        'nosphere': 0,                      # 'noSphere'
+        'campaigngame': 0,                  # 'campaignGame'
+        'govchoice': 0,                     # 'govChoice'
+        'thirdpartyrelationseffect': 0,     # 'thirdPartyRelationsEffect'
     }
 
     DEFAULT_THEATERS_STRUCTURE = {

@@ -15,6 +15,7 @@ class LogLevel(Enum):
     DEBUG = 'debug'
     INFO = 'info'
     ERROR = 'error'
+    WARNING = 'warning'
 
 def send_progress(progress, message):
     socketio.emit('progress', {'progress': progress, 'message': message})
@@ -27,7 +28,7 @@ def create_log_dirs():
     log_dir = os.path.join('logs', current_date)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    for log_level in ['trace', 'debug', 'info', 'error']:
+    for log_level in ['trace', 'debug', 'info', 'error', 'warning']:
         log_file = os.path.join(log_dir, f'.{log_level}.log')
         if not os.path.exists(log_file):
             open(log_file, 'w').close()
@@ -57,6 +58,12 @@ def add_to_log(message, level=LogLevel.INFO):
         write_log(log_dir, LogLevel.DEBUG, log_entry)
         write_log(log_dir, LogLevel.TRACE, log_entry)
     elif level == LogLevel.ERROR:
+        write_log(log_dir, LogLevel.ERROR, log_entry)
+        write_log(log_dir, LogLevel.INFO, log_entry)
+        write_log(log_dir, LogLevel.DEBUG, log_entry)
+        write_log(log_dir, LogLevel.TRACE, log_entry)
+    elif level == LogLevel.WARNING:
+        write_log(log_dir, LogLevel.WARNING, log_entry)
         write_log(log_dir, LogLevel.ERROR, log_entry)
         write_log(log_dir, LogLevel.INFO, log_entry)
         write_log(log_dir, LogLevel.DEBUG, log_entry)
