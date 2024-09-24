@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from config import Config
+from ..config import Config
 
 class SettingsHandler:
     def __init__(self):
