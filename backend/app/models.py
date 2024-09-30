@@ -1,9 +1,15 @@
+# models.py
+
 from pathlib import Path
 from .config import Config
 from .utils.logging_utils import add_to_log, LogLevel
 
-from .importers.scenario_importer import extract_scenario_file_data
+from .importers.scenario_importer import import_scenario_file
+from .exporters.scenario_exporter import export_scenario_file
 from .importers.cvp_importer import extract_cvp_data
+from .exporters.cvp_exporter import export_cvp
+import copy
+
 class Project:
     def __init__(self):
         self.original_structure = {}
@@ -14,14 +20,14 @@ class Project:
         self.supported_extensions = ['scenario', 'cvp', 'wmdata', 'oof', 'oob', 'regionincl']
 
         # Initialize data attributes with default structures
-        self.settings_data = Config.DEFAULT_SETTINGS_STRUCTURE.copy()
-        self.regions_data = Config.DEFAULT_REGIONS_STRUCTURE.copy()
-        self.theaters_data = Config.DEFAULT_THEATERS_STRUCTURE.copy()
-        self.regionincl_data = Config.DEFAULT_REGIONINCL_STRUCTURE.copy()
-        self.orbat_data = Config.DEFAULT_ORBAT_STRUCTURE.copy()
-        self.resources_data = Config.DEFAULT_RESOURCES_STRUCTURE.copy()
-        self.worldmarket_data = Config.DEFAULT_WORLDMARKET_STRUCTURE.copy()
-        self.scenario_data = {}  # Assuming scenario_data is a separate attribute
+        self.settings_data = copy.deepcopy(Config.DEFAULT_SETTINGS_STRUCTURE)
+        self.regions_data = copy.deepcopy(Config.DEFAULT_REGIONS_STRUCTURE)
+        self.theaters_data = copy.deepcopy(Config.DEFAULT_THEATERS_STRUCTURE)
+        self.regionincl_data = copy.deepcopy(Config.DEFAULT_REGIONINCL_STRUCTURE)
+        self.orbat_data = copy.deepcopy(Config.DEFAULT_ORBAT_STRUCTURE)
+        self.resources_data = copy.deepcopy(Config.DEFAULT_RESOURCES_STRUCTURE)
+        self.worldmarket_data = copy.deepcopy(Config.DEFAULT_WORLDMARKET_STRUCTURE)
+        self.scenario_data = {}  # Scenario data
 
         # Initialize seenSinceLastUpdate flags
         self.seen_since_last_update = {
@@ -37,13 +43,13 @@ class Project:
 
     def create_empty(self):
         # Reset all data to default values from Config
-        self.settings_data = Config.DEFAULT_SETTINGS_STRUCTURE.copy()
-        self.regions_data = Config.DEFAULT_REGIONS_STRUCTURE.copy()
-        self.theaters_data = Config.DEFAULT_THEATERS_STRUCTURE.copy()
-        self.regionincl_data = Config.DEFAULT_REGIONINCL_STRUCTURE.copy()
-        self.orbat_data = Config.DEFAULT_ORBAT_STRUCTURE.copy()
-        self.resources_data = Config.DEFAULT_RESOURCES_STRUCTURE.copy()
-        self.worldmarket_data = Config.DEFAULT_WORLDMARKET_STRUCTURE.copy()
+        self.settings_data = copy.deepcopy(Config.DEFAULT_SETTINGS_STRUCTURE)
+        self.regions_data = copy.deepcopy(Config.DEFAULT_REGIONS_STRUCTURE)
+        self.theaters_data = copy.deepcopy(Config.DEFAULT_THEATERS_STRUCTURE)
+        self.regionincl_data = copy.deepcopy(Config.DEFAULT_REGIONINCL_STRUCTURE)
+        self.orbat_data = copy.deepcopy(Config.DEFAULT_ORBAT_STRUCTURE)
+        self.resources_data = copy.deepcopy(Config.DEFAULT_RESOURCES_STRUCTURE)
+        self.worldmarket_data = copy.deepcopy(Config.DEFAULT_WORLDMARKET_STRUCTURE)
         self.scenario_data = {}
         self.original_structure = {}
         self.modified_structure = {}
@@ -65,7 +71,7 @@ class Project:
 
         add_to_log(f"Loading data from file: {file_path}", LogLevel.DEBUG)
         if file_extension == 'scenario':
-            scenario_file_data = extract_scenario_file_data(file_path)
+            scenario_file_data = import_scenario_file(file_path)
             self.settings_data = scenario_file_data['settings_data']
             self.scenario_data = scenario_file_data['scenario_data']
             self.seen_since_last_update['settings'] = False
@@ -140,16 +146,25 @@ class Project:
 
         add_to_log(f"Changed value of {label} to {new_value}", LogLevel.INFO)
 
+    def export_scenario_file(self, output_file_path):
+        """
+        Export the scenario data and settings data to a .scenario file.
+        """
+        add_to_log(f"Exporting scenario file to {output_file_path}", LogLevel.INFO)
+        export_scenario_file(self.scenario_data, self.settings_data, output_file_path)
+        add_to_log("Scenario file export completed.", LogLevel.INFO)
+
+    def export_cvp_file(self, output_file_path):
+        """
+        Export the CVP data to a .cvp file.
+        """
+        add_to_log(f"Exporting CVP file to {output_file_path}", LogLevel.INFO)
+        cvp_data = {
+            "Theaters_Data": self.theaters_data,
+            "Regions_Data": self.regions_data
+        }
+        export_cvp(cvp_data, output_file_path)
+        add_to_log("CVP file export completed.", LogLevel.INFO)
+
 # Global project instance
 project = Project()
-
-
-# def create_empty_structure():
-#     project.original_structure = {}
-#     project.modified_structure = {}
-#     for ext, info in Config.DEFAULT_PROJECT_FILE_STRUCTURE.items():
-#         project.modified_structure[ext] = info.copy()
-#     project.new_project = True
-#     project.root_directory = Path('unnamed')
-#     project.extracted_base_path = Path('unnamed')
-#     add_to_log("Created empty (default) project structure", LogLevel.INFO)

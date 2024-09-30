@@ -1,8 +1,11 @@
+# routes.py
+
 from flask import Blueprint, request, jsonify, send_file
 from pathlib import Path
 import shutil
 import json
 import os
+import copy
 
 from .models import project
 from .utils.logging_utils import add_to_log, LogLevel, send_progress
@@ -12,7 +15,8 @@ from .validation.validators import check_file_existence
 
 from .utils.file_utils import create_zip_archive, extract_archive
 
-from .importers.scenario_importer import extract_scenario_file_data
+from .importers.scenario_importer import import_scenario_file
+from .exporters.scenario_exporter import export_scenario_file
 
 main_blueprint = Blueprint('main', __name__)
 
@@ -182,7 +186,7 @@ def handle_project_upload():
 
         # Parse and validate the .scenario file
         add_to_log(f"Parsing .scenario file: {scenario_file_path}", LogLevel.TRACE)
-        scenario_file_data = extract_scenario_file_data(str(scenario_file_path))
+        scenario_file_data = import_scenario_file(str(scenario_file_path))
         add_to_log(f"Parsed .scenario file data: {scenario_file_data}", LogLevel.TRACE)
 
         # Update project data with scenario data and settings
@@ -201,14 +205,14 @@ def handle_project_upload():
         )
         add_to_log(f"File existence check complete. Original structure: {project.original_structure}", LogLevel.TRACE)
 
-        project.modified_structure = project.original_structure.copy()
+        project.modified_structure = copy.deepcopy(project.original_structure)
         add_to_log(f"Scenario file structure validated: {project.modified_structure}", LogLevel.INFO)
 
         project.new_project = False
 
         # Load data from existing files as specified in the .scenario file
         for ext, file_info in project.modified_structure.items():
-            if ext not in ['scenario', 'cvp', 'wmdata', 'oof', 'oob', 'regionincl']:
+            if ext not in project.supported_extensions:
                 add_to_log(f"Skipping unsupported file type: {ext}", LogLevel.WARNING)
                 continue
 
@@ -246,7 +250,6 @@ def handle_project_upload():
         add_to_log(f"Internal server error: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
-
 @main_blueprint.route('/load_default_project/<project_name>', methods=['GET'])
 def load_default_project(project_name):
     # TODO add seen_since_last_update logic
@@ -264,7 +267,6 @@ def load_default_project(project_name):
     except Exception as e:
         add_to_log(f"Error loading project: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
-
 
 @main_blueprint.route('/rename_file', methods=['POST'])
 def update_file_name():
@@ -316,10 +318,28 @@ def export_project_files():
             add_to_log(f"Export directory {export_base_dir} already exists. Deleting it.", LogLevel.DEBUG)
             shutil.rmtree(export_base_dir)
 
+        # Ensure the export directory exists
+        export_base_dir.mkdir(parents=True, exist_ok=True)
+
+        # Export scenario file
+        scenario_filename = f"{project.modified_structure['scenario']['filename']}.SCENARIO"
+        scenario_output_path = export_base_dir / scenario_filename
+        project.export_scenario_file(str(scenario_output_path))
+
+        # Export CVP file if present
+        if 'cvp' in project.modified_structure and project.modified_structure['cvp']['filename']:
+            cvp_filename = f"{project.modified_structure['cvp']['filename']}.CVP"
+            cvp_output_path = export_base_dir / cvp_filename
+            project.export_cvp_file(str(cvp_output_path))
+
+        # Process other files for export as needed
+        # For now, we can process other files using process_file_for_export
         for ext, file_info in project.modified_structure.items():
+            if ext in ['scenario', 'cvp']:
+                continue  # Already handled
             process_file_for_export(ext, file_info)
 
-        zip_buffer = create_zip_archive()
+        zip_buffer = create_zip_archive(export_base_dir)
         add_to_log("=== Finished: Exporting Project ===", LogLevel.INFO)
         return send_file(
             zip_buffer,
@@ -331,4 +351,3 @@ def export_project_files():
     except Exception as e:
         add_to_log(f"Internal server error during export: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
-

@@ -82,6 +82,13 @@ class Config:
         'campaigngame': 0,                  # 'campaignGame'
         'govchoice': 0,                     # 'govChoice'
         'thirdpartyrelationseffect': 0,     # 'thirdPartyRelationsEffect'
+
+        # Missing values detected
+        # [WARNING][scenario_importer - import_scenario_file]: Unknown key in GMC: wminvolve
+        # [WARNING][scenario_importer - import_scenario_file]: Unknown key in GMC: wmdeff
+        # TODO check their purpose
+        'wminvolve': 0,
+        'wmdeff': '',
     }
 
     DEFAULT_THEATERS_STRUCTURE = {

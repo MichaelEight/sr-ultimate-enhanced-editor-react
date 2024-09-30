@@ -60,7 +60,7 @@ const ScenarioPage = ({ project, setProject }) => {
             return project[ext]['filename'];
         }
         return '';
-    };    
+    };
 
     // Update handleInputFieldChange to include logging
     const handleInputFieldChange = (ext, newFileName) => {
