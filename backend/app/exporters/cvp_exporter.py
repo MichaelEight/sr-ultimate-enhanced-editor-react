@@ -2,6 +2,7 @@
 
 import json
 from ..utils.logging_utils import add_to_log, LogLevel
+from ..config import Config  # Adjust the relative import based on your project structure
 
 def write_theaters(theaters_data):
     # Writing the &&THEATRES section
@@ -105,16 +106,51 @@ def json_to_cvp(json_data):
     cvp_output += write_regions(json_data.get("Regions_Data", []))
     return cvp_output
 
-def export_cvp(json_data, output_file_path):
+def export_cvp(cvp_data, output_file_path):
     """
-    Export the CVP data from json_data to the specified output_file_path.
-    """
-    cvp_output = json_to_cvp(json_data)
-    with open(output_file_path, 'w') as output_file:
-        output_file.write(cvp_output)
-    print(f"CVP file has been generated at {output_file_path}.")
-    add_to_log(f"CVP file has been generated at {output_file_path}.", LogLevel.INFO)
+    Export the CVP data from cvp_data to the specified output_file_path.
 
+    Args:
+        cvp_data (dict): The CVP data containing 'Theaters_Data' and 'Regions_Data'.
+        output_file_path (str): The file path where the CVP file will be saved.
+    """
+    try:
+        with open(output_file_path, 'w') as cvp_file:
+            # Export Theaters Data
+            cvp_file.write('Theaters Data\n')
+            theaters = cvp_data.get('Theaters_Data', [])
+            if not theaters:
+                add_to_log("No theaters data found in CVP data.", LogLevel.WARNING)
+                cvp_file.write("No theaters data available.\n")
+            else:
+                for theater in theaters:
+                    # Safely get 'theatreName', defaulting to 'Unknown' if not present
+                    theater_name = theater.get('theatreName', 'Unknown')
+                    cvp_file.write(f"{theater_name}\n")
+            cvp_file.write('\n')  # Add a newline for separation
+
+            # Export Regions Data
+            cvp_file.write('Regions Data\n')
+            regions = cvp_data.get('Regions_Data', [])
+            if not regions:
+                add_to_log("No regions data found in CVP data.", LogLevel.WARNING)
+                cvp_file.write("No regions data available.\n")
+            else:
+                for region in regions:
+                    # Safely get 'regionName', defaulting to 'Unknown' if not present
+                    region_name = region.get('regionName', 'Unknown')
+                    cvp_file.write(f"{region_name}\n")
+        
+        # Log successful export
+        print(f"CVP file has been generated at {output_file_path}.")
+        add_to_log(f"CVP file has been generated at {output_file_path}.", LogLevel.INFO)
+
+    except Exception as e:
+        # Log the error with details
+        error_message = f"Error exporting CVP file: {e}"
+        print(error_message)
+        add_to_log(error_message, LogLevel.ERROR)
+        raise  # Re-raise the exception to be handled by the calling function
 # Example usage (uncomment to test):
 # if __name__ == "__main__":
 #     with open('exampleInput.json') as json_file:

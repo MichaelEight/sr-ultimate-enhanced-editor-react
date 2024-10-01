@@ -1,6 +1,7 @@
 # scenario_exporter.py
 
 import os
+from ..config import Config
 
 def export_scenario_file(scenario_data, settings_data, output_file_path):
     """
@@ -73,7 +74,7 @@ def get_directory_for_extension(ext):
     """
     Get the directory path for a given file extension, as per the default project file structure.
     """
-    from config import Config
+    
     default_structure = Config.DEFAULT_PROJECT_FILE_STRUCTURE
     if ext in default_structure:
         dir_path = default_structure[ext]['dir']

@@ -219,8 +219,8 @@ def handle_project_upload():
             if file_info['doesExist']:
                 filename = file_info['filename']
                 directory = file_info.get('dir', '')
-                dir_path = Path(directory)
-                file_full_path = base_dir / dir_path / f"{filename}.{ext}"
+                dir_path = base_dir / directory  # Include the directory
+                file_full_path = dir_path / f"{filename}.{ext.upper()}"
 
                 add_to_log(f"Loading data from file: {file_full_path}", LogLevel.TRACE)
                 if file_full_path.exists():
@@ -309,7 +309,7 @@ def export_project_files():
             add_to_log("Filename for 'scenario' is empty", LogLevel.ERROR)
             return jsonify({'error': "Filename for 'scenario' is empty"}), 400
 
-        project.root_directory = project.extracted_base_path
+        project.root_directory = project.modified_structure['scenario']['filename']
         add_to_log(f"Project root directory set to {project.root_directory}", LogLevel.DEBUG)
 
         export_base_dir = EXPORTS_PATH / project.root_directory
@@ -322,22 +322,25 @@ def export_project_files():
         export_base_dir.mkdir(parents=True, exist_ok=True)
 
         # Export scenario file
+        scenario_dir = project.modified_structure['scenario'].get('dir', '')
         scenario_filename = f"{project.modified_structure['scenario']['filename']}.SCENARIO"
-        scenario_output_path = export_base_dir / scenario_filename
+        scenario_output_path = export_base_dir / scenario_dir / scenario_filename
+        scenario_output_path.parent.mkdir(parents=True, exist_ok=True)
         project.export_scenario_file(str(scenario_output_path))
 
         # Export CVP file if present
         if 'cvp' in project.modified_structure and project.modified_structure['cvp']['filename']:
+            cvp_dir = project.modified_structure['cvp'].get('dir', '')
             cvp_filename = f"{project.modified_structure['cvp']['filename']}.CVP"
-            cvp_output_path = export_base_dir / cvp_filename
+            cvp_output_path = export_base_dir / cvp_dir / cvp_filename
+            cvp_output_path.parent.mkdir(parents=True, exist_ok=True)
             project.export_cvp_file(str(cvp_output_path))
 
         # Process other files for export as needed
-        # For now, we can process other files using process_file_for_export
         for ext, file_info in project.modified_structure.items():
             if ext in ['scenario', 'cvp']:
                 continue  # Already handled
-            process_file_for_export(ext, file_info)
+            process_file_for_export(ext, file_info, export_base_dir)
 
         zip_buffer = create_zip_archive(export_base_dir)
         add_to_log("=== Finished: Exporting Project ===", LogLevel.INFO)

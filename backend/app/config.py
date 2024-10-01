@@ -1,3 +1,5 @@
+# config.py
+
 import os
 
 class Config:
@@ -15,20 +17,20 @@ class Config:
     DEFAULT_PROJECT_FILE_STRUCTURE = {
         'scenario':    {'isRequired': True,  'doesExist': False, 'isModified': False, 'dir': '',            'filename': "NewScenario"},
         'sav':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': '',            'filename': ""},
-        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps',        'filename': ""},
-        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps',        'filename': ""},
-        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps',        'filename': ""},
-        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps',        'filename': ""},
-        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/orbats', 'filename': ""},
-        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': ""},
-        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': "DEFAULT"},
-        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': "DEFAULT"},
-        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': "DEFAULT"},
-        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': "DEFAULT"},
-        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': "DEFAULT"},
-        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': "DEFAULT"},
-        'preCache':    {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': ""},
-        'postCache':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'maps/data',   'filename': ""}
+        'cvp':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps',        'filename': ""},
+        'mapx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps',        'filename': ""},
+        'oof':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps',        'filename': ""},
+        'regionincl':  {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps',        'filename': ""},
+        'oob':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/ORBATS', 'filename': ""},
+        'wmdata':      {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': ""},
+        'unit':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': "DEFAULT"},
+        'pplx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': "DEFAULT"},
+        'ttrx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': "DEFAULT"},
+        'terx':        {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': "DEFAULT"},
+        'newsitems':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': "DEFAULT"},
+        'prf':         {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': "DEFAULT"},
+        'preCache':    {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': ""},
+        'postCache':   {'isRequired': False, 'doesExist': False, 'isModified': False, 'dir': 'Maps/DATA',   'filename': ""}
     }
 
     DEFAULT_SETTINGS_STRUCTURE = {
