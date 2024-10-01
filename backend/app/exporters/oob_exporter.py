@@ -20,7 +20,10 @@ def write_oob_region(region):
 
 def json_to_oob(oob_data):
     oob_output = "// Generated OOB File\n\n"
-    for region in oob_data["OOB_Data"]:
+    oob_data_list = oob_data.get("OOB_Data", [])
+    if not oob_data_list:
+        add_to_log("No OOB_Data found. Exporting empty OOB file.", LogLevel.WARNING)
+    for region in oob_data_list:
         oob_output += write_oob_region(region)
     return oob_output
 
