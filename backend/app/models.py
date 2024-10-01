@@ -92,8 +92,11 @@ class Project:
             add_to_log(f"Loaded .cvp file: {file_path}", LogLevel.INFO)
         elif file_extension == 'oob':
             orbat_data = extract_oob_data(file_path)
+            if "OOB_Data" not in orbat_data:
+                orbat_data["OOB_Data"] = []  # Ensure 'OOB_Data' exists
+                add_to_log(f"'OOB_Data' missing in {file_path}. Initialized as empty list.", LogLevel.WARNING)
             self.orbat_data = orbat_data
-            self.seen_since_last_update['oob'] = False
+            self.seen_since_last_update['orbat'] = False
             add_to_log(f"Loaded .oob file: {file_path}", LogLevel.INFO)
         elif file_extension == 'regionincl':
             regionincl_data = extract_regionincl_data(file_path)
@@ -177,6 +180,12 @@ class Project:
 
     def export_orbat_file(self, output_file_path):
         add_to_log(f"Exporting OOB file to {output_file_path}", LogLevel.INFO)
+        if not isinstance(self.orbat_data, dict):
+            add_to_log(f"Invalid or missing orbat_data: {self.orbat_data}", LogLevel.ERROR)
+            raise ValueError("Invalid orbat_data structure.")
+        if "OOB_Data" not in self.orbat_data:
+            add_to_log("OOB_Data key missing in orbat_data. Initializing as empty list.", LogLevel.WARNING)
+            self.orbat_data["OOB_Data"] = []
         export_oob(self.orbat_data, output_file_path)
         add_to_log("OOB file export completed.", LogLevel.INFO)
 
