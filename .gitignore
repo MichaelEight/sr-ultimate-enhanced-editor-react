@@ -41,3 +41,6 @@ yarn-error.log*
 
 /backend/__pycache__/*
 /backend/myenv/
+backend/app/__pycache__/config.cpython-311.pyc
+backend/app/importers/__pycache__/__init__.cpython-311.pyc
+backend/app/exporters/__pycache__/scenario_exporter.cpython-311.pyc
