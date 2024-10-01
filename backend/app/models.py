@@ -1,5 +1,6 @@
 # models.py
 
+import copy
 from pathlib import Path
 from .config import Config
 from .utils.logging_utils import add_to_log, LogLevel
@@ -8,7 +9,12 @@ from .importers.scenario_importer import import_scenario_file
 from .exporters.scenario_exporter import export_scenario_file
 from .importers.cvp_importer import extract_cvp_data
 from .exporters.cvp_exporter import export_cvp
-import copy
+from .importers.oob_importer import extract_oob_data
+from .exporters.oob_exporter import export_oob
+from .importers.regionincl_importer import extract_regionincl_data
+from .exporters.regionincl_exporter import write_regionincl
+from .importers.wmdata_importer import extract_wmdata
+from .exporters.wmdata_exporter import write_wmdata
 
 class Project:
     def __init__(self):
@@ -84,19 +90,22 @@ class Project:
             self.seen_since_last_update['regions'] = False
             self.seen_since_last_update['theaters'] = False
             add_to_log(f"Loaded .cvp file: {file_path}", LogLevel.INFO)
-        elif file_extension == 'regionincl':
-            # Implement the importer for regionincl files
-            self.seen_since_last_update['regionincl'] = False
-            pass  # Replace with actual implementation
         elif file_extension == 'oob':
-            # Implement the importer for oob files
-            self.seen_since_last_update['orbat'] = False
-            pass  # Replace with actual implementation
+            orbat_data = extract_oob_data(file_path)
+            self.orbat_data = orbat_data
+            self.seen_since_last_update['oob'] = False
+            add_to_log(f"Loaded .oob file: {file_path}", LogLevel.INFO)
+        elif file_extension == 'regionincl':
+            regionincl_data = extract_regionincl_data(file_path)
+            self.regionincl_data = regionincl_data
+            self.seen_since_last_update['regionincl'] = False
+            add_to_log(f"Loaded .regionincl file: {file_path}", LogLevel.INFO)
         elif file_extension == 'wmdata':
-            # Implement the importer for wmdata files
+            wmdata = extract_wmdata(file_path)
+            self.worldmarket_data = wmdata.get('worldmarket', {})
+            self.resources_data = wmdata.get('resources', {})
             self.seen_since_last_update['worldmarket'] = False
-            pass  # Replace with actual implementation
-        # Add handling for other file types as needed
+            add_to_log(f"Loaded .wmdata file: {file_path}", LogLevel.INFO)
         else:
             add_to_log(f"No importer available for file type: {file_extension}", LogLevel.WARNING)
         add_to_log(f"Loaded data from {file_path}", LogLevel.DEBUG)
@@ -165,6 +174,25 @@ class Project:
         }
         export_cvp(cvp_data, output_file_path)
         add_to_log("CVP file export completed.", LogLevel.INFO)
+
+    def export_orbat_file(self, output_file_path):
+        add_to_log(f"Exporting OOB file to {output_file_path}", LogLevel.INFO)
+        export_oob(self.orbat_data, output_file_path)
+        add_to_log("OOB file export completed.", LogLevel.INFO)
+
+    def export_regionincl_file(self, output_file_path):
+        add_to_log(f"Exporting REGIONINCL file to {output_file_path}", LogLevel.INFO)
+        write_regionincl(self.regionincl_data, output_file_path)
+        add_to_log("REGIONINCL file export completed.", LogLevel.INFO)
+
+    def export_wmdata_file(self, output_file_path):
+        add_to_log(f"Exporting WMData file to {output_file_path}", LogLevel.INFO)
+        wmdata = {
+            'worldmarket': self.worldmarket_data,
+            'resources': self.resources_data
+        }
+        write_wmdata(wmdata, output_file_path)
+        add_to_log("WMData file export completed.", LogLevel.INFO)
 
 # Global project instance
 project = Project()

@@ -151,8 +151,3 @@ def export_cvp(cvp_data, output_file_path):
         print(error_message)
         add_to_log(error_message, LogLevel.ERROR)
         raise  # Re-raise the exception to be handled by the calling function
-# Example usage (uncomment to test):
-# if __name__ == "__main__":
-#     with open('exampleInput.json') as json_file:
-#         json_data = json.load(json_file)
-#     export_cvp(json_data, 'output.cvp')
