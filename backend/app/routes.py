@@ -13,7 +13,7 @@ from .config import Config
 from .services.project_services import process_file_for_export
 from .validation.validators import check_file_existence
 
-from .utils.file_utils import create_zip_archive, extract_archive
+from .utils.file_utils import create_zip_archive, extract_archive, create_zip_archive_with_scenario
 
 from .importers.scenario_importer import import_scenario_file
 from .exporters.scenario_exporter import export_scenario_file
@@ -196,7 +196,7 @@ def handle_project_upload():
         add_to_log(f"Loaded settings_data: {project.settings_data}", LogLevel.TRACE)
 
         # Determine which files exist based on the .scenario file
-        add_to_log(f"Checking file existence based on .scenario file", LogLevel.TRACE)
+        add_to_log("Checking file existence based on .scenario file", LogLevel.TRACE)
         project.original_structure = check_file_existence(
             base_dir=base_dir,
             scenario_name=scenario_name,
@@ -321,12 +321,11 @@ def export_project_files():
         # Ensure the export directory exists
         export_base_dir.mkdir(parents=True, exist_ok=True)
 
-        # Export scenario file
-        scenario_dir = project.modified_structure['scenario'].get('dir', '')
+        # Export scenario file at the root level
         scenario_filename = f"{project.modified_structure['scenario']['filename']}.SCENARIO"
-        scenario_output_path = export_base_dir / scenario_dir / scenario_filename
-        scenario_output_path.parent.mkdir(parents=True, exist_ok=True)
+        scenario_output_path = EXPORTS_PATH / scenario_filename
         project.export_scenario_file(str(scenario_output_path))
+        add_to_log(f"Exported scenario file to {scenario_output_path}", LogLevel.INFO)
 
         # Export CVP file if present
         if 'cvp' in project.modified_structure and project.modified_structure['cvp']['filename']:
@@ -365,7 +364,7 @@ def export_project_files():
                 continue  # Already handled
             process_file_for_export(ext, file_info, export_base_dir)
 
-        zip_buffer = create_zip_archive(export_base_dir)
+        zip_buffer = create_zip_archive_with_scenario(export_base_dir, scenario_output_path)
         add_to_log("=== Finished: Exporting Project ===", LogLevel.INFO)
         return send_file(
             zip_buffer,

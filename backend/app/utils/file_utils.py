@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import zipfile
 import io
+import os
 
 from ..utils.logging_utils import add_to_log, LogLevel
 from ..config import Config
@@ -19,8 +20,8 @@ def extract_archive(zip_file_path: str, extract_to_path: str):
             parts = member_path.parts
             if len(parts) > 1:
                 parts = parts[1:]
-            else:
-                parts = parts
+            # else:
+            #     parts = parts
             target_path = Path(extract_to_path).joinpath(*parts)
             target_path.parent.mkdir(parents=True, exist_ok=True)
             with zip_ref.open(member) as source_file, open(target_path, 'wb') as target_file:
@@ -67,3 +68,29 @@ def create_zip_archive(directory_path):
     except Exception as e:
         add_to_log(f"Error creating zip archive: {e}", LogLevel.ERROR)
         raise
+
+def create_zip_archive_with_scenario(project_dir, scenario_file_path):
+    """
+    Create a zip archive containing the scenario file and the project directory.
+
+    Args:
+        project_dir (Path): The path to the project directory to include in the zip.
+        scenario_file_path (Path): The path to the scenario file to include in the zip.
+
+    Returns:
+        io.BytesIO: A buffer containing the zip archive data.
+    """
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        # Add the scenario file at the root of the zip
+        zip_file.write(scenario_file_path, arcname=scenario_file_path.name)
+
+        # Add the project directory and its contents
+        for root, dirs, files in os.walk(project_dir):
+            for file in files:
+                file_path = Path(root) / file
+                arcname = file_path.relative_to(project_dir.parent)
+                zip_file.write(file_path, arcname=str(arcname))
+
+    zip_buffer.seek(0)
+    return zip_buffer
