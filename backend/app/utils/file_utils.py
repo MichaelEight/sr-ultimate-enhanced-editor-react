@@ -1,11 +1,33 @@
+# file_utils.py
+
 from pathlib import Path
 import shutil
 import zipfile
 import io
+import os
 
 from ..utils.logging_utils import add_to_log, LogLevel
 from ..config import Config
 from ..models import project
+
+def extract_archive(zip_file_path: str, extract_to_path: str):
+    add_to_log(f"Starting extraction of '{zip_file_path}' to '{extract_to_path}'", LogLevel.INFO)
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        for member in zip_ref.namelist():
+            if member.endswith('/'):
+                continue
+            member_path = Path(member)
+            parts = member_path.parts
+            if len(parts) > 1:
+                parts = parts[1:]
+            # else:
+            #     parts = parts
+            target_path = Path(extract_to_path).joinpath(*parts)
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            with zip_ref.open(member) as source_file, open(target_path, 'wb') as target_file:
+                shutil.copyfileobj(source_file, target_file)
+            add_to_log(f"Extracted '{member}' to '{target_path}'", LogLevel.TRACE)
+    add_to_log(f"Extraction completed for '{zip_file_path}'", LogLevel.INFO)
 
 def copy_file(source: Path, destination: Path) -> bool:
     try:
@@ -20,21 +42,55 @@ def copy_file(source: Path, destination: Path) -> bool:
         add_to_log(f"Error copying file from {source} to {destination}: {e}", LogLevel.ERROR)
         return False
 
-def create_zip_archive():
+
+def create_zip_archive(directory_path):
+    """
+    Create a zip archive of the specified directory and return it as an in-memory file-like object.
+
+    Args:
+        directory_path (str or Path): The path to the directory to zip.
+
+    Returns:
+        BytesIO: A file-like object containing the zip archive.
+    """
+    try:
+        directory_path = Path(directory_path)
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for file_path in directory_path.rglob('*'):
+                zip_file.write(
+                    file_path,
+                    arcname=file_path.relative_to(directory_path.parent)
+                )
+        zip_buffer.seek(0)
+        add_to_log(f"Created zip archive for directory: {directory_path}", LogLevel.INFO)
+        return zip_buffer
+    except Exception as e:
+        add_to_log(f"Error creating zip archive: {e}", LogLevel.ERROR)
+        raise
+
+def create_zip_archive_with_scenario(project_dir, scenario_file_path):
+    """
+    Create a zip archive containing the scenario file and the project directory.
+
+    Args:
+        project_dir (Path): The path to the project directory to include in the zip.
+        scenario_file_path (Path): The path to the scenario file to include in the zip.
+
+    Returns:
+        io.BytesIO: A buffer containing the zip archive data.
+    """
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        scenario_file_path = Path(Config.EXPORT_FOLDER) / f"{project.modified_structure['scenario']['filename']}.scenario"
-        if scenario_file_path.exists():
-            arcname = scenario_file_path.name
-            zip_file.write(scenario_file_path, arcname)
-            add_to_log(f"Added scenario file to ZIP: {scenario_file_path}", LogLevel.DEBUG)
-        else:
-            add_to_log(f"Scenario file not found: {scenario_file_path}", LogLevel.ERROR)
-        export_base_dir = Path(Config.EXPORT_FOLDER) / project.extracted_base_path
-        for file_path in export_base_dir.rglob('*'):
-            if file_path.is_file():
-                arcname = file_path.relative_to(Path(Config.EXPORT_FOLDER)).as_posix()
-                zip_file.write(file_path, arcname)
-                add_to_log(f"Added file to ZIP: {file_path}", LogLevel.DEBUG)
+        # Add the scenario file at the root of the zip
+        zip_file.write(scenario_file_path, arcname=scenario_file_path.name)
+
+        # Add the project directory and its contents
+        for root, dirs, files in os.walk(project_dir):
+            for file in files:
+                file_path = Path(root) / file
+                arcname = file_path.relative_to(project_dir.parent)
+                zip_file.write(file_path, arcname=str(arcname))
+
     zip_buffer.seek(0)
     return zip_buffer
