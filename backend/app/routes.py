@@ -50,7 +50,6 @@ def check_seen_since_last_update():
         add_to_log(f"Error in check_seen_since_last_update: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
-
 @main_blueprint.route('/updateSetting', methods=['POST'])
 def update_setting():
     try:
@@ -375,4 +374,80 @@ def export_project_files():
 
     except Exception as e:
         add_to_log(f"Internal server error during export: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/regions', methods=['GET'])
+def get_regions():
+    try:
+        add_to_log("Fetching regions data", LogLevel.INFO)
+        # Combine regions data from CVP and REGIONINCL
+        regions_data = []
+        cvp_regions = project.regions_data  # List of regions from CVP
+        regionincl_regions = project.regionincl_data.get('regions', [])  # List of regions from REGIONINCL
+
+        # Create a mapping of region IDs to isActive status from REGIONINCL
+        regionincl_map = {region['regionId']: region['isActive'] for region in regionincl_regions}
+
+        for region in cvp_regions:
+            region_id = region['ID']
+            is_active = regionincl_map.get(region_id, False)  # Default to False if not in REGIONINCL
+            region_properties = region['Properties']
+            # Combine region data with isActive status
+            region_data = {
+                'ID': region_id,
+                'isActive': is_active,
+                'Properties': region_properties
+            }
+            regions_data.append(region_data)
+
+        return jsonify({'regions': regions_data}), 200
+    except Exception as e:
+        add_to_log(f"Error fetching regions data: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/regions/update', methods=['POST'])
+def update_region():
+    try:
+        data = request.get_json()
+        add_to_log(f"Received region update: {data}", LogLevel.INFO)
+        region_id = data.get('ID')
+        is_active = data.get('isActive')
+        properties = data.get('Properties')
+
+        if region_id is None:
+            add_to_log("Region ID is missing in the update request", LogLevel.ERROR)
+            return jsonify({'error': 'Region ID is required'}), 400
+
+        # Update CVP data
+        for region in project.regions_data:
+            if region['ID'] == region_id:
+                region['Properties'] = properties
+                break
+        else:
+            add_to_log(f"Region ID {region_id} not found in CVP data", LogLevel.ERROR)
+            return jsonify({'error': f'Region ID {region_id} not found'}), 404
+
+        # Update REGIONINCL data
+        # First, check if the region exists in regionincl_data
+        regionincl_regions = project.regionincl_data.get('regions', [])
+        for region in regionincl_regions:
+            if region['regionId'] == region_id:
+                region['isActive'] = is_active
+                break
+        else:
+            # If region not found in REGIONINCL, add it
+            project.regionincl_data.setdefault('regions', []).append({
+                'regionId': region_id,
+                'comment': None,  # Or set a default comment if needed
+                'isActive': is_active
+            })
+
+        # Mark data as changed
+        project.seen_since_last_update['regions'] = False
+        project.seen_since_last_update['regionincl'] = False
+
+        add_to_log(f"Region {region_id} updated successfully", LogLevel.INFO)
+        return jsonify({'message': 'Region updated successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error updating region: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
