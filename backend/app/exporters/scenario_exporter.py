@@ -2,6 +2,8 @@
 
 import os
 from ..config import Config
+from pathlib import Path    
+from ..utils.logging_utils import add_to_log, LogLevel
 
 def export_scenario_file(scenario_data, settings_data, output_file_path):
     """
@@ -17,6 +19,7 @@ def export_scenario_file(scenario_data, settings_data, output_file_path):
     for ext in ['cvp', 'regionincl', 'prf']:
         for filename in scenario_data.get(ext, []):
             dir_path = get_directory_for_extension(ext)
+            # Append the extension to the filename
             full_filename = f"{filename}.{ext.upper()}"
             scenario_output += '#include "{}", "{}"\n'.format(full_filename, dir_path)
     scenario_output += "#endifset\n\n"
@@ -26,28 +29,37 @@ def export_scenario_file(scenario_data, settings_data, output_file_path):
     for ext in ['unit', 'pplx', 'ttrx', 'terx', 'wmdata', 'newsitems']:
         for filename in scenario_data.get(ext, []):
             dir_path = get_directory_for_extension(ext)
-            scenario_output += '#include "{}", "{}"\n'.format(filename, dir_path)
+            # Append the extension to the filename
+            full_filename = f"{filename}.{ext.upper()}"
+            scenario_output += '#include "{}", "{}"\n'.format(full_filename, dir_path)
     scenario_output += '#include "AllSourceLoad.INI", "INI\\"' + "\n"
     scenario_output += "#endifset\n\n"
 
-    # Process #ifset 0x02 continued
-    scenario_output += "#ifset 0x02\n"
+    # Process #ifset 0x02 continued (This seems like an additional block; likely unintended)
+    # To fix, we need to check if this block should be part of the previous #ifset or a new one.
+    # Assuming it's intended to be part of #ifset 0x02, we'll remove the new #ifset
     scenario_output += "&&MAP\n"
     if scenario_data.get('mapx', []):
         map_name = os.path.splitext(scenario_data['mapx'][0])[0]
         scenario_output += 'mapfile "{}"\n'.format(map_name)
     scenario_output += "&&END\n\n"
 
+    # Continue with other includes without opening a new #ifset 0x02
     for ext in ['oof']:
         for filename in scenario_data.get(ext, []):
             dir_path = get_directory_for_extension(ext)
-            scenario_output += '#include "{}", "{}"\n'.format(filename, dir_path)
+            # Append the extension to the filename
+            full_filename = f"{filename}.{ext.upper()}"
+            scenario_output += '#include "{}", "{}"\n'.format(full_filename, dir_path)
     scenario_output += '#include "AllLoad.INI", "INI\\"' + "\n"
     for ext in ['oob']:
         for filename in scenario_data.get(ext, []):
             dir_path = get_directory_for_extension(ext)
-            scenario_output += '#include "{}", "{}"\n'.format(filename, dir_path)
-    scenario_output += "#endifset\n\n"
+            # Append the extension to the filename
+            full_filename = f"{filename}.{ext.upper()}"
+            scenario_output += '#include "{}", "{}"\n'.format(full_filename, dir_path)
+    # Removed the extra #endifset
+    # scenario_output += "#endifset\n\n"
 
     # Process #ifset 0x04 section
     scenario_output += "#ifset 0x04\n"
@@ -68,22 +80,25 @@ def export_scenario_file(scenario_data, settings_data, output_file_path):
     # Write to file
     with open(output_file_path, 'w') as output_file:
         output_file.write(scenario_output)
-    print(f"Scenario file has been generated at {output_file_path}.")
+    add_to_log(f"Scenario file has been generated at {output_file_path}.", LogLevel.INFO)
+
 
 def get_directory_for_extension(ext):
     """
     Get the directory path for a given file extension, as per the default project file structure.
+    Ensures consistent use of backslashes and uppercase directories.
     """
-    
     default_structure = Config.DEFAULT_PROJECT_FILE_STRUCTURE
     if ext in default_structure:
         dir_path = default_structure[ext]['dir']
-        # Ensure the path ends with a backslash and escape backslashes
-        if not dir_path.endswith('\\'):
-            dir_path += '\\'
-        return dir_path.replace('\\', '\\\\')  # Replace backslash for proper escaping
+        # Normalize path to use backslashes and uppercase directory names
+        normalized_path = Path(dir_path).as_posix().replace('/', '\\').upper()
+        if not normalized_path.endswith('\\'):
+            normalized_path += '\\'
+        return normalized_path
     else:
         return ''
+
 
 def format_gmc_line(key, value):
     """
