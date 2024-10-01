@@ -3,8 +3,6 @@
 import os
 
 class Config:
-    #LOGGING_LEVEL = 'trace' # DEPRECATED
-
     UPLOAD_FOLDER = 'uploaded'
     EXTRACT_FOLDER = 'extracted'
     EXPORT_FOLDER = 'exported'
@@ -88,7 +86,7 @@ class Config:
         # Missing values detected
         # [WARNING][scenario_importer - import_scenario_file]: Unknown key in GMC: wminvolve
         # [WARNING][scenario_importer - import_scenario_file]: Unknown key in GMC: wmdeff
-        # TODO check their purpose
+        # TODO check their purpose, add them to frontend
         'wminvolve': 0,
         'wmdeff': '',
     }
@@ -110,12 +108,220 @@ class Config:
     }
     
     DEFAULT_RESOURCES_STRUCTURE = {
-        # TODO
+        "agriculture": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "rubber": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "timber": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "petroleum": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "coal": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "ore": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "uranium": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "electricity": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "consumergoods": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "militarygoods": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        },
+        "industrialgoods": {
+            "producefrom": {
+                "agriculture": 0,
+                "rubber": 0,
+                "timber": 0,
+                "petroleum": 0,
+                "coal": 0,
+                "ore": 0,
+                "uranium": 0,
+                "electricity": 0,
+                "consumergoods": 0,
+                "militarygoods": 0,
+                "industrialgoods": 0
+            }
+        }
     }
 
     DEFAULT_WORLDMARKET_STRUCTURE = {
-        # TODO
+        "battstrdefault": {
+            "inf": 0,
+            "rec": 0,
+            "tank": 0,
+            "at": 0,
+            "art": 0,
+            "aa": 0,
+            "trp": 0,
+            "helo": 0,
+            "miss": 0,
+            "int": 0,
+            "fig": 0,
+            "multi": 0,
+            "bomb": 0,
+            "rec_air": 0,
+            "a-trp": 0,
+            "sub": 0,
+            "carr": 0,
+            "bship": 0,
+            "frig": 0,
+            "spat": 0,
+            "strp": 0,
+            "upgrade": 0,
+            "unused": 0
+        },
+        "socialdefaults": {
+            "healthcare": 0,
+            "education": 0,
+            "familysubsidy": 0,
+            "lawenforcement": 0,
+            "infrastructure": 0,
+            "socialassistance": 0,
+            "culturalsubsidy": 0,
+            "environment": 0
+        },
+        "hexresmults": {
+            "agriculture": 0,
+            "rubber": 0,
+            "timber": 0,
+            "petroleum": 0,
+            "coal": 0,
+            "ore": 0,
+            "uranium": 0,
+            "electricity": 0
+        },
+        "primerate": 1.0,      # Default primerate
+        "socadj": 1.0,         # Default social adjustment
+        "wmrelrate": 1         # Default world market relation rate
     }
-    
-    
-
