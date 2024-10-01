@@ -335,6 +335,22 @@ def export_project_files():
             cvp_output_path = export_base_dir / cvp_dir / cvp_filename
             cvp_output_path.parent.mkdir(parents=True, exist_ok=True)
             project.export_cvp_file(str(cvp_output_path))
+        
+        # Export OOB file if present
+        if 'oob' in project.modified_structure and project.modified_structure['oob']['filename']:
+            oob_dir = project.modified_structure['oob'].get('dir', '')
+            oob_filename = f"{project.modified_structure['oob']['filename']}.OOB"
+            oob_output_path = export_base_dir / oob_dir / oob_filename
+            oob_output_path.parent.mkdir(parents=True, exist_ok=True)
+            project.export_orbat_file(str(oob_output_path))
+
+        # Export REGIONINCL file if present
+        if 'regionincl' in project.modified_structure and project.modified_structure['regionincl']['filename']:
+            regionincl_dir = project.modified_structure['regionincl'].get('dir', '')
+            regionincl_filename = f"{project.modified_structure['regionincl']['filename']}.REGIONINCL"
+            regionincl_output_path = export_base_dir / regionincl_dir / regionincl_filename
+            regionincl_output_path.parent.mkdir(parents=True, exist_ok=True)
+            project.export_regionincl_file(str(regionincl_output_path))
 
         # Process other files for export as needed
         for ext, file_info in project.modified_structure.items():
