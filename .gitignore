@@ -45,7 +45,7 @@ yarn-error.log*
 /build
 
 # Uploaded, extracted, and exported files (used files)
-/backend/uploads/*
+/backend/uploaded/*
 /backend/extracted/*
 /backend/exported/*
 
