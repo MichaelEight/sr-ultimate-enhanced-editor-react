@@ -175,8 +175,9 @@ def handle_project_upload():
             add_to_log(f"Searching for .scenario file in {extract_path}", LogLevel.TRACE)
             scenario_file_path = next(extract_path.rglob('*.SCENARIO'))
             scenario_name = scenario_file_path.stem
-            base_dir = scenario_file_path.parent
 
+            # Adjust base_dir to include the scenario_name directory
+            base_dir = scenario_file_path.parent / scenario_name  # Add this line
             project.extracted_base_path = base_dir.relative_to(EXTRACTS_PATH)
             add_to_log(f"Scenario file found: {scenario_name} at {base_dir}", LogLevel.INFO)
         except StopIteration:

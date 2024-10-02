@@ -4,6 +4,27 @@ import json
 import re
 import os
 
+from ..utils.logging_utils import add_to_log, LogLevel
+
+# Define the required region properties (all possible labels)
+ALL_PROPERTY_LABELS = [
+    'regionname', 'prefixname', 'altregionname', 'blocknum', 'altblocknum',
+    'continentnum', 'flagnum', 'musictrack', 'regioncolor', 'politic', 'govtype',
+    'refpopulation', 'poptotalarmy', 'popminreserve', 'treasury', 'nationaldebtgdp',
+    'techlevel', 'civapproval', 'milapproval', 'fanaticism', 'defcon', 'loyalty',
+    'playeragenda', 'playeraistance', 'worldavail', 'armsavail', 'worldintegrity',
+    'treatyintegrity', 'envrating', 'milsubsidyrating', 'domsubsidyrating',
+    'creditrating', 'tourismrating', 'literacy', 'lifeexp', 'avgchildren',
+    'crimerate', 'unemployment', 'gdpc', 'inflation', 'buyingpower',
+    'prodefficiency', 'alertlevel', 'bwmmember', 'religionstate', 'bconscript',
+    'forcesplan', 'milspendsalary', 'milspendmaint', 'milspendintel',
+    'milspendresearch', 'RacePrimary', 'RaceSecondary', 'capitalx', 'capitaly',
+    'masterdata', 'nonplayable', 'influence', 'influenceval', 'couppossibility',
+    'revoltpossibility', 'independencedesire', 'parentloyalty',
+    'independencetarget', 'sphere', 'civiliansphere', 'keepregion', 'parentregion',
+    'theatrehome', 'electiondate'
+]
+
 # Helper functions for processing different && sections
 def process_grouping(lines):
     grouping_data = []
@@ -124,9 +145,10 @@ def extract_cvp_data(file_path):
             # Collecting Theaters_Data
             if in_theaters:
                 theater_parts = [x.strip() for x in stripped_line.split(',')]
+                add_to_log(f"Parsing theater line: {theater_parts}", LogLevel.DEBUG)
                 if len(theater_parts) >= 6:
-                    theater_id = int(theater_parts[0])
-                    data["Theaters_Data"][theater_id] = {
+                    theatre_id = int(theater_parts[0])
+                    data["Theaters_Data"][theatre_id] = {
                         "theatreName": theater_parts[1],
                         "theatreCode": theater_parts[2],
                         "culture": int(theater_parts[3]),
@@ -206,35 +228,41 @@ def extract_cvp_data(file_path):
                 continue
 
             if current_section is None:
-                # Process properties outside special sections
-                if region_data:  # Ensure region_data is not None
+                if region_data:
                     parts = re.split(r'\s+', stripped_line, 1)
                     if len(parts) == 2:
                         label, value = parts[0], parts[1]
                     elif len(parts) == 1:
-                        label, value = parts[0], None
+                        label, value = parts[0], ''
                     else:
                         continue
 
-                    # Ensure we skip empty labels (to avoid adding "")
-                    if label and value is not None:
-                        if label in ["altregionname", "influence", "influenceval"]:
+                    if label:
+                        # Process the value
+                        if value == '':
+                            value = None
+                        elif label in ["altregionname", "influence", "influenceval"]:
                             value = [x.strip() if x.strip() else None for x in value.split(",")]
                         elif label == "regioncolor":
-                            value = value.strip()  # Keep regioncolor as string, no conversion to int
+                            value = value.strip()
                         elif value.startswith('"') and value.endswith('"'):
                             value = value.strip('"')
                         elif value == ",":
                             value = []
                         elif value.startswith('0x'):
-                            value = value  # Keep hex as string
+                            value = value
                         elif re.match(r'^-?\d+(\.\d+)?$', value):
                             value = float(value) if '.' in value else int(value)
-                        elif value == "":
-                            value = None
+                        else:
+                            value = value.strip()
 
-                        # Add property if the label is valid (non-empty)
+                        # Initialize PropertyOrder if not already
+                        if "PropertyOrder" not in region_data:
+                            region_data["PropertyOrder"] = []
+
+                        # Add the label and value
                         region_data["Properties"][label] = value
+                        region_data["PropertyOrder"].append(label)
             else:
                 # Collect lines for the current section
                 section_lines.append(stripped_line)

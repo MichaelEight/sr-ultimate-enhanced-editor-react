@@ -178,6 +178,7 @@ class Project:
         export_cvp(cvp_data, output_file_path)
         add_to_log("CVP file export completed.", LogLevel.INFO)
 
+
     def export_orbat_file(self, output_file_path):
         add_to_log(f"Exporting OOB file to {output_file_path}", LogLevel.INFO)
         if not isinstance(self.orbat_data, dict):
