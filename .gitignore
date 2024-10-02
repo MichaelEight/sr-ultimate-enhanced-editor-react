@@ -57,3 +57,12 @@ yarn-error.log*
 # ---------------------------------------------------------------------------
 
 /On
+backend/app/__pycache__/__init__.cpython-311.pyc
+backend/app/__pycache__/config.cpython-311.pyc
+backend/app/__pycache__/models.cpython-311.pyc
+backend/app/__pycache__/routes.cpython-311.pyc
+backend/app/services/__pycache__/project_services.cpython-311.pyc
+backend/app/utils/__pycache__/file_utils.cpython-311.pyc
+backend/app/utils/__pycache__/logging_utils.cpython-311.pyc
+backend/app/validation/__pycache__/validators.cpython-311.pyc
+backend/output_cvp.json
