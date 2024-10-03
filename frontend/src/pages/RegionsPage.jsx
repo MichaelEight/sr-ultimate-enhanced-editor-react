@@ -7,20 +7,31 @@ import '../assets/styles/RegionsPage.css';
 const RegionsPage = ({ activeTab }) => {
   const [regions, setRegions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Ref to keep track of whether the component is mounted
+  const isMounted = useRef(false);
 
   // Fetch regions data from backend
   const fetchRegionsData = useCallback(() => {
+    setLoading(true);
     fetch('http://localhost:5000/regions')
       .then((response) => response.json())
       .then((data) => {
         if (data && data.regions) {
           const backendRegions = data.regions;
-          setRegions(backendRegions);
-          console.log('Fetched latest regions data.');
+          if (isMounted.current) {
+            setRegions(backendRegions);
+            setLoading(false);
+            console.log('Fetched latest regions data.');
+          }
         }
       })
       .catch((error) => {
-        console.error('Error fetching regions:', error);
+        if (isMounted.current) {
+          setLoading(false);
+          console.error('Error fetching regions:', error);
+        }
       });
   }, []);
 
@@ -36,6 +47,7 @@ const RegionsPage = ({ activeTab }) => {
       .then((response) => response.json())
       .then((data) => {
         if (data && data.seenSinceLastUpdate === false) {
+          console.log('Regions data has changed. Fetching new data.');
           fetchRegionsData();
         } else {
           console.log('Regions data is up to date.');
@@ -47,10 +59,20 @@ const RegionsPage = ({ activeTab }) => {
   }, [fetchRegionsData]);
 
   useEffect(() => {
+    isMounted.current = true;
     if (activeTab === '/regions') {
-      checkAndFetchRegions();
+      if (regions.length === 0) {
+        // First time loading or regions data is empty
+        fetchRegionsData();
+      } else {
+        // Check if data has changed on the backend
+        checkAndFetchRegions();
+      }
     }
-  }, [activeTab, checkAndFetchRegions]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, [activeTab, fetchRegionsData, checkAndFetchRegions, regions.length]);
 
   // Debounced function to handle region updates
   const debouncedHandleRegionChange = useRef();
@@ -99,9 +121,6 @@ const RegionsPage = ({ activeTab }) => {
     return regionName.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // Handle button - add new region
-  // Handle button - merge from CVP
-
   return (
     <div className="region-page">
       <div className="search-box">
@@ -116,55 +135,59 @@ const RegionsPage = ({ activeTab }) => {
       </div>
 
       <div className="region-table-wrapper">
-        <table className="region-table">
-          <thead>
-            <tr>
-              <th>&&CVP</th>
-              <th>isActive</th>
-              {regions.length > 0 &&
-                Object.keys(regions[0].Properties).map((key, index) => (
-                  <th key={index}>{key}</th>
-                ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRegions.length > 0 ? (
-              filteredRegions.map((region, index) => (
-                <tr key={region.ID}>
-                  <td>{region.ID}</td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={region.isActive}
-                      onChange={(e) =>
-                        handleRegionChange(index, 'isActive', e.target.checked)
-                      }
-                    />
-                  </td>
-                  {Object.keys(region.Properties).map((key) => (
-                    <td key={key}>
+        {loading ? (
+          <p>Loading data...</p>
+        ) : (
+          <table className="region-table">
+            <thead>
+              <tr>
+                <th>&&CVP</th>
+                <th>isActive</th>
+                {regions.length > 0 &&
+                  Object.keys(regions[0].Properties).map((key, index) => (
+                    <th key={index}>{key}</th>
+                  ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRegions.length > 0 ? (
+                filteredRegions.map((region, index) => (
+                  <tr key={region.ID}>
+                    <td>{region.ID}</td>
+                    <td>
                       <input
-                        type="text"
-                        value={
-                          Array.isArray(region.Properties[key])
-                            ? region.Properties[key].join(', ')
-                            : region.Properties[key] || ''
-                        }
+                        type="checkbox"
+                        checked={region.isActive}
                         onChange={(e) =>
-                          handleRegionChange(index, key, e.target.value)
+                          handleRegionChange(index, 'isActive', e.target.checked)
                         }
                       />
                     </td>
-                  ))}
+                    {Object.keys(region.Properties).map((key) => (
+                      <td key={key}>
+                        <input
+                          type="text"
+                          value={
+                            Array.isArray(region.Properties[key])
+                              ? region.Properties[key].join(', ')
+                              : region.Properties[key] || ''
+                          }
+                          onChange={(e) =>
+                            handleRegionChange(index, key, e.target.value)
+                          }
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">No regions available</td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3">No regions available</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
