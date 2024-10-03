@@ -108,6 +108,7 @@ class Project:
             self.worldmarket_data = wmdata.get('worldmarket', {})
             self.resources_data = wmdata.get('resources', {})
             self.seen_since_last_update['worldmarket'] = False
+            self.seen_since_last_update['resources'] = False  # Mark resources data as updated
             add_to_log(f"Loaded .wmdata file: {file_path}", LogLevel.INFO)
         else:
             add_to_log(f"No importer available for file type: {file_extension}", LogLevel.WARNING)

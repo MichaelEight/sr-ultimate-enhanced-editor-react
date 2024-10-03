@@ -60,39 +60,53 @@ def write_wmdata(json_data, output_file_path):
 
     # Writing worldmarket data
     worldmarket = json_data.get("worldmarket", {})
-    for key, value in worldmarket.items():
-        if key in ["primerate", "socadj", "wmrelrate"]:
-            # Handling floats where commas are decimal points
-            if value is None:
-                value_str = ""
-            else:
-                value_str = str(value).replace('.', ',')
-            wmdata_output += f"{key}, {value_str}\n"
+    settings = worldmarket.get("settings", {})
+    military = worldmarket.get("military", {})
+    economic = worldmarket.get("economic", {})
+    weather = worldmarket.get("weather", {})
 
-        elif key == "battstrdefault":
-            # Writing battstrdefault values with the correct labels
-            value_str = ", ".join(str(value.get(label, "")) if value.get(label) is not None else "" for label in BATTSTRDEFAULT_LABELS)
-            wmdata_output += f"{key}, {value_str},\n"
-        
-        elif key == "socialdefaults":
-            # Writing socialdefaults values with the correct labels
-            value_str = ", ".join(str(value.get(label, "")) if value.get(label) is not None else "" for label in SOCIALDEFAULTS_LABELS)
-            wmdata_output += f"{key}, {value_str},\n"
-        
-        elif key == "hexresmults":
-            # Writing hexresmults values with the correct labels
-            value_str = ", ".join(str(value.get(label, "")) if value.get(label) is not None else "" for label in HEXRESMULTS_LABELS)
-            wmdata_output += f"{key}, {value_str},\n"
-        
-        else:
-            # Handling regular world market data arrays
-            if isinstance(value, list):
-                value = remove_trailing_nulls(value)
-                value_str = ", ".join(str(v) if v is not None else "" for v in value)
-            else:
-                value_str = str(value) if value is not None else ""
-            wmdata_output += f"{key}, {value_str},\n"
-    
+    # Write settings
+    for key in ["wmlevel", "wmduration", "gdpcbase"]:
+        value = settings.get(key)
+        if value is not None:
+            wmdata_output += f"{key.upper()}, {value},\n"
+    for key in ["primerate", "socadj", "wmrelrate"]:
+        value = settings.get(key)
+        if value is not None:
+            value_str = str(value).replace('.', ',')
+            wmdata_output += f"{key.upper()}, {value_str},\n"
+
+    # Write military
+    if "battstrdefault" in military:
+        battstrdefault = military["battstrdefault"]
+        value_str = ", ".join(str(battstrdefault.get(label, "")) if battstrdefault.get(label) is not None else "" for label in BATTSTRDEFAULT_LABELS)
+        wmdata_output += f"BATTSTRDEFAULT, {value_str},\n"
+    if "garrisonprogression" in military:
+        values = military["garrisonprogression"]
+        value_str = ", ".join(str(v) if v is not None else "" for v in values)
+        wmdata_output += f"GARRISONPROGRESSION, {value_str},\n"
+
+    # Write economic
+    if "hexresmults" in economic:
+        hexresmults = economic["hexresmults"]
+        value_str = ", ".join(str(hexresmults.get(label, "")) if hexresmults.get(label) is not None else "" for label in HEXRESMULTS_LABELS)
+        wmdata_output += f"HEXRESMULTS, {value_str},\n"
+    if "socialdefaults" in economic:
+        socialdefaults = economic["socialdefaults"]
+        value_str = ", ".join(str(socialdefaults.get(label, "")) if socialdefaults.get(label) is not None else "" for label in SOCIALDEFAULTS_LABELS)
+        wmdata_output += f"SOCIALDEFAULTS, {value_str},\n"
+
+    # Write weather
+    for key in ["weatheryear"]:
+        value = weather.get(key)
+        if value is not None:
+            wmdata_output += f"{key.upper()}, {value},\n"
+    for key in ["weatheroffset", "weatherspeed"]:
+        values = weather.get(key)
+        if values:
+            value_str = ", ".join(str(v) if v is not None else "" for v in values)
+            wmdata_output += f"{key.upper()}, {value_str},\n"
+
     wmdata_output += "&&END\n\n"
 
     # Writing resource production data
@@ -101,19 +115,23 @@ def write_wmdata(json_data, output_file_path):
         resource_id = RESOURCE_TO_ID.get(resource)
         if resource_id is not None:
             wmdata_output += f"&&WMPRODDATA, {resource_id}\n"
-            for key, value in details.items():
-                if key == "producefrom":
-                    # Handling producefrom array with the correct labels
-                    value_str = ", ".join(str(value.get(label, "")) if value.get(label) is not None else "" for label in ID_TO_RESOURCE.values())
-                    wmdata_output += f"{key}, {value_str},\n"
-                else:
-                    if isinstance(value, list):
-                        value = remove_trailing_nulls(value)
-                        value_str = ", ".join(str(v) if v is not None else "" for v in value)
-                    else:
-                        value_str = str(value) if value is not None else ""
-                    wmdata_output += f"{key}, {value_str},\n"
-            
+            # Write cost
+            cost = details.get("cost", {})
+            for key in ["wmbasecost", "wmfullcost", "wmmargin"]:
+                value = cost.get(key)
+                if value is not None:
+                    wmdata_output += f"{key.upper()}, {value},\n"
+            # Write production
+            production = details.get("production", {})
+            for key in ["nodeproduction", "wmprodperpersonmax", "wmprodperpersonmin", "wmurbanproduction"]:
+                value = production.get(key)
+                if value is not None:
+                    wmdata_output += f"{key.upper()}, {value},\n"
+            # Write producefrom
+            if "producefrom" in details:
+                producefrom = details["producefrom"]
+                value_str = ", ".join(str(producefrom.get(label, "")) if producefrom.get(label) is not None else "" for label in ID_TO_RESOURCE.values())
+                wmdata_output += f"PRODUCEFROM, {value_str},\n"
             wmdata_output += "&&END\n\n"
         else:
             add_to_log(f"Unknown resource: {resource}", LogLevel.WARNING)

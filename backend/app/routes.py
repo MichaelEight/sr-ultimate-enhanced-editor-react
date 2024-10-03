@@ -543,6 +543,7 @@ def generate_theaters():
         add_to_log(f"Error generating theaters: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
+# TODO Import theatres from custom CVP
 @main_blueprint.route('/theaters/import_from_cvp', methods=['POST'])
 def import_theaters_from_cvp():
     try:
@@ -568,4 +569,110 @@ def import_theaters_from_cvp():
         return jsonify({'message': 'Theaters imported from CVP successfully'}), 200
     except Exception as e:
         add_to_log(f"Error importing theaters from CVP: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+    
+@main_blueprint.route('/resources', methods=['GET'])
+def get_resources():
+    try:
+        add_to_log("Fetching resources data", LogLevel.INFO)
+        resources_data = project.resources_data
+        add_to_log(f"Resources data: {json.dumps(resources_data, indent=2)}", LogLevel.DEBUG)
+        return jsonify({'resources': resources_data}), 200
+    except Exception as e:
+        add_to_log(f"Error fetching resources data: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/resources/update', methods=['POST'])
+def update_resource():
+    try:
+        data = request.get_json()
+        add_to_log(f"Received resource update: {data}", LogLevel.INFO)
+        resource_name = data.get('resourceName')
+        field_group = data.get('fieldGroup')  # e.g., 'cost', 'production', 'producefrom'
+        name = data.get('name')  # Field name within the group
+        value = data.get('value')
+
+        if not resource_name or not field_group or name is None:
+            add_to_log("Invalid data in resource update request", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid data'}), 400
+
+        # Convert value to int if necessary
+        try:
+            value = int(value)
+        except ValueError:
+            pass  # Keep as string if it cannot be converted to int
+
+        # Update resource data
+        resource = project.resources_data.setdefault(resource_name, {})
+        group = resource.setdefault(field_group, {})
+        group[name] = value
+
+        # Mark data as changed
+        project.seen_since_last_update['resources'] = False
+
+        add_to_log(f"Resource {resource_name} updated successfully", LogLevel.INFO)
+        return jsonify({'message': 'Resource updated successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error updating resource: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+
+@main_blueprint.route('/worldmarket', methods=['GET'])
+def get_worldmarket():
+    try:
+        add_to_log("Fetching world market data", LogLevel.INFO)
+        worldmarket_data = project.worldmarket_data
+        add_to_log(f"World Market data: {json.dumps(worldmarket_data, indent=2)}", LogLevel.DEBUG)
+        return jsonify({'worldmarket': worldmarket_data}), 200
+    except Exception as e:
+        add_to_log(f"Error fetching world market data: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/worldmarket/update', methods=['POST'])
+def update_worldmarket():
+    try:
+        data = request.get_json()
+        add_to_log(f"Received world market update: {data}", LogLevel.INFO)
+        field_group = data.get('fieldGroup')  # e.g., 'settings', 'military', 'economic', 'weather'
+        name = data.get('name')
+        value = data.get('value')
+
+        if not field_group or name is None:
+            add_to_log("Invalid data in world market update request", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid data'}), 400
+
+        # Convert value to int if necessary
+        try:
+            value = int(value)
+        except ValueError:
+            pass  # Keep as string if it cannot be converted to int
+
+        # Update world market data
+        group = project.worldmarket_data.setdefault(field_group, {})
+        # Handle nested keys if present (e.g., 'battstrdefault.inf')
+        if '.' in name:
+            keys = name.split('.')
+            sub_group = group
+            for key in keys[:-1]:
+                sub_group = sub_group.setdefault(key, {})
+            sub_group[keys[-1]] = value
+        elif '[' in name and ']' in name:
+            # Handle list indices (e.g., 'garrisonprogression[0]')
+            base_name, index = re.match(r'(\w+)\[(\d+)\]', name).groups()
+            index = int(index)
+            lst = group.setdefault(base_name, [])
+            # Ensure the list is long enough
+            while len(lst) <= index:
+                lst.append(None)
+            lst[index] = value
+        else:
+            group[name] = value
+
+        # Mark data as changed
+        project.seen_since_last_update['worldmarket'] = False
+
+        add_to_log("World market data updated successfully", LogLevel.INFO)
+        return jsonify({'message': 'World market data updated successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error updating world market data: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500

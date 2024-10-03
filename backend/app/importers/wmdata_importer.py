@@ -54,7 +54,12 @@ def parse_float_with_comma(parts):
 
 def extract_wmdata(file_path):
     data = {
-        "worldmarket": {},
+        "worldmarket": {
+            "settings": {},
+            "military": {},
+            "economic": {},
+            "weather": {}
+        },
         "resources": {}
     }
     current_section = None
@@ -85,7 +90,11 @@ def extract_wmdata(file_path):
                     resource_id = int(match.group(1))
                     current_resource_id = ID_TO_RESOURCE.get(resource_id)
                     if current_resource_id:
-                        data["resources"][current_resource_id] = {}
+                        data["resources"][current_resource_id] = {
+                            "cost": {},
+                            "production": {},
+                            "producefrom": {}
+                        }
                         current_section = "resources"
                     else:
                         add_to_log(f"Unknown resource ID: {resource_id}", LogLevel.WARNING)
@@ -94,21 +103,37 @@ def extract_wmdata(file_path):
                 # Processing worldmarket section
                 if current_section == "worldmarket":
                     parts = [x.strip() if x.strip() else None for x in re.split(r'[,]', stripped_line)]
-                    key = parts[0]
+                    key = parts[0].lower()  # Ensure keys are lowercase for consistency
 
-                    if key == "battstrdefault":
+                    # Map keys to their corresponding groups
+                    if key in ["wmlevel", "wmduration", "gdpcbase"]:
+                        # Settings group
+                        value = int(parts[1]) if parts[1] else None
+                        data["worldmarket"]["settings"][key] = value
+                    elif key in ["primerate", "socadj", "wmrelrate"]:
+                        value = parse_float_with_comma(parts)
+                        data["worldmarket"]["settings"][key] = value
+                    elif key == "battstrdefault":
                         values = ensure_length([int(x) if x else None for x in parts[1:]], len(BATTSTRDEFAULT_LABELS))
-                        data["worldmarket"][key] = dict(zip(BATTSTRDEFAULT_LABELS, values))
-                    elif key == "socialdefaults":
-                        values = ensure_length([int(x) if x else None for x in parts[1:]], len(SOCIALDEFAULTS_LABELS))
-                        data["worldmarket"][key] = dict(zip(SOCIALDEFAULTS_LABELS, values))
+                        data["worldmarket"]["military"][key] = dict(zip(BATTSTRDEFAULT_LABELS, values))
+                    elif key == "garrisonprogression":
+                        values = [int(x) if x else None for x in parts[1:]]
+                        data["worldmarket"]["military"][key] = values
                     elif key == "hexresmults":
                         values = ensure_length([int(x) if x else None for x in parts[1:]], len(HEXRESMULTS_LABELS))
-                        data["worldmarket"][key] = dict(zip(HEXRESMULTS_LABELS, values))
-                    elif key in ["primerate", "socadj", "wmrelrate"]:
-                        # Handle decimal values where commas are decimal points
-                        value = parse_float_with_comma(parts)
-                        data["worldmarket"][key] = value
+                        data["worldmarket"]["economic"][key] = dict(zip(HEXRESMULTS_LABELS, values))
+                    elif key == "socialdefaults":
+                        values = ensure_length([int(x) if x else None for x in parts[1:]], len(SOCIALDEFAULTS_LABELS))
+                        data["worldmarket"]["economic"][key] = dict(zip(SOCIALDEFAULTS_LABELS, values))
+                    elif key == "weatheroffset":
+                        values = [int(x) if x else None for x in parts[1:]]
+                        data["worldmarket"]["weather"][key] = values
+                    elif key == "weatherspeed":
+                        values = [int(x) if x else None for x in parts[1:]]
+                        data["worldmarket"]["weather"][key] = values
+                    elif key == "weatheryear":
+                        value = int(parts[1]) if parts[1] else None
+                        data["worldmarket"]["weather"][key] = value
                     else:
                         # Handle other values
                         values = [int(x) if x and x.isdigit() else None for x in parts[1:]]
@@ -117,14 +142,23 @@ def extract_wmdata(file_path):
                 # Processing resources section
                 elif current_section == "resources" and current_resource_id:
                     parts = [x.strip() if x.strip() else None for x in re.split(r'[,]', stripped_line)]
-                    key = parts[0]
+                    key = parts[0].lower()
+
+                    resource = data["resources"][current_resource_id]
 
                     if key == "producefrom":
                         values = ensure_length([int(x) if x else None for x in parts[1:]], len(ID_TO_RESOURCE))
-                        data["resources"][current_resource_id][key] = dict(zip(ID_TO_RESOURCE.values(), values))
+                        resource["producefrom"] = dict(zip(ID_TO_RESOURCE.values(), values))
+                    elif key in ["wmbasecost", "wmfullcost", "wmmargin"]:
+                        value = int(parts[1]) if parts[1] else None
+                        resource["cost"][key] = value
+                    elif key in ["nodeproduction", "wmprodperpersonmax", "wmprodperpersonmin", "wmurbanproduction"]:
+                        value = int(parts[1]) if parts[1] else None
+                        resource["production"][key] = value
                     else:
-                        values = [int(x) if x and x.isdigit() else None for x in parts[1:]]
-                        data["resources"][current_resource_id][key] = values if len(values) > 1 else values[0]
+                        # Handle other values
+                        value = int(parts[1]) if parts[1] else None
+                        resource[key] = value
 
         add_to_log(f"Successfully extracted WMData from {file_path}", LogLevel.INFO)
     except Exception as e:
