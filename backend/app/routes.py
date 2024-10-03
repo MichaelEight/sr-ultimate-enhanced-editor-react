@@ -452,3 +452,120 @@ def update_region():
     except Exception as e:
         add_to_log(f"Error updating region: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/theaters', methods=['GET'])
+def get_theaters():
+    try:
+        add_to_log("Fetching theaters data", LogLevel.INFO)
+        theaters_data = project.theaters_data  # Should be a dict with theater IDs as keys
+        theaters_list = []
+        for theater_id, theater in theaters_data.items():
+            theater_data = {
+                'id': theater_id,
+                'theatreName': theater.get('theatreName', ''),
+                'theatreCode': theater.get('theatreCode', ''),
+                'culture': theater.get('culture', 0),
+                'xLocation': theater.get('xLocation', 0),
+                'yLocation': theater.get('yLocation', 0),
+                'transfers': theater.get('transfers', [])
+            }
+            theaters_list.append(theater_data)
+        return jsonify({'theaters': theaters_list}), 200
+    except Exception as e:
+        add_to_log(f"Error fetching theaters data: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/theaters/update', methods=['POST'])
+def update_theater():
+    try:
+        data = request.get_json()
+        add_to_log(f"Received theater update: {data}", LogLevel.INFO)
+        theater_id = data.get('id')
+        if theater_id is None:
+            add_to_log("Theater ID is missing in the update request", LogLevel.ERROR)
+            return jsonify({'error': 'Theater ID is required'}), 400
+
+        theater_id = int(theater_id)  # Ensure theater_id is an int
+
+        # Update the theater data in project.theaters_data
+        theater = project.theaters_data.get(theater_id)
+        if not theater:
+            # If the theater doesn't exist, create a new one
+            project.theaters_data[theater_id] = {}
+            theater = project.theaters_data[theater_id]
+
+        theater['theatreName'] = data.get('theatreName', theater.get('theatreName', ''))
+        theater['theatreCode'] = data.get('theatreCode', theater.get('theatreCode', ''))
+        theater['culture'] = int(data.get('culture', theater.get('culture', 0)))
+        theater['xLocation'] = int(data.get('xLocation', theater.get('xLocation', 0)))
+        theater['yLocation'] = int(data.get('yLocation', theater.get('yLocation', 0)))
+        transfers = data.get('transfers', theater.get('transfers', []))
+        # Ensure transfers are integers
+        theater['transfers'] = [int(t) for t in transfers if t.isdigit()]
+
+        # Mark data as changed
+        project.seen_since_last_update['theaters'] = False
+
+        add_to_log(f"Theater {theater_id} updated successfully", LogLevel.INFO)
+        return jsonify({'message': 'Theater updated successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error updating theater: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/theaters/generate', methods=['POST'])
+def generate_theaters():
+    try:
+        add_to_log("Generating theaters data", LogLevel.INFO)
+        # Logic to generate theaters data
+        # For demonstration, create dummy data or implement your generation logic
+        project.theaters_data = {
+            1: {
+                'theatreName': 'Theatre Alpha',
+                'theatreCode': 'A001',
+                'culture': 0,
+                'xLocation': 100,
+                'yLocation': 200,
+                'transfers': [2]
+            },
+            2: {
+                'theatreName': 'Theatre Beta',
+                'theatreCode': 'B002',
+                'culture': 1,
+                'xLocation': 300,
+                'yLocation': 400,
+                'transfers': [1]
+            }
+        }
+        project.seen_since_last_update['theaters'] = False
+        add_to_log("Theaters data generated successfully", LogLevel.INFO)
+        return jsonify({'message': 'Theaters generated successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error generating theaters: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/theaters/import_from_cvp', methods=['POST'])
+def import_theaters_from_cvp():
+    try:
+        add_to_log("Importing theaters data from CVP", LogLevel.INFO)
+        # Logic to import theaters data from CVP file
+        cvp_file_info = project.modified_structure.get('cvp')
+        if not cvp_file_info or not cvp_file_info.get('filename'):
+            return jsonify({'error': 'CVP file not found in project'}), 400
+
+        cvp_filename = cvp_file_info['filename']
+        cvp_dir = cvp_file_info.get('dir', '')
+        base_dir = Path(project.extracted_base_path)
+        cvp_path = base_dir / cvp_dir / f"{cvp_filename}.CVP"
+
+        if not cvp_path.exists():
+            add_to_log(f"CVP file does not exist at path: {cvp_path}", LogLevel.ERROR)
+            return jsonify({'error': 'CVP file does not exist at expected path'}), 400
+
+        cvp_data = extract_cvp_data(str(cvp_path))
+        project.theaters_data = cvp_data['Theaters_Data']
+        project.seen_since_last_update['theaters'] = False
+        add_to_log("Theaters data imported from CVP successfully", LogLevel.INFO)
+        return jsonify({'message': 'Theaters imported from CVP successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error importing theaters from CVP: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
