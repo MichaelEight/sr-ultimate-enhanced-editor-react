@@ -7,7 +7,7 @@ from ..utils.logging_utils import add_to_log, LogLevel
 def process_oob_unit(line):
     # Split by comma and process each value (None for missing)
     unit_parts = [x.strip() if x.strip() else None for x in line.split(",")]
-    
+
     # Create a dictionary with all expected keys
     unit_data = {
         "unitId": int(unit_parts[0]) if unit_parts[0] else None,
@@ -31,17 +31,17 @@ def process_oob_unit(line):
         "StatustoBattC": unit_parts[18],
         "StatustoBattN": unit_parts[19]
     }
-    
+
     return unit_data
 
 def extract_oob_data(file_path):
     data = {
         "OOB_Data": []
     }
-    
+
     current_region_id = None
     current_units = []
-    
+
     try:
         with open(file_path, 'r') as file:
             for line in file:
@@ -68,14 +68,14 @@ def extract_oob_data(file_path):
 
                 # Process each unit line
                 current_units.append(process_oob_unit(stripped_line))
-            
+
             # Ensure last region is processed
             if current_region_id is not None:
                 data["OOB_Data"].append({
                     "regionId": current_region_id,
                     "units": current_units
                 })
-        
+
         add_to_log(f"Successfully extracted OOB data from {file_path}", LogLevel.INFO)
     except Exception as e:
         add_to_log(f"Error extracting OOB data: {e}", LogLevel.ERROR)
