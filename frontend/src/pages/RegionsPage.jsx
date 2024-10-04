@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import debounce from 'lodash/debounce';
 import '../assets/styles/RegionsPage.css';
 
-const RegionsPage = ({ activeTab }) => {
+const RegionsPage = ({ activeTab, project, setProject }) => {
   const [regions, setRegions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,20 +59,21 @@ const RegionsPage = ({ activeTab }) => {
   }, [fetchRegionsData]);
 
   useEffect(() => {
-    isMounted.current = true;
-    if (activeTab === '/regions') {
-      if (regions.length === 0) {
-        // First time loading or regions data is empty
-        fetchRegionsData();
-      } else {
-        // Check if data has changed on the backend
-        checkAndFetchRegions();
+      isMounted.current = true;
+      if (activeTab === '/regions' && project) {
+          if (regions.length === 0) {
+              fetchRegionsData();
+          } else {
+              checkAndFetchRegions();
+          }
+      } else if (!project) {
+          // Reset state when project is closed
+          setRegions([]);
       }
-    }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [activeTab, fetchRegionsData, checkAndFetchRegions, regions.length]);
+      return () => {
+          isMounted.current = false;
+      };
+  }, [activeTab, fetchRegionsData, checkAndFetchRegions, regions.length, project]);
 
   // Debounced function to handle region updates
   const debouncedHandleRegionChange = useRef();

@@ -89,8 +89,8 @@ const AppContent = ({
             <main>
                 <Routes>
                     <Route path="/" element={<ScenarioPage activeTab={activeTab} project={project} setProject={setProject} />} />
-                    <Route path="/settings" element={<SettingsPage activeTab={activeTab} />} />
-                    <Route path="/regions" element={<RegionsPage activeTab={activeTab} />} />
+                    <Route path="/settings" element={<SettingsPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                    <Route path="/regions" element={<RegionsPage activeTab={activeTab} project={project} setProject={setProject} />} />
                     <Route path="/theaters" element={<TheatersPage activeTab={activeTab} />} />
                     <Route path="/resources" element={<ResourcesPage activeTab={activeTab} />} />
                     <Route path="/worldmarket" element={<WorldMarketPage activeTab={activeTab} />} />

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../assets/styles/SettingsPage.css';
 
-const SettingsPage = ({ activeTab }) => {
-    // const [scenarioSettings, setScenarioSettings] = useState({
+const SettingsPage = ({ activeTab, project, setProject }) => {
     //     // General Info
     //     startingDate: new Date().toISOString().substr(0, 10), // Current date in 'YYYY-MM-DD' format
     //     scenarioId: '',
@@ -309,18 +308,21 @@ const SettingsPage = ({ activeTab }) => {
   }, [fetchSettingsData]);
 
   useEffect(() => {
-    isMounted.current = true;
-    if (activeTab === '/settings') {
-      if (Object.keys(scenarioSettings).length === 0) {
-        fetchSettingsData();
-      } else {
-        checkAndFetchSettings();
-      }
-    }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [activeTab, fetchSettingsData, checkAndFetchSettings, scenarioSettings]);
+        isMounted.current = true;
+        if (activeTab === '/settings' && project) {
+            if (Object.keys(scenarioSettings).length === 0) {
+                fetchSettingsData();
+            } else {
+                checkAndFetchSettings();
+            }
+        } else if (!project) {
+            // Reset state when project is closed
+            setScenarioSettings({});
+        }
+        return () => {
+            isMounted.current = false;
+        };
+    }, [activeTab, fetchSettingsData, checkAndFetchSettings, scenarioSettings, project]);
 
     const mapBackendSettingsToFrontend = (backendSettings) => {
         const formatDate = (dateArray) => {
