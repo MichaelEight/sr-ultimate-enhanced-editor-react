@@ -13,9 +13,56 @@ const ResourcesPage = ({ activeTab }) => {
       .then((response) => response.json())
       .then((data) => {
         if (data && data.resources) {
-          setResourceData(data.resources);
-          console.log('Fetched latest resources data.');
-          console.log(data.resources);
+          const fetchedData = data.resources;
+          const processedData = { ...fetchedData };
+
+          const updates = [];
+
+          // Iterate through each resource and its field groups
+          Object.keys(processedData).forEach((resourceName) => {
+            const resource = processedData[resourceName];
+            ['cost', 'production', 'producefrom'].forEach((group) => {
+              if (resource[group]) {
+                Object.keys(resource[group]).forEach((field) => {
+                  if (resource[group][field] === null || resource[group][field] === undefined) {
+                    processedData[resourceName][group][field] = 0;
+                    updates.push({
+                      resourceName,
+                      fieldGroup: group,
+                      name: field,
+                      value: 0,
+                    });
+                  }
+                });
+              }
+            });
+          });
+
+          // Update state and cache with processed data
+          setResourceData(processedData);
+          localStorage.setItem('resourceData', JSON.stringify(processedData));
+          console.log('Fetched and processed resources data:', processedData);
+
+          // Send updates to backend for null/empty values set to 0
+          updates.forEach((update) => {
+            fetch('http://localhost:5000/resources/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(update),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json();
+              })
+              .then((data) => {
+                console.log(`Updated ${update.resourceName}.${update.fieldGroup}.${update.name} to 0`);
+              })
+              .catch((error) => {
+                console.error('Error updating resource:', error);
+              });
+          });
         }
       })
       .catch((error) => {
@@ -36,6 +83,12 @@ const ResourcesPage = ({ activeTab }) => {
           fetchResourcesData();
         } else {
           console.log('Resources data is up to date.');
+          // Load from cache
+          const cachedData = localStorage.getItem('resourceData');
+          if (cachedData) {
+            setResourceData(JSON.parse(cachedData));
+            console.log('Loaded resources data from cache.');
+          }
         }
       })
       .catch((error) => {
@@ -82,6 +135,13 @@ const ResourcesPage = ({ activeTab }) => {
           throw new Error('Network response was not ok');
         }
         console.log('Resource updated successfully');
+        // Update cache with new value
+        const cachedData = localStorage.getItem('resourceData');
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData);
+          parsedData[selectedResource][fieldGroup][name] = numericValue;
+          localStorage.setItem('resourceData', JSON.stringify(parsedData));
+        }
       })
       .catch((error) => {
         console.error('Error updating resource:', error);

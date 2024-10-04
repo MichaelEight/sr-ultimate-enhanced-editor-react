@@ -576,6 +576,36 @@ def get_resources():
     try:
         add_to_log("Fetching resources data", LogLevel.INFO)
         resources_data = project.resources_data
+
+        # Ensure resources data includes all fields with default values
+        ID_TO_RESOURCE = {
+            0: "agriculture",
+            1: "rubber",
+            2: "timber",
+            3: "petroleum",
+            4: "coal",
+            5: "ore",
+            6: "uranium",
+            7: "electricity",
+            8: "consumergoods",
+            9: "militarygoods",
+            10: "industrialgoods"
+        }
+
+        for resource_name, resource_info in resources_data.items():
+            resource_info.setdefault('cost', {
+                "wmbasecost": 0,
+                "wmfullcost": 0,
+                "wmmargin": 0
+            })
+            resource_info.setdefault('production', {
+                "nodeproduction": 0,
+                "wmprodperpersonmax": 0,
+                "wmprodperpersonmin": 0,
+                "wmurbanproduction": 0
+            })
+            resource_info.setdefault('producefrom', {res: 0 for res in ID_TO_RESOURCE.values()})
+
         add_to_log(f"Resources data: {json.dumps(resources_data, indent=2)}", LogLevel.DEBUG)
         return jsonify({'resources': resources_data}), 200
     except Exception as e:
@@ -596,26 +626,76 @@ def update_resource():
             add_to_log("Invalid data in resource update request", LogLevel.ERROR)
             return jsonify({'error': 'Invalid data'}), 400
 
-        # Convert value to int if necessary
-        try:
-            value = int(value)
-        except ValueError:
-            pass  # Keep as string if it cannot be converted to int
+        # Validate field_group
+        if field_group not in ['cost', 'production', 'producefrom']:
+            add_to_log(f"Invalid field group: {field_group}", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid field group'}), 400
+
+        # Validate resource_name
+        ID_TO_RESOURCE = {
+            0: "agriculture",
+            1: "rubber",
+            2: "timber",
+            3: "petroleum",
+            4: "coal",
+            5: "ore",
+            6: "uranium",
+            7: "electricity",
+            8: "consumergoods",
+            9: "militarygoods",
+            10: "industrialgoods"
+        }
+
+        if resource_name not in ID_TO_RESOURCE.values():
+            add_to_log(f"Invalid resource name: {resource_name}", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid resource name'}), 400
+
+        # Validate field name based on field group
+        valid_fields = {
+            'cost': ["wmbasecost", "wmfullcost", "wmmargin"],
+            'production': ["nodeproduction", "wmprodperpersonmax", "wmprodperpersonmin", "wmurbanproduction"],
+            'producefrom': list(ID_TO_RESOURCE.values())
+        }
+
+        if name not in valid_fields[field_group]:
+            add_to_log(f"Invalid field name '{name}' for field group '{field_group}'", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid field name for the specified field group'}), 400
+
+        # Convert value to int if it's a number
+        if isinstance(value, str):
+            if value.isdigit():
+                value = int(value)
+            else:
+                try:
+                    value = float(value)
+                except ValueError:
+                    add_to_log(f"Invalid value type for field '{name}': {value}", LogLevel.ERROR)
+                    return jsonify({'error': 'Invalid value type'}), 400
 
         # Update resource data
         resource = project.resources_data.setdefault(resource_name, {})
         group = resource.setdefault(field_group, {})
         group[name] = value
 
+        # Ensure no null values
+        if field_group == 'producefrom':
+            for res in ID_TO_RESOURCE.values():
+                group.setdefault(res, 0)
+        elif field_group == 'cost':
+            for field in ["wmbasecost", "wmfullcost", "wmmargin"]:
+                group.setdefault(field, 0)
+        elif field_group == 'production':
+            for field in ["nodeproduction", "wmprodperpersonmax", "wmprodperpersonmin", "wmurbanproduction"]:
+                group.setdefault(field, 0)
+
         # Mark data as changed
         project.seen_since_last_update['resources'] = False
 
-        add_to_log(f"Resource {resource_name} updated successfully", LogLevel.INFO)
+        add_to_log(f"Resource '{resource_name}' updated successfully: {field_group}.{name} = {value}", LogLevel.INFO)
         return jsonify({'message': 'Resource updated successfully'}), 200
     except Exception as e:
         add_to_log(f"Error updating resource: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
-
 
 @main_blueprint.route('/worldmarket', methods=['GET'])
 def get_worldmarket():
