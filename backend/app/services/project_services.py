@@ -18,6 +18,11 @@ def process_file_for_export(ext, file_info, export_base_dir):
         file_info (dict): Information about the file.
         export_base_dir (Path): The base directory for the export.
     """
+
+    if ext == 'wmdata':
+            # FIXME temp check, remove later
+            # Skip processing here since it's handled separately
+            return
     source_filename = f"{file_info['filename']}.{ext.upper()}"
     dest_filename = f"{file_info['filename']}.{ext.upper()}"
 

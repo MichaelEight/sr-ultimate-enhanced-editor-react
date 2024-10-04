@@ -334,7 +334,8 @@ def export_project_files():
             cvp_output_path = export_base_dir / cvp_dir / cvp_filename
             cvp_output_path.parent.mkdir(parents=True, exist_ok=True)
             project.export_cvp_file(str(cvp_output_path))
-        
+            add_to_log(f"Exported CVP file to {cvp_output_path}", LogLevel.INFO)
+
         # Export OOB file if present
         if 'oob' in project.modified_structure and project.modified_structure['oob']['filename']:
             oob_dir = project.modified_structure['oob'].get('dir', '')
@@ -342,6 +343,7 @@ def export_project_files():
             oob_output_path = export_base_dir / oob_dir / oob_filename
             oob_output_path.parent.mkdir(parents=True, exist_ok=True)
             project.export_orbat_file(str(oob_output_path))
+            add_to_log(f"Exported OOB file to {oob_output_path}", LogLevel.INFO)
 
         # Export REGIONINCL file if present
         if 'regionincl' in project.modified_structure and project.modified_structure['regionincl']['filename']:
@@ -350,20 +352,25 @@ def export_project_files():
             regionincl_output_path = export_base_dir / regionincl_dir / regionincl_filename
             regionincl_output_path.parent.mkdir(parents=True, exist_ok=True)
             project.export_regionincl_file(str(regionincl_output_path))
+            add_to_log(f"Exported REGIONINCL file to {regionincl_output_path}", LogLevel.INFO)
 
+        # Export WMData file if present
         if 'wmdata' in project.modified_structure and project.modified_structure['wmdata']['filename']:
             wmdata_dir = project.modified_structure['wmdata'].get('dir', '')
             wmdata_filename = f"{project.modified_structure['wmdata']['filename']}.WMDATA"
             wmdata_output_path = export_base_dir / wmdata_dir / wmdata_filename
             wmdata_output_path.parent.mkdir(parents=True, exist_ok=True)
             project.export_wmdata_file(str(wmdata_output_path))
+            add_to_log(f"Exported WMData file to {wmdata_output_path}", LogLevel.INFO)
 
-        # Process other files for export as needed
+        # Process other files for export as needed, excluding 'wmdata'
         for ext, file_info in project.modified_structure.items():
-            if ext in ['scenario', 'cvp']:
+            if ext in ['scenario', 'cvp', 'wmdata']:
                 continue  # Already handled
             process_file_for_export(ext, file_info, export_base_dir)
+            add_to_log(f"Processed file type: .{ext}", LogLevel.DEBUG)
 
+        # Create a zip archive including the scenario file and project directory
         zip_buffer = create_zip_archive_with_scenario(export_base_dir, scenario_output_path)
         add_to_log("=== Finished: Exporting Project ===", LogLevel.INFO)
         return send_file(
