@@ -419,6 +419,7 @@ def update_region():
     try:
         data = request.get_json()
         add_to_log(f"Received region update: {data}", LogLevel.INFO)
+        original_id = data.get('originalID', data.get('ID'))
         region_id = data.get('ID')
         is_active = data.get('isActive')
         properties = data.get('Properties')
@@ -429,25 +430,26 @@ def update_region():
 
         # Update CVP data
         for region in project.regions_data:
-            if region['ID'] == region_id:
+            if region['ID'] == original_id:
+                region['ID'] = region_id
                 region['Properties'] = properties
                 break
         else:
-            add_to_log(f"Region ID {region_id} not found in CVP data", LogLevel.ERROR)
-            return jsonify({'error': f'Region ID {region_id} not found'}), 404
+            add_to_log(f"Region ID {original_id} not found in CVP data", LogLevel.ERROR)
+            return jsonify({'error': f'Region ID {original_id} not found'}), 404
 
         # Update REGIONINCL data
-        # First, check if the region exists in regionincl_data
         regionincl_regions = project.regionincl_data.get('regions', [])
         for region in regionincl_regions:
-            if region['regionId'] == region_id:
+            if region['regionId'] == original_id:
+                region['regionId'] = region_id
                 region['isActive'] = is_active
                 break
         else:
             # If region not found in REGIONINCL, add it
             project.regionincl_data.setdefault('regions', []).append({
                 'regionId': region_id,
-                'comment': None,  # Or set a default comment if needed
+                'comment': None,
                 'isActive': is_active
             })
 
@@ -455,7 +457,7 @@ def update_region():
         project.seen_since_last_update['regions'] = False
         project.seen_since_last_update['regionincl'] = False
 
-        add_to_log(f"Region {region_id} updated successfully", LogLevel.INFO)
+        add_to_log(f"Region {original_id} updated to {region_id} successfully", LogLevel.INFO)
         return jsonify({'message': 'Region updated successfully'}), 200
     except Exception as e:
         add_to_log(f"Error updating region: {e}", LogLevel.ERROR)
