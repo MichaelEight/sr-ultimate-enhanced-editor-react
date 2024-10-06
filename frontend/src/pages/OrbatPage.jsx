@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import debounce from 'lodash/debounce';
+import React, { useState, useEffect } from 'react';
 import '../assets/styles/OrbatPage.css'; // Ensure you have the appropriate CSS
 
 const OrbatPage = ({ activeTab, project, setProject }) => {
@@ -17,9 +16,9 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
         addBy: 1
     });
     const [allUnits, setAllUnits] = useState([
-        { id: 101, name: 'Unit Alpha' },
-        { id: 102, name: 'Unit Beta' },
-        { id: 103, name: 'Unit Gamma' }
+        { id: 101, name: 'Unit Alpha', class: 'Infantry', year: 2020, region: 'Region A' },
+        { id: 102, name: 'Unit Beta', class: 'Armor', year: 2019, region: 'Region B' },
+        { id: 103, name: 'Unit Gamma', class: 'Artillery', year: 2018, region: 'Region C' }
     ]);
     const [unitIDFilter, setUnitIDFilter] = useState('');
     const [unitNameFilter, setUnitNameFilter] = useState('');
@@ -93,12 +92,11 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
         }));
     };
 
-    // Handle changes in Unit ID filter
+    // Handle changes in Unit filters
     const handleUnitIDFilterChange = (e) => {
         setUnitIDFilter(e.target.value);
     };
 
-    // Handle changes in Unit Name filter
     const handleUnitNameFilterChange = (e) => {
         setUnitNameFilter(e.target.value);
     };
@@ -115,14 +113,18 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
         const unitToAdd = {
             unitId: unit.id,
             Quantity: quantity,
-            // Additional fields can be added here
+            Name: unit.name,
+            Class: unit.class,
+            // Additional default values can be set here
+            X: 0,
+            Y: 0,
+            Status: 'Active',
+            // ... other fields as needed
         };
 
         if (settings.addToAllRegions) {
-            // Add to all regions
-            regions.forEach(region => {
-                addUnitToRegion(region.ID, unitToAdd);
-            });
+            // Add to all regions in one request
+            addUnitToMultipleRegions(unitToAdd);
         } else {
             // Add to selected region
             addUnitToRegion(regionID, unitToAdd);
@@ -138,6 +140,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             .then(response => response.json())
             .then(data => {
                 console.log(`Unit added to region ${regionId}:`, data);
+                //alert(data.message);
                 if (parseInt(regionId) === parseInt(regionID)) {
                     // If the current region, refresh the units
                     fetchOrbatUnits(regionId);
@@ -145,6 +148,27 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             })
             .catch(error => {
                 console.error(`Error adding unit to region ${regionId}:`, error);
+                //alert(`Error adding unit to region ${regionId}: ${error}`);
+            });
+    };
+
+    const addUnitToMultipleRegions = (unit) => {
+        const regionIds = regions.map(region => region.ID);
+        fetch('http://localhost:5000/orbat/add_unit_multiple', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ regionIds, unit })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Add unit to multiple regions response:', data);
+                alert(data.message);
+                // Optionally, refresh the current region's units
+                fetchOrbatUnits(regionID);
+            })
+            .catch(error => {
+                console.error('Error adding unit to multiple regions:', error);
+                alert(`Error adding unit to multiple regions: ${error}`);
             });
     };
 
@@ -181,12 +205,31 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                 <th>Unit ID</th>
                                 <th>X</th>
                                 <th>Y</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Name</th>
+                                <th>Entrenchment</th>
+                                <th>Experience</th>
+                                <th>LocName</th>
+                                <th>BattNum</th>
+                                <th>BattName</th>
+                                <th>Eff</th>
+                                <th>Special</th>
+                                <th>Str</th>
+                                <th>MaxStr</th>
+                                <th>DaysLeft</th>
+                                <th>Facing</th>
+                                <th>Group#</th>
+                                <th>TargetRole</th>
+                                <th>StatustoBattC</th>
+                                <th>StatustoBattN</th>
+                                <th>Class</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="4">Loading units...</td>
+                                    <td colSpan="23">Loading units...</td>
                                 </tr>
                             ) : orbatUnits.length > 0 ? (
                                 orbatUnits.map((unit, index) => (
@@ -195,11 +238,30 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                         <td>{unit.unitId}</td>
                                         <td>{unit.X}</td>
                                         <td>{unit.Y}</td>
+                                        <td>{unit.Quantity}</td>
+                                        <td>{unit.Status}</td>
+                                        <td>{unit.Name}</td>
+                                        <td>{unit.Entrench}</td>
+                                        <td>{unit.Exp}</td>
+                                        <td>{unit.LocName}</td>
+                                        <td>{unit.BattNum}</td>
+                                        <td>{unit.BattName}</td>
+                                        <td>{unit.Eff}</td>
+                                        <td>{unit.Special}</td>
+                                        <td>{unit.Str}</td>
+                                        <td>{unit.MaxStr}</td>
+                                        <td>{unit.DaysLeft}</td>
+                                        <td>{unit.Facing}</td>
+                                        <td>{unit.GroupId}</td>
+                                        <td>{unit.TargetRole}</td>
+                                        <td>{unit.StatustoBattC}</td>
+                                        <td>{unit.StatustoBattN}</td>
+                                        <td>{unit.Class}</td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4">No units found for this region.</td>
+                                    <td colSpan="23">No units found for this region.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -223,6 +285,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                     <option value="Infantry">Infantry</option>
                     <option value="Armor">Armor</option>
                     <option value="Artillery">Artillery</option>
+                    {/* Add more classes as needed */}
                 </select>
 
                 <label>
@@ -290,8 +353,10 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                         <thead>
                             <tr>
                                 <th>Add</th>
-                                <th>ID</th>
                                 <th>Name</th>
+                                <th>Class</th>
+                                <th>Year</th>
+                                <th>Region</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -302,8 +367,10 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                             {settings.addToAllRegions ? 'Add to All' : 'Add'}
                                         </button>
                                     </td>
-                                    <td>{unit.id}</td>
                                     <td>{unit.name}</td>
+                                    <td>{unit.class}</td>
+                                    <td>{unit.year}</td>
+                                    <td>{unit.region}</td>
                                 </tr>
                             ))}
                         </tbody>

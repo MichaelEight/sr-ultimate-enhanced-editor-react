@@ -859,6 +859,62 @@ def add_orbat_unit():
         add_to_log(f"Error adding Orbat unit: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
+@main_blueprint.route('/orbat/add_unit_multiple', methods=['POST'])
+def add_unit_to_multiple_regions():
+    try:
+        data = request.get_json()
+        add_to_log(f"Received Orbat add unit to multiple regions request: {data}", LogLevel.INFO)
+        region_ids = data.get('regionIds')
+        unit = data.get('unit')
+        if not region_ids or not unit:
+            add_to_log("Invalid data in Orbat add unit to multiple regions request", LogLevel.ERROR)
+            return jsonify({'error': 'Invalid data'}), 400
+
+        success_count = 0
+        failed_regions = []
+        total_count = len(region_ids)
+
+        for region_id in region_ids:
+            try:
+                region_id = int(region_id)
+                unit_id = unit.get('unitId')
+                if unit_id is None:
+                    add_to_log("Unit ID is missing in the unit data", LogLevel.ERROR)
+                    continue
+
+                # Find or create the region in the orbat data
+                orbat_data = project.orbat_data.setdefault('OOB_Data', [])
+                region = next((r for r in orbat_data if r['regionId'] == region_id), None)
+                if region is None:
+                    # If region not found, create it
+                    region = {'regionId': region_id, 'units': []}
+                    orbat_data.append(region)
+
+                # Add new unit
+                region['units'].append(unit)
+
+                # Mark data as changed
+                project.seen_since_last_update['orbat'] = False
+                success_count += 1
+            except Exception as e:
+                add_to_log(f"Error adding unit to region {region_id}: {e}", LogLevel.ERROR)
+                failed_regions.append(region_id)
+
+        message = f"Units added to {success_count} out of {total_count} regions."
+        if failed_regions:
+            message += f" Failed regions: {', '.join(map(str, failed_regions))}."
+
+        return jsonify({
+            'message': message,
+            'successCount': success_count,
+            'totalCount': total_count,
+            'failedRegions': failed_regions
+        }), 200
+
+    except Exception as e:
+        add_to_log(f"Error adding unit to multiple regions: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
 
 @main_blueprint.route('/orbat/update', methods=['POST'])
 def update_orbat():
