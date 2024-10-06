@@ -56,6 +56,9 @@ const WorldMarketPage = ({ activeTab }) => {
   }, [activeTab, checkAndFetchWorldMarket]);
 
   const handleInputChange = (fieldGroup, name, value) => {
+    // Convert value to integer
+    const intValue = parseInt(value, 10) || 0; // Ensure 0 is retained
+
     // Update local state
     setWorldMarketData((prevData) => {
       const updatedData = { ...prevData };
@@ -73,7 +76,7 @@ const WorldMarketPage = ({ activeTab }) => {
           }
           temp = temp[keys[i]];
         }
-        temp[keys[keys.length - 1]] = value;
+        temp[keys[keys.length - 1]] = intValue;
       } else if (name.match(/\[\d+\]$/)) {
         const arrayMatch = name.match(/^(\w+)\[(\d+)\]$/);
         if (arrayMatch) {
@@ -82,10 +85,10 @@ const WorldMarketPage = ({ activeTab }) => {
           if (!Array.isArray(updatedData[fieldGroup][arrayName])) {
             updatedData[fieldGroup][arrayName] = [];
           }
-          updatedData[fieldGroup][arrayName][index] = value;
+          updatedData[fieldGroup][arrayName][index] = intValue;
         }
       } else {
-        updatedData[fieldGroup][name] = value;
+        updatedData[fieldGroup][name] = intValue;
       }
 
       // Update localStorage
@@ -98,7 +101,7 @@ const WorldMarketPage = ({ activeTab }) => {
     const payload = {
       fieldGroup,
       name,
-      value,
+      value: intValue,
     };
     fetch('http://localhost:5000/worldmarket/update', {
       method: 'POST',
@@ -140,7 +143,7 @@ const WorldMarketPage = ({ activeTab }) => {
         <label>Level (obsolete):</label>
         <input
           type="number"
-          value={settings.wmlevel || ''}
+          value={settings.wmlevel !== undefined && settings.wmlevel !== null ? settings.wmlevel : ''}
           onChange={(e) => handleInputChange('settings', 'wmlevel', e.target.value)}
           min="0"
           max="9999999999"
@@ -148,7 +151,7 @@ const WorldMarketPage = ({ activeTab }) => {
         <label>Duration:</label>
         <input
           type="number"
-          value={settings.dayswmlevel || ''}
+          value={settings.dayswmlevel !== undefined && settings.dayswmlevel !== null ? settings.dayswmlevel : ''}
           onChange={(e) => handleInputChange('settings', 'dayswmlevel', e.target.value)}
           min="0"
           max="9999999999"
@@ -156,7 +159,7 @@ const WorldMarketPage = ({ activeTab }) => {
         <label>Base GDPC:</label>
         <input
           type="number"
-          value={settings.gdpcbase || ''}
+          value={settings.gdpcbase !== undefined && settings.gdpcbase !== null ? settings.gdpcbase : ''}
           onChange={(e) => handleInputChange('settings', 'gdpcbase', e.target.value)}
           min="0"
           max="9999999999"
@@ -309,7 +312,7 @@ const WorldMarketPage = ({ activeTab }) => {
         <label>Days:</label>
         <input
           type="number"
-          value={weather.days || ''}
+          value={weather.days !== undefined && weather.days !== null ? weather.days : ''}
           onChange={(e) => handleInputChange('weather', 'days', e.target.value)}
           min="0"
           max="9999999999"
