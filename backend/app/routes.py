@@ -840,22 +840,15 @@ def add_orbat_unit():
             return jsonify({'error': 'Unit ID is required'}), 400
 
         # Find or create the region in the orbat data
-        orbat_data = project.orbat_data.get('OOB_Data', [])
+        orbat_data = project.orbat_data.setdefault('OOB_Data', [])
         region = next((r for r in orbat_data if r['regionId'] == region_id), None)
         if region is None:
             # If region not found, create it
             region = {'regionId': region_id, 'units': []}
             orbat_data.append(region)
 
-        # Check if the unit already exists
-        units = region['units']
-        existing_unit = next((u for u in units if u['unitId'] == unit_id), None)
-        if existing_unit:
-            add_to_log(f"Unit ID {unit_id} already exists in region {region_id}", LogLevel.ERROR)
-            return jsonify({'error': f'Unit ID {unit_id} already exists in region {region_id}'}), 400
-
         # Add new unit
-        units.append(unit)
+        region['units'].append(unit)
 
         # Mark data as changed
         project.seen_since_last_update['orbat'] = False
@@ -910,4 +903,20 @@ def update_orbat():
         return jsonify({'message': 'Unit updated successfully'}), 200
     except Exception as e:
         add_to_log(f"Error updating Orbat data: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/orbat/<int:region_id>', methods=['GET'])
+def get_orbat_units_for_region(region_id):
+    try:
+        add_to_log(f"Fetching Orbat units for region {region_id}", LogLevel.INFO)
+        orbat_data = project.orbat_data.get('OOB_Data', [])
+        # Find the region in orbat_data
+        region_data = next((region for region in orbat_data if region['regionId'] == region_id), None)
+        if region_data:
+            units = region_data.get('units', [])
+            return jsonify({'units': units}), 200
+        else:
+            return jsonify({'units': []}), 200
+    except Exception as e:
+        add_to_log(f"Error fetching Orbat units for region {region_id}: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
