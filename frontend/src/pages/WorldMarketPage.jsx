@@ -137,7 +137,7 @@ const WorldMarketPage = ({ activeTab }) => {
       {/* Settings Group */}
       <div className="settings-group">
         <h3>Settings</h3>
-        <label>Level:</label>
+        <label>Level (obsolete):</label>
         <input
           type="number"
           value={settings.wmlevel || ''}
@@ -148,16 +148,16 @@ const WorldMarketPage = ({ activeTab }) => {
         <label>Duration:</label>
         <input
           type="number"
-          value={settings.wmduration || ''}
-          onChange={(e) => handleInputChange('settings', 'wmduration', e.target.value)}
+          value={settings.dayswmlevel || ''}
+          onChange={(e) => handleInputChange('settings', 'dayswmlevel', e.target.value)}
           min="0"
           max="9999999999"
         />
         <label>Base GDPC:</label>
         <input
           type="number"
-          value={settings.basegdpc || ''}
-          onChange={(e) => handleInputChange('settings', 'basegdpc', e.target.value)}
+          value={settings.gdpcbase || ''}
+          onChange={(e) => handleInputChange('settings', 'gdpcbase', e.target.value)}
           min="0"
           max="9999999999"
         />

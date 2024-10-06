@@ -102,11 +102,11 @@ def extract_wmdata(file_path):
 
                 # Processing worldmarket section
                 if current_section == "worldmarket":
-                    parts = [x.strip() if x.strip() else None for x in re.split(r'[,]', stripped_line)]
+                    parts = [x.strip() if x.strip() else None for x in re.split(r',', stripped_line)]
                     key = parts[0].lower()  # Ensure keys are lowercase for consistency
 
                     # Map keys to their corresponding groups
-                    if key in ["wmlevel", "wmduration", "gdpcbase"]:
+                    if key in ["wmlevel", "gdpcbase", "dayswmlevel"]:
                         # Settings group
                         value = int(parts[1]) if parts[1] else None
                         data["worldmarket"]["settings"][key] = value
@@ -116,6 +116,9 @@ def extract_wmdata(file_path):
                     elif key == "battstrdefault":
                         values = ensure_length([int(x) if x else None for x in parts[1:]], len(BATTSTRDEFAULT_LABELS))
                         data["worldmarket"]["military"][key] = dict(zip(BATTSTRDEFAULT_LABELS, values))
+                    elif key == "unitgarrison":
+                        values = [int(x) if x else None for x in parts[1:]]
+                        data["worldmarket"]["military"][key] = values
                     elif key == "garrisonprogression":
                         values = [int(x) if x else None for x in parts[1:]]
                         data["worldmarket"]["military"][key] = values
@@ -125,7 +128,7 @@ def extract_wmdata(file_path):
                     elif key == "socialdefaults":
                         values = ensure_length([int(x) if x else None for x in parts[1:]], len(SOCIALDEFAULTS_LABELS))
                         data["worldmarket"]["economic"][key] = dict(zip(SOCIALDEFAULTS_LABELS, values))
-                    elif key == "weatheroffset":
+                    elif key == "weatheroffy":
                         values = [int(x) if x else None for x in parts[1:]]
                         data["worldmarket"]["weather"][key] = values
                     elif key == "weatherspeed":
@@ -135,34 +138,35 @@ def extract_wmdata(file_path):
                         value = int(parts[1]) if parts[1] else None
                         data["worldmarket"]["weather"][key] = value
                     else:
-                        # Handle other values
+                        # Handle other values if any
                         values = [int(x) if x and x.isdigit() else None for x in parts[1:]]
-                        data["worldmarket"][key] = values if len(values) > 1 else values[0]
+                        data["worldmarket"][key] = values if len(values) > 1 else (values[0] if values else None)
 
                 # Processing resources section
                 elif current_section == "resources" and current_resource_id:
-                    parts = [x.strip() if x.strip() else None for x in re.split(r'[,]', stripped_line)]
+                    parts = [x.strip() if x.strip() else None for x in re.split(r',', stripped_line)]
                     key = parts[0].lower()
 
                     resource = data["resources"][current_resource_id]
 
                     if key == "producefrom":
-                        values = ensure_length([int(x) if x else None for x in parts[1:]], len(ID_TO_RESOURCE))
+                        values = ensure_length([int(x) if x else 0 for x in parts[1:]], len(ID_TO_RESOURCE))
                         resource["producefrom"] = dict(zip(ID_TO_RESOURCE.values(), values))
                     elif key in ["wmbasecost", "wmfullcost", "wmmargin"]:
-                        value = int(parts[1]) if parts[1] else None
+                        value = int(parts[1]) if parts[1] else 0
                         resource["cost"][key] = value
                     elif key in ["nodeproduction", "wmprodperpersonmax", "wmprodperpersonmin", "wmurbanproduction"]:
-                        value = int(parts[1]) if parts[1] else None
+                        value = int(parts[1]) if parts[1] else 0
                         resource["production"][key] = value
                     else:
-                        # Handle other values
-                        value = int(parts[1]) if parts[1] else None
+                        # Handle other values if any
+                        value = int(parts[1]) if parts[1] and parts[1].isdigit() else 0
                         resource[key] = value
 
-        add_to_log(f"Successfully extracted WMData from {file_path}", LogLevel.INFO)
     except Exception as e:
         add_to_log(f"Error extracting WMData: {e}", LogLevel.ERROR)
         raise
+
+    add_to_log(f"Successfully extracted WMData from {file_path}", LogLevel.INFO)
 
     return data
