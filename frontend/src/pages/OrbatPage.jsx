@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../assets/styles/OrbatPage.css'; // Ensure you have the appropriate CSS
+import debounce from 'lodash/debounce';
 
 const OrbatPage = ({ activeTab, project, setProject }) => {
     // States for Regions, Settings, and Units
@@ -71,7 +72,9 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             .then(response => response.json())
             .then(data => {
                 if (data && data.units) {
-                    setOrbatUnits(data.units);
+                    // Deep copy units to avoid mutating state directly
+                    const unitsCopy = data.units.map(unit => ({ ...unit }));
+                    setOrbatUnits(unitsCopy);
                 } else {
                     setOrbatUnits([]);
                 }
@@ -140,7 +143,6 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             .then(response => response.json())
             .then(data => {
                 console.log(`Unit added to region ${regionId}:`, data);
-                //alert(data.message);
                 if (parseInt(regionId) === parseInt(regionID)) {
                     // If the current region, refresh the units
                     fetchOrbatUnits(regionId);
@@ -148,7 +150,6 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             })
             .catch(error => {
                 console.error(`Error adding unit to region ${regionId}:`, error);
-                //alert(`Error adding unit to region ${regionId}: ${error}`);
             });
     };
 
@@ -171,6 +172,40 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                 alert(`Error adding unit to multiple regions: ${error}`);
             });
     };
+
+    // Debounced function to update unit in backend
+    const updateUnitInBackend = debounce((regionId, unit) => {
+        fetch('http://localhost:5000/orbat/update_unit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ regionId, unit })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(`Unit ${unit.unitId} updated:`, data);
+            })
+            .catch(error => {
+                console.error(`Error updating unit ${unit.unitId}:`, error);
+            });
+    }, 500);
+
+    // Handle input changes in units table
+    const handleUnitChange = (index, field, value) => {
+        setOrbatUnits(prevUnits => {
+            const updatedUnits = [...prevUnits];
+            const unit = { ...updatedUnits[index], [field]: value };
+            updatedUnits[index] = unit;
+            // Update backend
+            updateUnitInBackend(regionID, unit);
+            return updatedUnits;
+        });
+    };
+
+    // Columns that are string inputs
+    const stringFields = ['LocName', 'Status', 'BattName', 'Special', 'Facing', 'TargetRole', 'StatustoBattC', 'StatustoBattN', 'Name', 'Class'];
+
+    // Columns that are numerical inputs
+    const numericalFields = ['unitId', 'X', 'Y', 'Quantity', 'BattNum', 'Entrench', 'Eff', 'Exp', 'Str', 'MaxStr', 'DaysLeft', 'GroupId'];
 
     return (
         <div className="orbat-page">
@@ -201,7 +236,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                     <table className="region-table">
                         <thead>
                             <tr>
-                                <th>Region ID</th>
+                                {/* <th>Region ID</th> */}
                                 <th>Unit ID</th>
                                 <th>X</th>
                                 <th>Y</th>
@@ -229,39 +264,35 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="23">Loading units...</td>
+                                    <td colSpan="21">Loading units...</td>
                                 </tr>
                             ) : orbatUnits.length > 0 ? (
                                 orbatUnits.map((unit, index) => (
                                     <tr key={index}>
-                                        <td>{regionID}</td>
-                                        <td>{unit.unitId}</td>
-                                        <td>{unit.X}</td>
-                                        <td>{unit.Y}</td>
-                                        <td>{unit.Quantity}</td>
-                                        <td>{unit.Status}</td>
-                                        <td>{unit.Name}</td>
-                                        <td>{unit.Entrench}</td>
-                                        <td>{unit.Exp}</td>
-                                        <td>{unit.LocName}</td>
-                                        <td>{unit.BattNum}</td>
-                                        <td>{unit.BattName}</td>
-                                        <td>{unit.Eff}</td>
-                                        <td>{unit.Special}</td>
-                                        <td>{unit.Str}</td>
-                                        <td>{unit.MaxStr}</td>
-                                        <td>{unit.DaysLeft}</td>
-                                        <td>{unit.Facing}</td>
-                                        <td>{unit.GroupId}</td>
-                                        <td>{unit.TargetRole}</td>
-                                        <td>{unit.StatustoBattC}</td>
-                                        <td>{unit.StatustoBattN}</td>
-                                        <td>{unit.Class}</td>
+                                        {/* <td>{regionID}</td> */}
+                                        {numericalFields.map(field => (
+                                            <td key={field}>
+                                                <input
+                                                    type="number"
+                                                    value={unit[field] !== undefined ? unit[field] : ''}
+                                                    onChange={(e) => handleUnitChange(index, field, e.target.value !== '' ? parseInt(e.target.value) : '')}
+                                                />
+                                            </td>
+                                        ))}
+                                        {stringFields.map(field => (
+                                            <td key={field}>
+                                                <input
+                                                    type="text"
+                                                    value={unit[field] !== undefined ? unit[field] : ''}
+                                                    onChange={(e) => handleUnitChange(index, field, e.target.value)}
+                                                />
+                                            </td>
+                                        ))}
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="23">No units found for this region.</td>
+                                    <td colSpan="21">No units found for this region.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -379,6 +410,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             </div>
         </div>
     );
+
 };
 
 export default OrbatPage;
