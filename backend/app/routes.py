@@ -6,6 +6,7 @@ import shutil
 import json
 import os
 import copy
+import re
 
 from .models import project
 from .utils.logging_utils import add_to_log, LogLevel, send_progress
@@ -763,13 +764,6 @@ def update_worldmarket():
     except Exception as e:
         add_to_log(f"Error updating world market data: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
-
-# routes.py
-
-# ... existing imports ...
-import re
-
-# ... existing code ...
 
 @main_blueprint.route('/orbat', methods=['GET'])
 def get_orbat():
