@@ -13,9 +13,9 @@ const WorldMarketPage = ({ activeTab }) => {
       .then((data) => {
         if (data && data.worldmarket) {
           setWorldMarketData(data.worldmarket);
-          console.log('Fetched latest world market data.');
-          console.log(data.worldmarket);
-          
+          // Cache the data in localStorage
+          localStorage.setItem('worldMarketData', JSON.stringify(data.worldmarket));
+          console.log('Fetched and cached latest world market data.');
         }
       })
       .catch((error) => {
@@ -36,6 +36,12 @@ const WorldMarketPage = ({ activeTab }) => {
           fetchWorldMarketData();
         } else {
           console.log('World market data is up to date.');
+          // Load from cache
+          const cachedData = localStorage.getItem('worldMarketData');
+          if (cachedData) {
+            setWorldMarketData(JSON.parse(cachedData));
+            console.log('Loaded world market data from cache.');
+          }
         }
       })
       .catch((error) => {
@@ -50,12 +56,41 @@ const WorldMarketPage = ({ activeTab }) => {
   }, [activeTab, checkAndFetchWorldMarket]);
 
   const handleInputChange = (fieldGroup, name, value) => {
+    // Update local state
     setWorldMarketData((prevData) => {
       const updatedData = { ...prevData };
       if (!updatedData[fieldGroup]) {
         updatedData[fieldGroup] = {};
       }
-      updatedData[fieldGroup][name] = value;
+
+      // Handle nested fields and arrays
+      if (name.includes('.')) {
+        const keys = name.split('.');
+        let temp = updatedData[fieldGroup];
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (!temp[keys[i]]) {
+            temp[keys[i]] = {};
+          }
+          temp = temp[keys[i]];
+        }
+        temp[keys[keys.length - 1]] = value;
+      } else if (name.match(/\[\d+\]$/)) {
+        const arrayMatch = name.match(/^(\w+)\[(\d+)\]$/);
+        if (arrayMatch) {
+          const arrayName = arrayMatch[1];
+          const index = parseInt(arrayMatch[2], 10);
+          if (!Array.isArray(updatedData[fieldGroup][arrayName])) {
+            updatedData[fieldGroup][arrayName] = [];
+          }
+          updatedData[fieldGroup][arrayName][index] = value;
+        }
+      } else {
+        updatedData[fieldGroup][name] = value;
+      }
+
+      // Update localStorage
+      localStorage.setItem('worldMarketData', JSON.stringify(updatedData));
+
       return updatedData;
     });
 
@@ -81,6 +116,7 @@ const WorldMarketPage = ({ activeTab }) => {
       });
   };
 
+  // Destructure data with defaults
   const {
     settings = {},
     military = {},
@@ -88,38 +124,11 @@ const WorldMarketPage = ({ activeTab }) => {
     weather = {},
   } = worldMarketData;
 
-  // Define labels for garrison progression and battalion sizes
+  // Define labels
   const garrisonLabels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6'];
-  const battalionTypes = [
-    'Infantry',
-    'Recon',
-    'Artillery',
-    'Armor',
-    'Airborne',
-    'Engineer',
-  ];
-
-  const resourceMultipliersLabels = [
-    'agriculture',
-    'rubber',
-    'timber',
-    'petroleum',
-    'coal',
-    'ore',
-    'uranium',
-    'electricity',
-  ];
-
-  const socialSpendingLabels = [
-    'healthcare',
-    'education',
-    'familysubsidy',
-    'lawenforcement',
-    'infrastructure',
-    'socialassistance',
-    'culturalsubsidy',
-    'environment',
-  ];
+  const battalionTypes = ['Infantry', 'Recon', 'Artillery', 'Armor', 'Airborne', 'Engineer'];
+  const resourceMultipliersLabels = ['agriculture', 'rubber', 'timber', 'petroleum', 'coal', 'ore', 'uranium', 'electricity'];
+  const socialSpendingLabels = ['healthcare', 'education', 'familysubsidy', 'lawenforcement', 'infrastructure', 'socialassistance', 'culturalsubsidy', 'environment'];
 
   return (
     <div className="world-market-page">
@@ -169,8 +178,8 @@ const WorldMarketPage = ({ activeTab }) => {
                     <input
                       type="number"
                       value={
-                        military.garrisonprogression
-                          ? military.garrisonprogression[index] || ''
+                        military.garrisonprogression && military.garrisonprogression[index] !== undefined
+                          ? military.garrisonprogression[index]
                           : ''
                       }
                       onChange={(e) =>
@@ -195,15 +204,15 @@ const WorldMarketPage = ({ activeTab }) => {
         <div className="table-wrapper">
           <table className="battalion-size-table">
             <tbody>
-              {battalionTypes.map((type, index) => (
+              {battalionTypes.map((type) => (
                 <tr key={type}>
                   <td>{type}</td>
                   <td>
                     <input
                       type="number"
                       value={
-                        military.battstrdefault
-                          ? military.battstrdefault[type.toLowerCase()] || ''
+                        military.battstrdefault && military.battstrdefault[type.toLowerCase()] !== undefined
+                          ? military.battstrdefault[type.toLowerCase()]
                           : ''
                       }
                       onChange={(e) =>
@@ -239,8 +248,8 @@ const WorldMarketPage = ({ activeTab }) => {
                     <input
                       type="number"
                       value={
-                        economic.hexresmults
-                          ? economic.hexresmults[resource] || ''
+                        economic.hexresmults && economic.hexresmults[resource] !== undefined
+                          ? economic.hexresmults[resource]
                           : ''
                       }
                       onChange={(e) =>
@@ -272,8 +281,8 @@ const WorldMarketPage = ({ activeTab }) => {
                     <input
                       type="number"
                       value={
-                        economic.socialdefaults
-                          ? economic.socialdefaults[category] || ''
+                        economic.socialdefaults && economic.socialdefaults[category] !== undefined
+                          ? economic.socialdefaults[category]
                           : ''
                       }
                       onChange={(e) =>
@@ -318,8 +327,8 @@ const WorldMarketPage = ({ activeTab }) => {
                     <input
                       type="number"
                       value={
-                        weather.weatheroffset
-                          ? weather.weatheroffset[index] || ''
+                        weather.weatheroffset && weather.weatheroffset[index] !== undefined
+                          ? weather.weatheroffset[index]
                           : ''
                       }
                       onChange={(e) =>
@@ -351,8 +360,8 @@ const WorldMarketPage = ({ activeTab }) => {
                     <input
                       type="number"
                       value={
-                        weather.weatherspeed
-                          ? weather.weatherspeed[index] || ''
+                        weather.weatherspeed && weather.weatherspeed[index] !== undefined
+                          ? weather.weatherspeed[index]
                           : ''
                       }
                       onChange={(e) =>
