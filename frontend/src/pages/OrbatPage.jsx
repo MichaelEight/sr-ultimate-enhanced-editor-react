@@ -144,11 +144,27 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             Quantity: quantity,
             Name: unit.name,
             Class: unit.class,
-            // Additional default values can be set here
+            // Include all required fields with default values
             X: 0,
             Y: 0,
             Status: 'Active',
-            // ... other fields as needed
+            LocName: '',
+            BattNum: 0,
+            BattName: '',
+            Entrench: 0,
+            Eff: 0,
+            Exp: 0,
+            Special: '',
+            Str: 0,
+            MaxStr: 0,
+            DaysLeft: 0,
+            Facing: '',
+            GroupId: 0,
+            TargetRole: '',
+            StatustoBattC: '',
+            StatustoBattN: '',
+            Experience: 0,
+            // Add other fields if necessary
         };
 
         if (settings.addToAllRegions) {
@@ -169,8 +185,11 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             .then(response => response.json())
             .then(data => {
                 console.log(`Unit added to region ${regionId}:`, data);
-                if (parseInt(regionId) === parseInt(regionID)) {
-                    // If the current region, refresh the units
+                if (data.unit) {
+                    // Update the orbatUnits state with the new unit
+                    setOrbatUnits(prevUnits => [...prevUnits, data.unit]);
+                } else {
+                    // Fetch the updated units from the backend
                     fetchOrbatUnits(regionId);
                 }
             })
@@ -207,6 +226,9 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             .then(response => response.json())
             .then(data => {
                 console.log(`Unit ${unit.unitId} updated:`, data);
+                if (data.error) {
+                    console.error(`Error updating unit ${unit.unitId}:`, data.error);
+                }
             })
             .catch(error => {
                 console.error(`Error updating unit ${unit.unitId}:`, error);
@@ -280,7 +302,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                             <td key={col.field}>
                                                 <input
                                                     type={col.type}
-                                                    value={unit[col.field] !== undefined ? unit[col.field] : ''}
+                                                    value={unit[col.field] !== undefined && unit[col.field] !== null ? unit[col.field] : ''}
                                                     onChange={(e) => {
                                                         let value = e.target.value;
                                                         if (col.type === 'number') {
@@ -449,7 +471,6 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             </div>
         </div>
     );
-
 };
 
 export default OrbatPage;

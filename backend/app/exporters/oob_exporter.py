@@ -5,7 +5,7 @@ from ..utils.logging_utils import add_to_log, LogLevel
 def write_oob_units(units):
     units_output = ""
     for unit in units:
-        unit_str = ", ".join([str(unit[key]) if unit[key] is not None else "" for key in [
+        unit_str = ", ".join([str(unit.get(key, '')) if unit.get(key, '') is not None else "" for key in [
             "unitId", "X", "Y", "LocName", "Quantity", "Status", "BattNum", "BattName",
             "Entrench", "Eff", "Exp", "Special", "Str", "MaxStr", "DaysLeft", "Facing",
             "GroupId", "TargetRole", "StatustoBattC", "StatustoBattN"

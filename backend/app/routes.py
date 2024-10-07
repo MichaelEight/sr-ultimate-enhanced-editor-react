@@ -808,18 +808,28 @@ def update_orbat_unit():
         if existing_unit:
             # Update existing unit
             existing_unit.update(unit)
+            # Mark data as changed
+            project.seen_since_last_update['orbat'] = False
+            add_to_log(f"Unit {unit_id} in region {region_id} updated successfully", LogLevel.INFO)
+            return jsonify({'message': 'Unit updated successfully'}), 200
         else:
             add_to_log(f"Unit ID {unit_id} not found in region {region_id}", LogLevel.ERROR)
             return jsonify({'error': f'Unit ID {unit_id} not found in region {region_id}'}), 404
 
-        # Mark data as changed
-        project.seen_since_last_update['orbat'] = False
-
-        add_to_log(f"Unit {unit_id} in region {region_id} updated successfully", LogLevel.INFO)
-        return jsonify({'message': 'Unit updated successfully'}), 200
     except Exception as e:
         add_to_log(f"Error updating Orbat unit data: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
+
+
+def generate_unique_unit_id():
+    existing_unit_ids = {
+        u['unitId']
+        for r in project.orbat_data.get('OOB_Data', [])
+        for u in r.get('units', [])
+        if 'unitId' in u and u['unitId'] is not None
+    }
+    new_unit_id = max(existing_unit_ids, default=0) + 1
+    return new_unit_id
 
 @main_blueprint.route('/orbat/add_unit', methods=['POST'])
 def add_orbat_unit():
@@ -835,9 +845,23 @@ def add_orbat_unit():
         region_id = int(region_id)
         unit_id = unit.get('unitId')
 
-        if unit_id is None:
-            add_to_log("Unit ID is missing in the unit data", LogLevel.ERROR)
-            return jsonify({'error': 'Unit ID is required'}), 400
+        # Generate a unique unitId if necessary
+        if unit_id is None or any(
+            u.get('unitId') == unit_id
+            for r in project.orbat_data.get('OOB_Data', [])
+            for u in r.get('units', [])
+        ):
+            unit['unitId'] = generate_unique_unit_id()
+
+        # Ensure all required fields are present
+        required_fields = [
+            "unitId", "X", "Y", "LocName", "Quantity", "Status", "BattNum",
+            "BattName", "Entrench", "Eff", "Exp", "Special", "Str", "MaxStr",
+            "DaysLeft", "Facing", "GroupId", "TargetRole", "StatustoBattC",
+            "StatustoBattN", "Name", "Class"
+        ]
+        for field in required_fields:
+            unit.setdefault(field, None)
 
         # Find or create the region in the orbat data
         orbat_data = project.orbat_data.setdefault('OOB_Data', [])
@@ -853,8 +877,8 @@ def add_orbat_unit():
         # Mark data as changed
         project.seen_since_last_update['orbat'] = False
 
-        add_to_log(f"Unit {unit_id} added to region {region_id} successfully", LogLevel.INFO)
-        return jsonify({'message': 'Unit added successfully'}), 200
+        add_to_log(f"Unit {unit['unitId']} added to region {region_id} successfully", LogLevel.INFO)
+        return jsonify({'message': 'Unit added successfully', 'unit': unit}), 200
     except Exception as e:
         add_to_log(f"Error adding Orbat unit: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
