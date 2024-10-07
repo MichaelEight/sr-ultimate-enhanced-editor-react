@@ -366,7 +366,7 @@ def export_project_files():
 
         # Process other files for export as needed, excluding 'wmdata'
         for ext, file_info in project.modified_structure.items():
-            if ext in ['scenario', 'cvp', 'wmdata']:
+            if ext in ['scenario', 'cvp', 'wmdata', 'oob']:
                 continue  # Already handled
             process_file_for_export(ext, file_info, export_base_dir)
             add_to_log(f"Processed file type: .{ext}", LogLevel.DEBUG)
