@@ -2,60 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../assets/styles/SettingsPage.css';
 
 const SettingsPage = ({ activeTab, project, setProject }) => {
-    //     // General Info
-    //     startingDate: new Date().toISOString().substr(0, 10), // Current date in 'YYYY-MM-DD' format
-    //     scenarioId: '',
-    //     fastForwardDays: '',
-    //     defaultRegion: '',
-    //     // Difficulties
-    //     militaryDifficulty: 2, // Default to 'Normal'
-    //     economicDifficulty: 2,
-    //     diplomaticDifficulty: 2,
-    //     // Victory Conditions
-    //     gameLength: 0, // Default to 'None'
-    //     victory: 0,    // Default to 'Complete'
-    //     victoryHexX: '',
-    //     victoryHexY: '',
-    //     victoryTech: '',
-    //     // Starting Conditions
-    //     resourcesLevel: 2, // Default to 'Standard'
-    //     initialFunds: 2,   // Default to 'Default'
-    //     // AI Settings
-    //     globalAIStance: 0, // Default to 'Normal'
-    //     nukeEffect: 2,     // Default to 'High'
-    //     approvalEffect: 0, // Default to 'Low'
-    //     // Graphics Options
-    //     guiLevel: 0,       // Default to 'Skin 0 - 1936'
-    //     mapSplash: '',
-    //     mapMusic: '',
-    //     // Miscellaneous
-    //     startingYear: '',
-    //     techTreeDefault: '',
-    //     regionAllies: '',
-    //     regionAxis: '',
-    //     sphereNN: '',
-    //     // Scenario Options (Checkboxes)
-    //     fixedCapitals: false,
-    //     criticalUN: false,
-    //     allowNukes: false,
-    //     alliedVictory: false,
-    //     noStartingDebt: false,
-    //     limitDarEffect: false,
-    //     limitRegionsInScenario: false,
-    //     restrictTechTrade: false,
-    //     regionEquip: false,
-    //     fastBuild: false,
-    //     noLoyaltyPenalty: false,
-    //     missileLimit: false,
-    //     reserveLimit: false,
-    //     groupLoyaltyMerge: false,
-    //     groupResearchMerge: false,
-    //     limitMarEffect: false,
-    //     noSphere: false,
-    //     campaignGame: false,
-    //     govChoice: false,
-    //     thirdPartyRelationsEffect: false,
-    // });
     const [scenarioSettings, setScenarioSettings] = useState({});
     const [loading, setLoading] = useState(false);
 
