@@ -25,6 +25,32 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
     const [unitNameFilter, setUnitNameFilter] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Define column configurations
+    const columns = [
+        { field: 'unitId', label: 'Unit ID', type: 'number', min: 0, max: 99999 },
+        { field: 'X', label: 'X', type: 'number', min: 0, max: 99999 },
+        { field: 'Y', label: 'Y', type: 'number', min: 0, max: 99999 },
+        { field: 'Quantity', label: 'Quantity', type: 'number', min: 0, max: 99999 },
+        { field: 'Status', label: 'Status', type: 'text' },
+        { field: 'Name', label: 'Name', type: 'text' },
+        { field: 'Entrench', label: 'Entrenchment', type: 'number', min: 0, max: 99999 },
+        { field: 'Experience', label: 'Experience', type: 'number', min: 0, max: 99999 },
+        { field: 'LocName', label: 'LocName', type: 'text' },
+        { field: 'BattNum', label: 'BattNum', type: 'number', min: 0, max: 99999 },
+        { field: 'BattName', label: 'BattName', type: 'text' },
+        { field: 'Eff', label: 'Eff', type: 'number', min: 0, max: 99999 },
+        { field: 'Special', label: 'Special', type: 'text' },
+        { field: 'Str', label: 'Str', type: 'number', min: 0, max: 99999 },
+        { field: 'MaxStr', label: 'MaxStr', type: 'number', min: 0, max: 99999 },
+        { field: 'DaysLeft', label: 'DaysLeft', type: 'number', min: 0, max: 99999 },
+        { field: 'Facing', label: 'Facing', type: 'text' },
+        { field: 'GroupId', label: 'Group#', type: 'number', min: 0, max: 99999 },
+        { field: 'TargetRole', label: 'TargetRole', type: 'text' },
+        { field: 'StatustoBattC', label: 'StatustoBattC', type: 'text' },
+        { field: 'StatustoBattN', label: 'StatustoBattN', type: 'text' },
+        { field: 'Class', label: 'Class', type: 'text' },
+    ];
+
     // Fetch regions data from backend
     useEffect(() => {
         fetch('http://localhost:5000/regions')
@@ -199,12 +225,6 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
         });
     };
 
-    // Columns that are string inputs
-    const stringFields = ['LocName', 'Status', 'BattName', 'Special', 'Facing', 'TargetRole', 'StatustoBattC', 'StatustoBattN', 'Name', 'Class'];
-
-    // Columns that are numerical inputs
-    const numericalFields = ['unitId', 'X', 'Y', 'Quantity', 'BattNum', 'Entrench', 'Eff', 'Exp', 'Str', 'MaxStr', 'DaysLeft', 'GroupId'];
-
     return (
         <div className="orbat-page">
             <h2>Orbat</h2>
@@ -245,59 +265,34 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                     <table className="orbat-region-table">
                         <thead>
                             <tr>
-                                {/* <th>Region ID</th> */}
-                                <th>Unit ID</th>
-                                <th>X</th>
-                                <th>Y</th>
-                                <th>Quantity</th>
-                                <th>Status</th>
-                                <th>Name</th>
-                                <th>Entrenchment</th>
-                                <th>Experience</th>
-                                <th>LocName</th>
-                                <th>BattNum</th>
-                                <th>BattName</th>
-                                <th>Eff</th>
-                                <th>Special</th>
-                                <th>Str</th>
-                                <th>MaxStr</th>
-                                <th>DaysLeft</th>
-                                <th>Facing</th>
-                                <th>Group#</th>
-                                <th>TargetRole</th>
-                                <th>StatustoBattC</th>
-                                <th>StatustoBattN</th>
-                                <th>Class</th>
+                                {columns.map(col => (
+                                    <th key={col.field}>{col.label}</th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="22">Loading units...</td>
+                                    <td colSpan={columns.length}>Loading units...</td>
                                 </tr>
                             ) : orbatUnits.length > 0 ? (
                                 orbatUnits.map((unit, index) => (
                                     <tr key={index}>
-                                        {/* <td>{regionID}</td> */}
-                                        {numericalFields.map(field => (
-                                            <td key={field}>
+                                        {columns.map(col => (
+                                            <td key={col.field}>
                                                 <input
-                                                    type="number"
-                                                    value={unit[field] !== undefined ? unit[field] : ''}
-                                                    onChange={(e) => handleUnitChange(index, field, e.target.value !== '' ? parseInt(e.target.value) : '')}
+                                                    type={col.type}
+                                                    value={unit[col.field] !== undefined ? unit[col.field] : ''}
+                                                    onChange={(e) => {
+                                                        let value = e.target.value;
+                                                        if (col.type === 'number') {
+                                                            value = e.target.value !== '' ? parseInt(e.target.value) : '';
+                                                        }
+                                                        handleUnitChange(index, col.field, value);
+                                                    }}
                                                     className="orbat-table-input"
-                                                    min="0"
-                                                    max="99999"
-                                                />
-                                            </td>
-                                        ))}
-                                        {stringFields.map(field => (
-                                            <td key={field}>
-                                                <input
-                                                    type="text"
-                                                    value={unit[field] !== undefined ? unit[field] : ''}
-                                                    onChange={(e) => handleUnitChange(index, field, e.target.value)}
-                                                    className="orbat-table-input"
+                                                    min={col.min}
+                                                    max={col.max}
                                                 />
                                             </td>
                                         ))}
@@ -305,7 +300,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="22">No units found for this region.</td>
+                                    <td colSpan={columns.length}>No units found for this region.</td>
                                 </tr>
                             )}
                         </tbody>
