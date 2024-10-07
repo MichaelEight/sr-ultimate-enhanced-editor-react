@@ -1,0 +1,402 @@
+/* ================================
+   OrbatPage.css
+   ================================ */
+
+/* --------------------------------
+   Main Container
+--------------------------------- */
+.orbat-page {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+    background-color: #f4f7fa; /* Light background */
+    min-height: 100vh; /* Full viewport height */
+    box-sizing: border-box; /* Include padding in width */
+    font-family: Arial, sans-serif; /* Consistent font */
+}
+
+/* --------------------------------
+   Page Heading
+--------------------------------- */
+.orbat-page > h2 {
+    font-size: 28px;
+    color: #007bff;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* --------------------------------
+   Group Containers
+--------------------------------- */
+.orbat-group {
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
+    border: 1px solid #e0e0e0;
+}
+
+/* --------------------------------
+   Group Headers
+--------------------------------- */
+.orbat-group > h3 {
+    font-size: 20px;
+    color: #007bff;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 8px;
+}
+
+/* --------------------------------
+   Input Containers
+--------------------------------- */
+.orbat-input-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.orbat-input-container label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 15px;
+    min-width: 160px; /* Adequate label width */
+    white-space: nowrap; /* Prevent label text from wrapping */
+}
+
+.orbat-input-container input,
+.orbat-input-container select {
+    width: 300px !important; /* Sufficient input width with priority */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.3s;
+    min-width: 200px !important; /* Ensures minimum width with priority */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.orbat-input-container input:focus,
+.orbat-input-container select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* --------------------------------
+   Checkbox Containers
+--------------------------------- */
+.orbat-checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.orbat-checkbox-container label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+}
+
+.orbat-checkbox-container input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.3);
+    cursor: pointer;
+}
+
+/* --------------------------------
+   Table Wrappers
+--------------------------------- */
+.orbat-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    margin-top: 20px;
+}
+
+/* --------------------------------
+   Regions Table
+--------------------------------- */
+.orbat-region-table {
+    width: 100% !important;
+    min-width: 1600px !important; /* Increased to accommodate all columns with priority */
+    border-collapse: collapse;
+    font-size: 16px;
+    table-layout: auto !important; /* Allow columns to adjust based on content */
+}
+
+.orbat-region-table th,
+.orbat-region-table td {
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.orbat-region-table th {
+    background-color: #007bff;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Define specific widths for each column with priority */
+.orbat-region-table th:nth-child(1),
+.orbat-region-table td:nth-child(1) { width: 120px !important; } /* Unit ID */
+.orbat-region-table th:nth-child(2),
+.orbat-region-table td:nth-child(2) { width: 100px !important; }  /* X */
+.orbat-region-table th:nth-child(3),
+.orbat-region-table td:nth-child(3) { width: 100px !important; }  /* Y */
+.orbat-region-table th:nth-child(4),
+.orbat-region-table td:nth-child(4) { width: 120px !important; } /* Quantity */
+.orbat-region-table th:nth-child(5),
+.orbat-region-table td:nth-child(5) { width: 150px !important; } /* Status */
+.orbat-region-table th:nth-child(6),
+.orbat-region-table td:nth-child(6) { width: 180px !important; } /* Name */
+.orbat-region-table th:nth-child(7),
+.orbat-region-table td:nth-child(7) { width: 180px !important; } /* Entrenchment */
+.orbat-region-table th:nth-child(8),
+.orbat-region-table td:nth-child(8) { width: 140px !important; } /* Experience */
+.orbat-region-table th:nth-child(9),
+.orbat-region-table td:nth-child(9) { width: 180px !important; } /* LocName */
+.orbat-region-table th:nth-child(10),
+.orbat-region-table td:nth-child(10) { width: 120px !important; } /* BattNum */
+.orbat-region-table th:nth-child(11),
+.orbat-region-table td:nth-child(11) { width: 180px !important; } /* BattName */
+.orbat-region-table th:nth-child(12),
+.orbat-region-table td:nth-child(12) { width: 100px !important; }  /* Eff */
+.orbat-region-table th:nth-child(13),
+.orbat-region-table td:nth-child(13) { width: 140px !important; } /* Special */
+.orbat-region-table th:nth-child(14),
+.orbat-region-table td:nth-child(14) { width: 100px !important; }  /* Str */
+.orbat-region-table th:nth-child(15),
+.orbat-region-table td:nth-child(15) { width: 120px !important; } /* MaxStr */
+.orbat-region-table th:nth-child(16),
+.orbat-region-table td:nth-child(16) { width: 120px !important; } /* DaysLeft */
+.orbat-region-table th:nth-child(17),
+.orbat-region-table td:nth-child(17) { width: 120px !important; } /* Facing */
+.orbat-region-table th:nth-child(18),
+.orbat-region-table td:nth-child(18) { width: 120px !important; } /* Group# */
+.orbat-region-table th:nth-child(19),
+.orbat-region-table td:nth-child(19) { width: 180px !important; } /* TargetRole */
+.orbat-region-table th:nth-child(20),
+.orbat-region-table td:nth-child(20) { width: 180px !important; } /* StatustoBattC */
+.orbat-region-table th:nth-child(21),
+.orbat-region-table td:nth-child(21) { width: 180px !important; } /* StatustoBattN */
+.orbat-region-table th:nth-child(22),
+.orbat-region-table td:nth-child(22) { width: 140px !important; } /* Class */
+
+/* Ensure inputs within regions table have adequate width */
+.orbat-region-table .orbat-table-input {
+    width: 100% !important; /* Full width of the cell */
+    min-width: 80px !important; /* Minimum width to display at least one digit */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+/* Alternate row coloring */
+.orbat-region-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* --------------------------------
+   Units Table
+--------------------------------- */
+.orbat-units-table {
+    width: 100% !important;
+    min-width: 900px !important; /* Increased to accommodate all columns with priority */
+    border-collapse: collapse;
+    font-size: 16px;
+    table-layout: auto !important; /* Allow columns to adjust based on content */
+}
+
+.orbat-units-table th,
+.orbat-units-table td {
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.orbat-units-table th {
+    background-color: #007bff;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Define specific widths for units table columns with priority */
+.orbat-units-table th:nth-child(1),
+.orbat-units-table td:nth-child(1) { width: 150px !important; } /* Add */
+.orbat-units-table th:nth-child(2),
+.orbat-units-table td:nth-child(2) { width: 250px !important; } /* Name */
+.orbat-units-table th:nth-child(3),
+.orbat-units-table td:nth-child(3) { width: 200px !important; } /* Class */
+.orbat-units-table th:nth-child(4),
+.orbat-units-table td:nth-child(4) { width: 120px !important; } /* Year */
+.orbat-units-table th:nth-child(5),
+.orbat-units-table td:nth-child(5) { width: 180px !important; } /* Region */
+
+/* Ensure inputs within units table have adequate width */
+.orbat-units-table .orbat-table-input {
+    width: 100% !important; /* Full width of the cell */
+    min-width: 80px !important; /* Minimum width to display at least one digit */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+/* Alternate row coloring */
+.orbat-units-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* --------------------------------
+   Add Button Styling
+--------------------------------- */
+.orbat-add-button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.orbat-add-button:hover {
+    background-color: #218838;
+}
+
+.orbat-add-button:active {
+    background-color: #1e7e34;
+}
+
+/* --------------------------------
+   Responsive Design
+--------------------------------- */
+
+/* Medium Screens (e.g., Tablets) */
+@media (max-width: 1600px) {
+    .orbat-region-table {
+        min-width: 1500px !important; /* Slight adjustment */
+    }
+
+    .orbat-units-table {
+        min-width: 850px !important; /* Adjust as needed */
+    }
+}
+
+@media (max-width: 1400px) {
+    .orbat-region-table {
+        min-width: 1400px !important; /* Adjust as needed */
+    }
+
+    .orbat-units-table {
+        min-width: 800px !important; /* Adjust as needed */
+    }
+}
+
+@media (max-width: 1200px) {
+    .orbat-region-table {
+        min-width: 1300px !important; /* Adjust as needed */
+    }
+
+    .orbat-units-table {
+        min-width: 750px !important; /* Adjust as needed */
+    }
+}
+
+@media (max-width: 992px) {
+    .orbat-group {
+        padding: 15px;
+    }
+
+    .orbat-input-container label {
+        min-width: 140px; /* Adjust label width for smaller screens */
+    }
+
+    .orbat-input-container input,
+    .orbat-input-container select {
+        width: 280px !important; /* Adjust input width for smaller screens */
+    }
+
+    .orbat-region-table {
+        min-width: 1200px !important; /* Adjust as needed */
+    }
+
+    .orbat-units-table {
+        min-width: 700px !important; /* Adjust as needed */
+    }
+}
+
+@media (max-width: 768px) {
+    .orbat-input-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .orbat-input-container label,
+    .orbat-input-container input,
+    .orbat-input-container select {
+        width: 100% !important;
+    }
+
+    .orbat-checkbox-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .orbat-page {
+        margin-left: 0;
+    }
+
+    .orbat-region-table {
+        min-width: 1000px !important; /* Allow horizontal scroll */
+    }
+
+    .orbat-units-table {
+        min-width: 600px !important; /* Adjust as needed */
+    }
+}
+
+@media (max-width: 576px) {
+    .orbat-page > h2 {
+        font-size: 22px;
+    }
+
+    .orbat-group > h3 {
+        font-size: 18px;
+    }
+
+    .orbat-input-container label {
+        font-size: 14px;
+    }
+
+    .orbat-input-container input,
+    .orbat-input-container select {
+        font-size: 14px;
+    }
+
+    .orbat-checkbox-container label {
+        font-size: 14px;
+    }
+
+    .orbat-region-table th,
+    .orbat-region-table td,
+    .orbat-units-table th,
+    .orbat-units-table td {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .orbat-add-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}

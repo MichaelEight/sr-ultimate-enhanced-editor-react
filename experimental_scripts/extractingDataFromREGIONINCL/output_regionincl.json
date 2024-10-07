@@ -1,0 +1,1049 @@
+{
+    "regions": [
+        {
+            "regionId": 101,
+            "comment": "Egypt - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 102,
+            "comment": "Libya - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 103,
+            "comment": "Algeria - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 104,
+            "comment": "Morocco - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 105,
+            "comment": "Western Sahara - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 106,
+            "comment": "Tunisia - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 109,
+            "comment": "Suez",
+            "isActive": false
+        },
+        {
+            "regionId": 201,
+            "comment": "Nigeria - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 202,
+            "comment": "Benin -",
+            "isActive": false
+        },
+        {
+            "regionId": 203,
+            "comment": "Burkina Faso -",
+            "isActive": false
+        },
+        {
+            "regionId": 204,
+            "comment": "Cameroun -",
+            "isActive": false
+        },
+        {
+            "regionId": 205,
+            "comment": "Central Africa -",
+            "isActive": false
+        },
+        {
+            "regionId": 206,
+            "comment": "Chad -",
+            "isActive": false
+        },
+        {
+            "regionId": 207,
+            "comment": "Cote D'ivoire - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 208,
+            "comment": "Mauritania -",
+            "isActive": false
+        },
+        {
+            "regionId": 209,
+            "comment": "Gambia -",
+            "isActive": false
+        },
+        {
+            "regionId": 210,
+            "comment": "Ghana -",
+            "isActive": false
+        },
+        {
+            "regionId": 211,
+            "comment": "Guinea -",
+            "isActive": false
+        },
+        {
+            "regionId": 212,
+            "comment": "Guinea-Bissau -",
+            "isActive": false
+        },
+        {
+            "regionId": 213,
+            "comment": "Liberia -",
+            "isActive": false
+        },
+        {
+            "regionId": 214,
+            "comment": "Mali -",
+            "isActive": false
+        },
+        {
+            "regionId": 215,
+            "comment": "Niger -",
+            "isActive": false
+        },
+        {
+            "regionId": 216,
+            "comment": "Senegal -",
+            "isActive": false
+        },
+        {
+            "regionId": 217,
+            "comment": "Sierra Leone -",
+            "isActive": false
+        },
+        {
+            "regionId": 218,
+            "comment": "-",
+            "isActive": false
+        },
+        {
+            "regionId": 219,
+            "comment": "Cape Verde -",
+            "isActive": false
+        },
+        {
+            "regionId": 224,
+            "comment": "Sao Tome and Principe -",
+            "isActive": false
+        },
+        {
+            "regionId": 301,
+            "comment": "Kenya -",
+            "isActive": false
+        },
+        {
+            "regionId": 302,
+            "comment": "Eritrea -",
+            "isActive": false
+        },
+        {
+            "regionId": 303,
+            "comment": "Ethiopia -",
+            "isActive": false
+        },
+        {
+            "regionId": 304,
+            "comment": "Somalia - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 305,
+            "comment": "Rwanda -",
+            "isActive": false
+        },
+        {
+            "regionId": 306,
+            "comment": "Djibouti -",
+            "isActive": false
+        },
+        {
+            "regionId": 307,
+            "comment": "Burundi -",
+            "isActive": false
+        },
+        {
+            "regionId": 308,
+            "comment": "Sudan -",
+            "isActive": false
+        },
+        {
+            "regionId": 309,
+            "comment": "Uganda -",
+            "isActive": false
+        },
+        {
+            "regionId": 310,
+            "comment": "Tanzania -",
+            "isActive": false
+        },
+        {
+            "regionId": 313,
+            "comment": "South Sudan",
+            "isActive": false
+        },
+        {
+            "regionId": 401,
+            "comment": "South Africa -",
+            "isActive": false
+        },
+        {
+            "regionId": 402,
+            "comment": "Lesotho -",
+            "isActive": false
+        },
+        {
+            "regionId": 403,
+            "comment": "Namibia -",
+            "isActive": false
+        },
+        {
+            "regionId": 404,
+            "comment": "Madagascar -",
+            "isActive": false
+        },
+        {
+            "regionId": 405,
+            "comment": "Botswana -",
+            "isActive": false
+        },
+        {
+            "regionId": 406,
+            "comment": "Mozambique -",
+            "isActive": false
+        },
+        {
+            "regionId": 407,
+            "comment": "Malawi -",
+            "isActive": false
+        },
+        {
+            "regionId": 408,
+            "comment": "Swaziland -",
+            "isActive": false
+        },
+        {
+            "regionId": 409,
+            "comment": "Zimbabwe -",
+            "isActive": false
+        },
+        {
+            "regionId": 410,
+            "comment": "Angola -",
+            "isActive": false
+        },
+        {
+            "regionId": 411,
+            "comment": "Zambia - Works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 412,
+            "comment": "DRC -",
+            "isActive": false
+        },
+        {
+            "regionId": 413,
+            "comment": "Congo -",
+            "isActive": false
+        },
+        {
+            "regionId": 414,
+            "comment": "Gabon -",
+            "isActive": false
+        },
+        {
+            "regionId": 415,
+            "comment": "Equat Guinea -",
+            "isActive": false
+        },
+        {
+            "regionId": 416,
+            "comment": "Comoros -",
+            "isActive": false
+        },
+        {
+            "regionId": 417,
+            "comment": "Mauritius -",
+            "isActive": false
+        },
+        {
+            "regionId": 418,
+            "comment": "Mayotte?",
+            "isActive": false
+        },
+        {
+            "regionId": 419,
+            "comment": "Reunion?",
+            "isActive": false
+        },
+        {
+            "regionId": 420,
+            "comment": "Seychelles -",
+            "isActive": false
+        },
+        {
+            "regionId": 501,
+            "comment": "Israel - Works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 502,
+            "comment": "Palestine -",
+            "isActive": false
+        },
+        {
+            "regionId": 503,
+            "comment": "Jordan -",
+            "isActive": false
+        },
+        {
+            "regionId": 601,
+            "comment": "Iran",
+            "isActive": false
+        },
+        {
+            "regionId": 602,
+            "comment": "Iraq",
+            "isActive": false
+        },
+        {
+            "regionId": 603,
+            "comment": "Kuwait",
+            "isActive": false
+        },
+        {
+            "regionId": 604,
+            "comment": "Oman",
+            "isActive": false
+        },
+        {
+            "regionId": 605,
+            "comment": "Qatar",
+            "isActive": false
+        },
+        {
+            "regionId": 606,
+            "comment": "Saudi Arabia",
+            "isActive": false
+        },
+        {
+            "regionId": 607,
+            "comment": "Syria",
+            "isActive": false
+        },
+        {
+            "regionId": 608,
+            "comment": "Lebanon",
+            "isActive": false
+        },
+        {
+            "regionId": 609,
+            "comment": "Turkey -",
+            "isActive": false
+        },
+        {
+            "regionId": 610,
+            "comment": "UAE -",
+            "isActive": false
+        },
+        {
+            "regionId": 611,
+            "comment": "Yemen -",
+            "isActive": false
+        },
+        {
+            "regionId": 612,
+            "comment": "Kurdistan -",
+            "isActive": false
+        },
+        {
+            "regionId": 613,
+            "comment": "Bahrain -",
+            "isActive": false
+        },
+        {
+            "regionId": 616,
+            "comment": "Turkish Straights",
+            "isActive": false
+        },
+        {
+            "regionId": 617,
+            "comment": "Isis",
+            "isActive": false
+        },
+        {
+            "regionId": 701,
+            "comment": "Armenia -",
+            "isActive": false
+        },
+        {
+            "regionId": 702,
+            "comment": "Azerbaijan -",
+            "isActive": false
+        },
+        {
+            "regionId": 799,
+            "comment": "Georgia Republic -",
+            "isActive": false
+        },
+        {
+            "regionId": 704,
+            "comment": "Kazakhstan - Works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 705,
+            "comment": "Kyrgyzstan -",
+            "isActive": false
+        },
+        {
+            "regionId": 706,
+            "comment": "Tajikistan -",
+            "isActive": false
+        },
+        {
+            "regionId": 707,
+            "comment": "Turkmenistan -",
+            "isActive": false
+        },
+        {
+            "regionId": 708,
+            "comment": "Uzbekistan -  -",
+            "isActive": false
+        },
+        {
+            "regionId": 812,
+            "comment": "Crimea",
+            "isActive": false
+        },
+        {
+            "regionId": 889,
+            "comment": "Russia",
+            "isActive": false
+        },
+        {
+            "regionId": 907,
+            "comment": "Nepal -",
+            "isActive": false
+        },
+        {
+            "regionId": 908,
+            "comment": "Bhutan -",
+            "isActive": false
+        },
+        {
+            "regionId": 909,
+            "comment": "Sri Lanka -",
+            "isActive": false
+        },
+        {
+            "regionId": 910,
+            "comment": "Pakistan -",
+            "isActive": false
+        },
+        {
+            "regionId": 911,
+            "comment": "Afghanistan -",
+            "isActive": false
+        },
+        {
+            "regionId": 912,
+            "comment": "Bangladesh -",
+            "isActive": false
+        },
+        {
+            "regionId": 917,
+            "comment": "Maldives",
+            "isActive": false
+        },
+        {
+            "regionId": 989,
+            "comment": "India",
+            "isActive": false
+        },
+        {
+            "regionId": 1001,
+            "comment": "**B&H - , replace with 1098?",
+            "isActive": false
+        },
+        {
+            "regionId": 1002,
+            "comment": "**Serb Rep - , replace with 1098?",
+            "isActive": false
+        },
+        {
+            "regionId": 1003,
+            "comment": "Croatia -",
+            "isActive": false
+        },
+        {
+            "regionId": 1004,
+            "comment": "Serbia",
+            "isActive": false
+        },
+        {
+            "regionId": 1005,
+            "comment": "Mont -",
+            "isActive": false
+        },
+        {
+            "regionId": 1006,
+            "comment": "Kos -",
+            "isActive": false
+        },
+        {
+            "regionId": 1007,
+            "comment": "Albania -",
+            "isActive": false
+        },
+        {
+            "regionId": 1008,
+            "comment": "Slovenia -",
+            "isActive": false
+        },
+        {
+            "regionId": 1101,
+            "comment": "Belarus -",
+            "isActive": false
+        },
+        {
+            "regionId": 1102,
+            "comment": "Ukraine -",
+            "isActive": false
+        },
+        {
+            "regionId": 1103,
+            "comment": "Moldova -",
+            "isActive": false
+        },
+        {
+            "regionId": 1104,
+            "comment": "Romania -",
+            "isActive": false
+        },
+        {
+            "regionId": 1105,
+            "comment": "Bulgaria -",
+            "isActive": false
+        },
+        {
+            "regionId": 1106,
+            "comment": "Poland -",
+            "isActive": false
+        },
+        {
+            "regionId": 1107,
+            "comment": "Hungary -",
+            "isActive": false
+        },
+        {
+            "regionId": 1108,
+            "comment": "Cze -",
+            "isActive": false
+        },
+        {
+            "regionId": 1109,
+            "comment": "Slov -",
+            "isActive": false
+        },
+        {
+            "regionId": 1110,
+            "comment": "Latvia -",
+            "isActive": false
+        },
+        {
+            "regionId": 1111,
+            "comment": "Lithuania -",
+            "isActive": false
+        },
+        {
+            "regionId": 1112,
+            "comment": "Estonia - Works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 1114,
+            "comment": "Greece -",
+            "isActive": false
+        },
+        {
+            "regionId": 1115,
+            "comment": "Macedonia -",
+            "isActive": false
+        },
+        {
+            "regionId": 1116,
+            "comment": "Cyprus (Greek) (also EU Nation)",
+            "isActive": false
+        },
+        {
+            "regionId": 1117,
+            "comment": "Cyprus (Turkish)",
+            "isActive": false
+        },
+        {
+            "regionId": 1298,
+            "comment": "Denmark -",
+            "isActive": false
+        },
+        {
+            "regionId": 1299,
+            "comment": "Norway -",
+            "isActive": false
+        },
+        {
+            "regionId": 1203,
+            "comment": "Finland -",
+            "isActive": false
+        },
+        {
+            "regionId": 1204,
+            "comment": "Sweden - Works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 1205,
+            "comment": "Iceland -",
+            "isActive": false
+        },
+        {
+            "regionId": 1306,
+            "comment": "Ireland -",
+            "isActive": false
+        },
+        {
+            "regionId": 1399,
+            "comment": "United Kingdom -",
+            "isActive": false
+        },
+        {
+            "regionId": 1404,
+            "comment": "Austria -",
+            "isActive": false
+        },
+        {
+            "regionId": 1499,
+            "comment": "Germany -",
+            "isActive": false
+        },
+        {
+            "regionId": 1505,
+            "comment": "Malta -",
+            "isActive": false
+        },
+        {
+            "regionId": 1599,
+            "comment": "Italy -",
+            "isActive": false
+        },
+        {
+            "regionId": 1699,
+            "comment": "France -",
+            "isActive": false
+        },
+        {
+            "regionId": 1603,
+            "comment": "Belgium -",
+            "isActive": false
+        },
+        {
+            "regionId": 1605,
+            "comment": "Luxembourg -",
+            "isActive": false
+        },
+        {
+            "regionId": 1697,
+            "comment": "Netherlands -",
+            "isActive": false
+        },
+        {
+            "regionId": 1705,
+            "comment": "Andorra -",
+            "isActive": false
+        },
+        {
+            "regionId": 1798,
+            "comment": "Portugal -",
+            "isActive": false
+        },
+        {
+            "regionId": 1799,
+            "comment": "Spain -",
+            "isActive": false
+        },
+        {
+            "regionId": 1801,
+            "comment": "Switzerland -",
+            "isActive": false
+        },
+        {
+            "regionId": 1901,
+            "comment": "Taiwan -",
+            "isActive": false
+        },
+        {
+            "regionId": 1902,
+            "comment": "Hong Kong",
+            "isActive": false
+        },
+        {
+            "regionId": 1999,
+            "comment": "China -",
+            "isActive": false
+        },
+        {
+            "regionId": 1907,
+            "comment": "Tibet",
+            "isActive": false
+        },
+        {
+            "regionId": 1909,
+            "comment": "Mongolia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2001,
+            "comment": "Japan - Works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 2002,
+            "comment": "N Korea -",
+            "isActive": false
+        },
+        {
+            "regionId": 2003,
+            "comment": "S Korea -",
+            "isActive": false
+        },
+        {
+            "regionId": 2101,
+            "comment": "Thailand - works 2020",
+            "isActive": false
+        },
+        {
+            "regionId": 2102,
+            "comment": "Vietnam -",
+            "isActive": false
+        },
+        {
+            "regionId": 2103,
+            "comment": "Myanmar -",
+            "isActive": false
+        },
+        {
+            "regionId": 2104,
+            "comment": "Cambodia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2105,
+            "comment": "Laos -",
+            "isActive": false
+        },
+        {
+            "regionId": 2106,
+            "comment": "Philippines -",
+            "isActive": false
+        },
+        {
+            "regionId": 2199,
+            "comment": "Indonesia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2108,
+            "comment": "East Timor -",
+            "isActive": false
+        },
+        {
+            "regionId": 2110,
+            "comment": "Papua New Guinea -",
+            "isActive": false
+        },
+        {
+            "regionId": 2111,
+            "comment": "Malaysia - ***",
+            "isActive": false
+        },
+        {
+            "regionId": 2112,
+            "comment": "Brunei -",
+            "isActive": false
+        },
+        {
+            "regionId": 2113,
+            "comment": "Singapore -",
+            "isActive": false
+        },
+        {
+            "regionId": 2299,
+            "comment": "New Zealand -",
+            "isActive": false
+        },
+        {
+            "regionId": 2203,
+            "comment": "Fiji -",
+            "isActive": false
+        },
+        {
+            "regionId": 2205,
+            "comment": null,
+            "isActive": true
+        },
+        {
+            "regionId": 2207,
+            "comment": "Solomon Islands -",
+            "isActive": false
+        },
+        {
+            "regionId": 2208,
+            "comment": "Vanuatu -",
+            "isActive": false
+        },
+        {
+            "regionId": 2211,
+            "comment": "Pacific Isles  -   (no a single region)",
+            "isActive": false
+        },
+        {
+            "regionId": 2212,
+            "comment": "Yap, Micronesia",
+            "isActive": false
+        },
+        {
+            "regionId": 2213,
+            "comment": "Northern Mariana",
+            "isActive": false
+        },
+        {
+            "regionId": 2297,
+            "comment": "Australia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2301,
+            "comment": "Argentina -",
+            "isActive": false
+        },
+        {
+            "regionId": 2302,
+            "comment": "Bolivia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2303,
+            "comment": "Brazil -",
+            "isActive": false
+        },
+        {
+            "regionId": 2304,
+            "comment": "Chile -",
+            "isActive": false
+        },
+        {
+            "regionId": 2305,
+            "comment": "Colombia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2306,
+            "comment": "Ecuador -",
+            "isActive": false
+        },
+        {
+            "regionId": 2307,
+            "comment": "Fr Guiana",
+            "isActive": false
+        },
+        {
+            "regionId": 2308,
+            "comment": "British Guiana (Guyana) -",
+            "isActive": false
+        },
+        {
+            "regionId": 2309,
+            "comment": "Paraguay -",
+            "isActive": false
+        },
+        {
+            "regionId": 2310,
+            "comment": "Peru -",
+            "isActive": false
+        },
+        {
+            "regionId": 2311,
+            "comment": "Suriname -",
+            "isActive": false
+        },
+        {
+            "regionId": 2312,
+            "comment": "Uruguay -",
+            "isActive": false
+        },
+        {
+            "regionId": 2313,
+            "comment": "Venezuela -",
+            "isActive": false
+        },
+        {
+            "regionId": 2314,
+            "comment": "Falklands",
+            "isActive": false
+        },
+        {
+            "regionId": 2414,
+            "comment": "St Pierre & Miq",
+            "isActive": false
+        },
+        {
+            "regionId": 2499,
+            "comment": "Canada -",
+            "isActive": false
+        },
+        {
+            "regionId": 2501,
+            "comment": "Bahamas -",
+            "isActive": false
+        },
+        {
+            "regionId": 2503,
+            "comment": "Dom. Republic -",
+            "isActive": false
+        },
+        {
+            "regionId": 2504,
+            "comment": "Haiti -",
+            "isActive": false
+        },
+        {
+            "regionId": 2505,
+            "comment": "Jamaica -",
+            "isActive": false
+        },
+        {
+            "regionId": 2596,
+            "comment": "Puerto Rico & US Virgin Islands",
+            "isActive": false
+        },
+        {
+            "regionId": 2511,
+            "comment": "Antigua and Barbuda -",
+            "isActive": false
+        },
+        {
+            "regionId": 2513,
+            "comment": "Barbados -",
+            "isActive": false
+        },
+        {
+            "regionId": 2514,
+            "comment": "Dominica -",
+            "isActive": false
+        },
+        {
+            "regionId": 2515,
+            "comment": "Grenada -",
+            "isActive": false
+        },
+        {
+            "regionId": 2519,
+            "comment": "St Kitts & Nevis -",
+            "isActive": false
+        },
+        {
+            "regionId": 2520,
+            "comment": "Saint Lucia -",
+            "isActive": false
+        },
+        {
+            "regionId": 2521,
+            "comment": "Grenadines -",
+            "isActive": false
+        },
+        {
+            "regionId": 2522,
+            "comment": "Trinidad and Tobago -",
+            "isActive": false
+        },
+        {
+            "regionId": 2601,
+            "comment": "Mexico -",
+            "isActive": false
+        },
+        {
+            "regionId": 2602,
+            "comment": "El Salvador -",
+            "isActive": false
+        },
+        {
+            "regionId": 2603,
+            "comment": "Guatemala -",
+            "isActive": false
+        },
+        {
+            "regionId": 2604,
+            "comment": "Honduras -",
+            "isActive": false
+        },
+        {
+            "regionId": 2605,
+            "comment": "Nicaragua -",
+            "isActive": false
+        },
+        {
+            "regionId": 2606,
+            "comment": "Panama -",
+            "isActive": false
+        },
+        {
+            "regionId": 2607,
+            "comment": "Costa Rica -",
+            "isActive": false
+        },
+        {
+            "regionId": 2608,
+            "comment": "Belize -",
+            "isActive": false
+        },
+        {
+            "regionId": 2609,
+            "comment": "PCZ",
+            "isActive": false
+        },
+        {
+            "regionId": 2727,
+            "comment": "Cuba",
+            "isActive": false
+        },
+        {
+            "regionId": 2987,
+            "comment": "WESTERN blue:",
+            "isActive": false
+        },
+        {
+            "regionId": 2986,
+            "comment": "EASTERN blue:",
+            "isActive": false
+        },
+        {
+            "regionId": 2984,
+            "comment": "RED:",
+            "isActive": false
+        },
+        {
+            "regionId": 2983,
+            "comment": "PURPLE:",
+            "isActive": false
+        }
+    ]
+}

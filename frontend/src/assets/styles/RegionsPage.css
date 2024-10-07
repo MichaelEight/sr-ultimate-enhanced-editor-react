@@ -1,0 +1,131 @@
+/* Main container for the page */
+.region-page {
+    padding: 20px;
+    margin-left: 250px; /* Keep space for the sidebar */
+    background-color: #f4f7fa; /* Light background */
+    min-height: 100vh; /* Ensure full page height */
+}
+
+/* Button group styling */
+.region-page .button-group {
+    display: flex;
+    gap: 15px; /* Space between buttons */
+    margin-bottom: 20px;
+}
+
+/* Button styling - similar to ScenarioPage */
+.region-page .button-group button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1); /* Soft shadow */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.region-page .button-group button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.2);
+}
+
+.region-page .button-group button:active {
+    background-color: #004080;
+}
+
+/* Search box styling */
+.region-page .search-box {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label and input */
+}
+
+.region-page .search-box label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.region-page .search-box input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    width: 250px;
+    transition: border-color 0.3s ease;
+}
+
+.region-page .search-box input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Wrapper around the table to enable horizontal scroll */
+.region-page .region-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    border: 1px solid #dee2e6; /* Subtle border around the table */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Soft shadow */
+    background-color: white; /* White background for contrast */
+}
+
+/* Styles for the table */
+.region-page .region-table {
+    width: 100%;
+    min-width: 800px; /* Minimum width to force scrolling if needed */
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+/* Table header and cell styling */
+.region-page .region-table th, 
+.region-page .region-table td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+/* Table header styling */
+.region-page .region-table th {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    font-weight: bold;
+}
+
+/* Alternate row background for readability */
+.region-page .region-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .region-page .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .region-page .search-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .region-page .search-box input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .region-page .button-group button {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+
+    .region-page .search-box label,
+    .region-page .region-table th, 
+    .region-page .region-table td {
+        font-size: 12px;
+    }
+}

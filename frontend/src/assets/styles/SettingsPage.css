@@ -1,0 +1,163 @@
+/* Main container for the page - takes full width minus sidebar */
+.scenario-page-container {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+    width: calc(100% - 250px); /* Full width minus the sidebar */
+    background-color: #f4f7fa; /* Light background */
+    min-height: 100vh; /* Ensure full height */
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+/* Styling for each group section */
+.scenario-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Tighter gap between elements */
+}
+
+/* Section headers */
+.scenario-group h3 {
+    font-size: 18px;
+    color: #007bff;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 5px;
+    width: 100%; /* Header takes full width */
+}
+
+/* Flex container for label and input to keep them together */
+.scenario-group .input-container {
+    display: flex;
+    align-items: center; /* Align input and label vertically */
+    flex-wrap: nowrap; /* Keep label and input on the same line */
+    width: auto;
+    margin-bottom: 10px; /* Space between input containers */
+}
+
+/* Label with a fixed width next to the input */
+.scenario-group label {
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+    margin-right: 10px; /* Space between label and input */
+    white-space: nowrap; /* Prevent label from breaking */
+}
+
+/* Inputs with consistent width */
+.scenario-group input[type="text"],
+.scenario-group input[type="number"],
+.scenario-group select {
+    width: 180px; /* Consistent input width */
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.3s;
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.scenario-group input[type="text"]:focus,
+.scenario-group input[type="number"]:focus,
+.scenario-group select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Checkbox group styling */
+.scenario-group input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.scenario-group .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Checkbox and label aligned */
+.scenario-group input[type="checkbox"] + label {
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Button group styling */
+.button-group {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1); /* Soft shadow for depth */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button-group button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.2);
+}
+
+.button-group button:active {
+    background-color: #004080;
+}
+
+/* Responsiveness for smaller screens */
+@media (max-width: 768px) {
+    .scenario-page-container {
+        margin-left: 0;
+        padding: 10px;
+        width: 100%; /* Full width on small screens */
+    }
+
+    .scenario-group .input-container {
+        flex-direction: column; /* Stack label and input vertically on small screens */
+        width: 100%;
+    }
+
+    .scenario-group label,
+    .scenario-group input,
+    .scenario-group select {
+        width: 100%; /* Inputs take full width on smaller screens */
+        text-align: left;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .scenario-group label,
+    .scenario-group input,
+    .scenario-group select {
+        font-size: 12px;
+    }
+
+    .scenario-group h3 {
+        font-size: 16px;
+    }
+
+    .button-group button {
+        font-size: 12px;
+        padding: 8px 16px;
+    }
+}

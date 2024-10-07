@@ -1,0 +1,139 @@
+/* Main container for the page */
+.resources-page {
+    padding: 20px;
+    margin-left: 250px; /* Space for the sidebar */
+    background-color: #f4f7fa; /* Light background */
+    min-height: 100vh; /* Ensure full height */
+}
+
+/* Section styling for resource, cost, production, and produced-from groups */
+.resources-page .resource-group,
+.resources-page .cost-group,
+.resources-page .production-group,
+.resources-page .produced-from-group {
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    border: 1px solid #dee2e6; /* Soft border */
+}
+
+/* Section headers */
+.resources-page h2, 
+.resources-page h3 {
+    color: #007bff; /* Highlight headers */
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 5px;
+}
+
+/* Inline resource selection */
+.resource-group label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.resource-group input[type="radio"] {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+/* Cost and production inputs */
+/* Adjust width to accommodate 10 digits */
+.cost-group input,
+.production-group input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    width: 150px; /* Set a specific width for cost/production inputs */
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    margin-right: 20px;
+    transition: border-color 0.3s ease;
+}
+
+.cost-group input:focus,
+.production-group input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Labels with compact layout */
+.cost-group label,
+.production-group label {
+    display: inline-block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+    width: auto; /* Allow label width to adjust */
+    margin-right: 10px; /* Space between label and input */
+    white-space: nowrap; /* Prevent labels from breaking into new lines */
+}
+
+/* Grouping labels and inputs together to ensure they stay on the same line */
+.cost-group .input-group,
+.production-group .input-group {
+    display: inline-flex; /* Display input and label inline */
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 20px; /* Increase the space between label and input */
+}
+
+/* Ensure enough space between input groups */
+.cost-group .input-group,
+.production-group .input-group {
+    margin-right: 40px; /* Increased spacing between each input group */
+}
+
+/* Produced From table styling */
+.produced-from-group .produced-from-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Soft shadow */
+}
+
+.produced-from-group .produced-from-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.produced-from-group th, 
+.produced-from-group td {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.produced-from-group th {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    font-weight: bold;
+}
+
+.produced-from-group tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .resource-group label,
+    .cost-group label,
+    .production-group label {
+        display: block; /* Stack labels and inputs on small screens */
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    .cost-group input,
+    .production-group input {
+        width: 100%; /* Full width on smaller screens */
+    }
+}

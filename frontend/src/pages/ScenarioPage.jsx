@@ -1,85 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import useFileUpload from '../hooks/useFileUpload';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import useFileUpload from '../hooks/useProjectManagement';
 import useSocket from '../hooks/useSocket';
 import { useMessage } from '../contexts/MessageContext';
-import '../assets/styles/Home.css'; // Import the CSS file for Home styles
-import debounce from 'lodash/debounce'; // Import debounce from lodash
+import '../assets/styles/ScenarioPage.css';
+import debounce from 'lodash/debounce';
 
-const Home = () => {
+const ScenarioPage = ({ project, setProject }) => {
     const {
         handleFileChangeAndUpload,
         handleExport,
         progress,
         setProgress,
-        setProgressMessage,
-        project,
-        setProject
+        setProgressMessage
     } = useFileUpload();
+
     const [defaultProjects] = useState(["Project1", "Project2", "Project3"]); // Example default projects
 
     useSocket(setProgress, setProgressMessage);
 
-    const handleCreateEmptyProject = () => {
-        setProject({
-            scenario: [''],
-            sav: [''],
-            map: [''],
-            oof: [''],
-            regionincl: [''],
-            unit: ['default'],
-            pplx: ['default'],
-            ttrx: ['default'],
-            terx: ['default'],
-            newsitems: ['default'],
-            prf: ['default'],
-            cvp: [''],
-            wmdata: [''],
-            oob: [''],
-            preCache: [''],
-            postCache: [''],
-            new_project: true  // Indicate that this is a new project
-        });
+    const [useDefaultFiles, setUseDefaultFiles] = useState(true);
+    const [isCacheNameSameAsScenario, setIsCacheNameSameAsScenario] = useState(false);
+    const [isOOFSameAsMapName, setIsOOFSameAsMapName] = useState(false);
 
-        // Make a call to /create_empty_project endpoint
-        fetch('http://localhost:5000/create_empty_project')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('[create_empty_project] Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Success:', data);
-            // Optionally update the state with data from the response
-            // setProject(data.structure);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-    };
+    // Create a ref to store the debounced function
+    const debouncedHandleInputChange = useRef();
 
-    // useEffect(() => {
-    //     console.log("Project state:", project);  // Log the current project state
-    // }, [project]);
-
-    const handleLoadDefaultProject = async (projectName) => {
-        try {
-            const response = await fetch(`http://localhost:5000/load_default_project/${projectName}`);
-            if (response.ok) {
-                const projectData = await response.json();
-                console.log('Loaded default project data:', projectData);  // Log the loaded project data
-                setProject(projectData.scenario_data);
-            } else {
-                console.error("Failed to load project data");
-            }
-        } catch (error) {
-            console.error("Error loading project data:", error);
-        }
-    };
-
-    // Function to handle input changes and send API request to rename the file
-    const handleInputChange = useCallback(
-        debounce((ext, newFileName) => {
+    if (!debouncedHandleInputChange.current) {
+        debouncedHandleInputChange.current = debounce((ext, newFileName) => {
+            console.log(`handleInputChange ${ext} : ${newFileName}`);
             fetch('http://localhost:5000/rename_file', {
                 method: 'POST',
                 headers: {
@@ -87,155 +35,319 @@ const Home = () => {
                 },
                 body: JSON.stringify({ ext, newFileName }),
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('[rename_file] Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('File renamed successfully:', data);
-            })
-            .catch(error => {
-                console.error('There was a problem with the rename operation:', error);
-            });
-        }, 500), // Debounce time: 500ms
-        [] // Only re-create if any dependencies change (none in this case)
-    );
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('[rename_file] Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('File renamed successfully:', data);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the rename operation:', error);
+                });
+        }, 500);
+    }
 
+    const handleInputChange = (ext, newFileName) => {
+        debouncedHandleInputChange.current(ext, newFileName);
+    };
+
+    // Helper function to get the filename
+    const getFilename = (ext) => {
+        if (project && project[ext] && project[ext]['filename']) {
+            return project[ext]['filename'];
+        }
+        return '';
+    };
+
+    // Update handleInputFieldChange to include logging
     const handleInputFieldChange = (ext, newFileName) => {
-        setProject(prevProject => ({ ...prevProject, [ext]: [newFileName] }));
-        handleInputChange(ext, newFileName); // Call the debounced function
+        console.log(`handleInputFieldChange ${ext} : ${newFileName}`);
+        let extsToUpdate = [ext]; // Keep track of which exts need to send API calls
+    
+        setProject((prevProject) => {
+            if (!prevProject) prevProject = {};
+            const prevFileName = prevProject[ext]?.filename || '';
+            if (prevFileName === newFileName) {
+                return prevProject; // No change, return previous state
+            }
+            let updatedProject = {
+                ...prevProject,
+                [ext]: {
+                    ...(prevProject[ext] || {}),
+                    filename: newFileName,
+                },
+            };
+    
+            // Synchronize 'sav' with 'scenario' if checkbox is checked
+            if (ext === 'scenario' && isCacheNameSameAsScenario) {
+                updatedProject = {
+                    ...updatedProject,
+                    'sav': {
+                        ...(prevProject['sav'] || {}),
+                        filename: newFileName,
+                    },
+                };
+                extsToUpdate.push('sav'); // Add 'sav' to the list of extensions to update
+            }
+    
+            // Synchronize 'oof' with 'mapx' if checkbox is checked
+            if (ext === 'mapx' && isOOFSameAsMapName) {
+                updatedProject = {
+                    ...updatedProject,
+                    'oof': {
+                        ...(prevProject['oof'] || {}),
+                        filename: newFileName,
+                    },
+                };
+                extsToUpdate.push('oof'); // Add 'oof' to the list of extensions to update
+            }
+    
+            return updatedProject;
+        });
+    
+        // After state update, make API calls for all affected extensions
+        extsToUpdate.forEach((extension) => {
+            handleInputChange(extension, newFileName);
+        });
     };
-
-    const handleCloseProject = () => {
-        setProject(null);
-    };
-
-    const removeFileExtension = (filename) => {
-        return typeof filename === 'string' ? filename.replace(/\.\w+$/, '') : '';
-    };
+    
 
     return (
-        <div className="home-container">
-            <div className="sidebar">
-                <button onClick={handleCreateEmptyProject}>Create Empty Project</button>
-                <input type="file" onChange={handleFileChangeAndUpload} style={{ display: 'none' }} id="fileInput"/>
-                <button onClick={() => document.getElementById('fileInput').click()}>Upload Project</button>
-                <div className="default-projects">
-                    <h3>Load Default Project</h3>
-                    {defaultProjects.map((project, index) => (
-                        <button key={index} onClick={() => handleLoadDefaultProject(project)}>{project}</button>
-                    ))}
-                </div>
-                <button disabled>Load Last Project</button>
-                <button onClick={handleCloseProject} disabled={!project}>Close Current Project</button>
-                <button onClick={handleExport} disabled={!project}>Export</button>
-            </div>
+        <div className="ScenarioPage-container">
             <div className="content">
-                {project ? (
+                {project && Object.keys(project).length > 0 ? (
                     <div className="project-content">
                         <h2>General Information</h2>
-                        <label>Scenario Name*</label>
-                        <input
-                            type="text"
-                            value={project.scenario && project.scenario[0] ? removeFileExtension(project.scenario[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('scenario', e.target.value)}
-                        />
-                        <label>Cache Name*</label>
-                        <input
-                            type="text"
-                            value={project.sav && project.sav[0] ? removeFileExtension(project.sav[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('sav', e.target.value)}
-                        />
-                        <input type="checkbox" /> Same as Scenario Name
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>Scenario Name*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('scenario')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('scenario', e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Cache Name*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('sav')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('sav', e.target.value)
+                                    }
+                                    disabled={isCacheNameSameAsScenario}
+                                />
+                                <div className="checkbox-under-input">
+                                <input
+                                    type="checkbox"
+                                    id="same-as-scenario"
+                                    checked={isCacheNameSameAsScenario}
+                                    onChange={() => {
+                                        const newValue = !isCacheNameSameAsScenario;
+                                        setIsCacheNameSameAsScenario(newValue);
+                                        if (newValue) {
+                                            const newFileName = getFilename('scenario');
+                                            handleInputFieldChange('sav', newFileName);
+                                        }
+                                    }}
+                                />
+                                    <label htmlFor="same-as-scenario">Same as Scenario Name</label>
+                                </div>
+                            </div>
+                        </div>
 
                         <h2>Map Files</h2>
-                        <label>Map Name*</label>
-                        <input
-                            type="text"
-                            value={project.mapx && project.mapx[0] ? removeFileExtension(project.mapx[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('mapx', e.target.value)}
-                        />
-                        <input type="checkbox" /> Create New Map
-                        <label>OOF*</label>
-                        <input 
-                            type="text"
-                            value={project.oof && project.oof[0] ? removeFileExtension(project.oof[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('oof', e.target.value)}
-                        />
-                        <input type="checkbox" /> Same as Map Name
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>Map Name*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('mapx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('mapx', e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div className="input-group">
+                                <label>OOF*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('oof')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('oof', e.target.value)
+                                    }
+                                    disabled={isOOFSameAsMapName}
+                                />
+                                <div className="checkbox-under-input">
+                                    <input
+                                        type="checkbox"
+                                        id="same-as-map"
+                                        checked={isOOFSameAsMapName}
+                                        onChange={() => {
+                                            const newValue = !isOOFSameAsMapName;
+                                            setIsOOFSameAsMapName(newValue);
+                                            if (newValue) {
+                                                const newFileName = getFilename('mapx');
+                                                handleInputFieldChange('oof', newFileName);
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor="same-as-map">Same as Map Name</label>
+                                </div>
+                            </div>
+                        </div>
 
                         <h2>Non-editable Data Files</h2>
-                        <input type="checkbox" /> Use Default Files
-                        <label>UNIT*</label>
-                        <input 
-                            type="text"
-                            value={project.unit && project.unit[0] ? removeFileExtension(project.unit[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('unit', e.target.value)}
-                            />
-                        <label>PPLX*</label>
-                        <input 
-                            type="text"
-                            value={project.pplx && project.pplx[0] ? removeFileExtension(project.pplx[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('pplx', e.target.value)}
-                            />
-                        <label>TTRX*</label>
-                        <input 
-                            type="text"
-                            value={project.ttrx && project.ttrx[0] ? removeFileExtension(project.ttrx[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('ttrx', e.target.value)}
-                            />
-                        <label>TERX*</label>
-                        <input 
-                            type="text"
-                            value={project.terx && project.terx[0] ? removeFileExtension(project.terx[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('terx', e.target.value)}
-                            />
-                        <label>NEWSITEMS*</label>
-                        <input 
-                            type="text"
-                            value={project.newsitems && project.newsitems[0] ? removeFileExtension(project.newsitems[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('newsitems', e.target.value)}
-                            />
-                        <label>PROFILE*</label>
-                        <input 
-                            type="text"
-                            value={project.prf && project.prf[0] ? removeFileExtension(project.prf[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('prf', e.target.value)}
-                            />
+                        <div className="checkbox-group">
+                        <input
+                            type="checkbox"
+                            id="use-default-files"
+                            checked={useDefaultFiles}
+                            onChange={() => {
+                                const newValue = !useDefaultFiles;
+                                setUseDefaultFiles(newValue);
+                                if (newValue) {
+                                    const nonEditableExtensions = ['unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf'];
+                                    nonEditableExtensions.forEach((ext) => {
+                                        handleInputFieldChange(ext, 'DEFAULT');
+                                    });
+                                }
+                            }}
+                        />
+
+                            <label htmlFor="use-default-files">Use Default Files</label>
+                        </div>
+
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>UNIT*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('unit')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('unit', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>PPLX*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('pplx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('pplx', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>TTRX*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('ttrx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('ttrx', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>TERX*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('terx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('terx', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>NEWSITEMS*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('newsitems')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('newsitems', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>PROFILE*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('prf')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('prf', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                />
+                            </div>
+                        </div>
 
                         <h2>Editable Data Files</h2>
-                        <label>CVP*</label>
-                        <input 
-                            type="text"
-                            value={project.cvp && project.cvp[0] ? removeFileExtension(project.cvp[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('cvp', e.target.value)}
-                            />
-                        <label>WMData*</label>
-                        <input 
-                            type="text"
-                            value={project.wmdata && project.wmdata[0] ? removeFileExtension(project.wmdata[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('wmdata', e.target.value)}
-                            />
-                        <label>OOB</label>
-                        <input 
-                            type="text"
-                            value={project.oob && project.oob[0] ? removeFileExtension(project.oob[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('oob', e.target.value)}
-                            />
-                        <label>Pre-Cache</label>
-                        <input 
-                            type="text"
-                            value={project.preCache && project.preCache[0] ? removeFileExtension(project.preCache[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('preCache', e.target.value)}
-                            />
-                        <label>Post-Cache</label>
-                        <input 
-                            type="text"
-                            value={project.postCache && project.postCache[0] ? removeFileExtension(project.postCache[0]) : ''} 
-                            onChange={(e) => handleInputFieldChange('postCache', e.target.value)}
-                            />
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>CVP*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('cvp')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('cvp', e.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div className="input-group">
+                                <label>WMData*</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('wmdata')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('wmdata', e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>OOB</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('oob')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('oob', e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>Pre-Cache</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('preCache')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('preCache', e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>Post-Cache</label>
+                                <input
+                                    type="text"
+                                    value={getFilename('postCache')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('postCache', e.target.value)
+                                    }
+                                />
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="empty-content">
@@ -247,4 +359,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default ScenarioPage;

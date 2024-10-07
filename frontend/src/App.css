@@ -1,38 +1,58 @@
-.App {
-  text-align: center;
+/* src/assets/styles/App.css */
+
+/* Global resets */
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  height: 100%;
+  overflow-x: hidden;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Flexbox layout for the entire screen */
+main {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  min-height: 100vh;
+  padding-top: 60px; /* Account for navbar height */
+  padding-bottom: 20px; /* Account for footer height or bottom elements */
+}
+
+/* Content styling */
+.content {
+  flex: 1;
+  margin-left: 250px;  /* Make space for the sidebar */
+  padding: 20px;
+  overflow: auto;
+}
+
+/* Navbar styling */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;  /* Ensure height matches the top padding */
+  background-color: #333;
   color: white;
+  z-index: 1000;
 }
 
-.App-link {
-  color: #61dafb;
+/* Ensure full-height layout for the body and html */
+html, body {
+  height: 100%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Progress bar styling (if needed) */
+.progress-bar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.content {
+  flex: 1;
+  margin-left: 250px; /* Make space for the sidebar */
+  padding: 20px;
+  overflow: auto;
 }
