@@ -163,13 +163,11 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             .then(response => response.json())
             .then(data => {
                 console.log('Add unit to multiple regions response:', data);
-                alert(data.message);
                 // Optionally, refresh the current region's units
                 fetchOrbatUnits(regionID);
             })
             .catch(error => {
                 console.error('Error adding unit to multiple regions:', error);
-                alert(`Error adding unit to multiple regions: ${error}`);
             });
     };
 
@@ -212,28 +210,39 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             <h2>Orbat</h2>
 
             {/* Group: Regions */}
-            <div className="regions-group">
+            <div className="orbat-group regions-group">
                 <h3>Regions</h3>
-                <label>ID:</label>
-                <input
-                    type="number"
-                    value={regionID}
-                    onChange={(e) => setRegionID(e.target.value)}
-                    min="0"
-                    max="99999"
-                />
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-region-id">ID:</label>
+                    <input
+                        type="number"
+                        id="orbat-region-id"
+                        value={regionID}
+                        onChange={(e) => setRegionID(e.target.value)}
+                        min="0"
+                        max="99999"
+                        className="orbat-input"
+                    />
+                </div>
 
-                <label>Name:</label>
-                <select value={regionName} onChange={(e) => setRegionName(e.target.value)}>
-                    {regions.map(region => (
-                        <option key={region.ID} value={region.Properties.regionname}>
-                            {region.Properties.regionname}
-                        </option>
-                    ))}
-                </select>
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-region-name">Name:</label>
+                    <select
+                        id="orbat-region-name"
+                        value={regionName}
+                        onChange={(e) => setRegionName(e.target.value)}
+                        className="orbat-select"
+                    >
+                        {regions.map(region => (
+                            <option key={region.ID} value={region.Properties.regionname}>
+                                {region.Properties.regionname}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-                <div className="table-wrapper">
-                    <table className="region-table">
+                <div className="orbat-table-wrapper">
+                    <table className="orbat-region-table">
                         <thead>
                             <tr>
                                 {/* <th>Region ID</th> */}
@@ -264,7 +273,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="21">Loading units...</td>
+                                    <td colSpan="22">Loading units...</td>
                                 </tr>
                             ) : orbatUnits.length > 0 ? (
                                 orbatUnits.map((unit, index) => (
@@ -276,6 +285,9 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                                     type="number"
                                                     value={unit[field] !== undefined ? unit[field] : ''}
                                                     onChange={(e) => handleUnitChange(index, field, e.target.value !== '' ? parseInt(e.target.value) : '')}
+                                                    className="orbat-table-input"
+                                                    min="0"
+                                                    max="99999"
                                                 />
                                             </td>
                                         ))}
@@ -285,6 +297,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                                     type="text"
                                                     value={unit[field] !== undefined ? unit[field] : ''}
                                                     onChange={(e) => handleUnitChange(index, field, e.target.value)}
+                                                    className="orbat-table-input"
                                                 />
                                             </td>
                                         ))}
@@ -292,7 +305,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="21">No units found for this region.</td>
+                                    <td colSpan="22">No units found for this region.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -301,86 +314,116 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
             </div>
 
             {/* Group: Settings */}
-            <div className="settings-group">
+            <div className="orbat-group settings-group">
                 <h3>Settings</h3>
-                <label>Branch:</label>
-                <select name="branch" value={settings.branch} onChange={handleSettingsChange}>
-                    <option value="All">All</option>
-                    <option value="Land">Land</option>
-                    <option value="Air">Air</option>
-                    <option value="Naval">Naval</option>
-                </select>
-
-                <label>Class:</label>
-                <select name="classType" value={settings.classType} onChange={handleSettingsChange}>
-                    <option value="Infantry">Infantry</option>
-                    <option value="Armor">Armor</option>
-                    <option value="Artillery">Artillery</option>
-                    {/* Add more classes as needed */}
-                </select>
-
-                <label>
-                    <input
-                        type="checkbox"
-                        name="showKnownDesigns"
-                        checked={settings.showKnownDesigns}
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-branch">Branch:</label>
+                    <select
+                        id="orbat-branch"
+                        name="branch"
+                        value={settings.branch}
                         onChange={handleSettingsChange}
-                    />
-                    Show known designs
-                </label>
+                        className="orbat-select"
+                    >
+                        <option value="All">All</option>
+                        <option value="Land">Land</option>
+                        <option value="Air">Air</option>
+                        <option value="Naval">Naval</option>
+                    </select>
+                </div>
 
-                <label>
-                    <input
-                        type="checkbox"
-                        name="showRegionalUnits"
-                        checked={settings.showRegionalUnits}
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-class">Class:</label>
+                    <select
+                        id="orbat-class"
+                        name="classType"
+                        value={settings.classType}
                         onChange={handleSettingsChange}
-                    />
-                    Show regional units
-                </label>
+                        className="orbat-select"
+                    >
+                        <option value="Infantry">Infantry</option>
+                        <option value="Armor">Armor</option>
+                        <option value="Artillery">Artillery</option>
+                        {/* Add more classes as needed */}
+                    </select>
+                </div>
 
-                <label>
+                <div className="orbat-checkbox-container">
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="showKnownDesigns"
+                            checked={settings.showKnownDesigns}
+                            onChange={handleSettingsChange}
+                        />
+                        Show known designs
+                    </label>
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="showRegionalUnits"
+                            checked={settings.showRegionalUnits}
+                            onChange={handleSettingsChange}
+                        />
+                        Show regional units
+                    </label>
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="addToAllRegions"
+                            checked={settings.addToAllRegions}
+                            onChange={handleSettingsChange}
+                        />
+                        Add to all regions
+                    </label>
+                </div>
+
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-add-by">Add by:</label>
                     <input
-                        type="checkbox"
-                        name="addToAllRegions"
-                        checked={settings.addToAllRegions}
+                        type="number"
+                        id="orbat-add-by"
+                        name="addBy"
+                        value={settings.addBy}
                         onChange={handleSettingsChange}
+                        min="1"
+                        max="9999"
+                        className="orbat-input"
                     />
-                    Add to all regions
-                </label>
-
-                <label>Add by:</label>
-                <input
-                    type="number"
-                    name="addBy"
-                    value={settings.addBy}
-                    onChange={handleSettingsChange}
-                    min="1"
-                    max="9999"
-                />
+                </div>
             </div>
 
             {/* Group: Units */}
-            <div className="units-group">
+            <div className="orbat-group units-group">
                 <h3>Units</h3>
-                <label>ID:</label>
-                <input
-                    type="number"
-                    min="0"
-                    max="99999"
-                    value={unitIDFilter}
-                    onChange={handleUnitIDFilterChange}
-                />
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-unit-id-filter">ID:</label>
+                    <input
+                        type="number"
+                        id="orbat-unit-id-filter"
+                        min="0"
+                        max="99999"
+                        value={unitIDFilter}
+                        onChange={handleUnitIDFilterChange}
+                        className="orbat-input"
+                    />
+                </div>
 
-                <label>Name:</label>
-                <input
-                    type="text"
-                    value={unitNameFilter}
-                    onChange={handleUnitNameFilterChange}
-                />
+                <div className="orbat-input-container">
+                    <label htmlFor="orbat-unit-name-filter">Name:</label>
+                    <input
+                        type="text"
+                        id="orbat-unit-name-filter"
+                        value={unitNameFilter}
+                        onChange={handleUnitNameFilterChange}
+                        className="orbat-input"
+                    />
+                </div>
 
-                <div className="table-wrapper">
-                    <table className="units-table">
+                <div className="orbat-table-wrapper">
+                    <table className="orbat-units-table">
                         <thead>
                             <tr>
                                 <th>Add</th>
@@ -394,7 +437,10 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
                             {filteredUnits.map((unit, index) => (
                                 <tr key={index}>
                                     <td>
-                                        <button onClick={() => handleAddClick(unit)}>
+                                        <button
+                                            onClick={() => handleAddClick(unit)}
+                                            className="orbat-add-button"
+                                        >
                                             {settings.addToAllRegions ? 'Add to All' : 'Add'}
                                         </button>
                                     </td>
