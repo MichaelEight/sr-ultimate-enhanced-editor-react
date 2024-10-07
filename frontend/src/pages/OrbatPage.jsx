@@ -227,8 +227,6 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
 
     return (
         <div className="orbat-page">
-            <h2>Orbat</h2>
-
             {/* Group: Regions */}
             <div className="orbat-group regions-group">
                 <h3>Regions</h3>
