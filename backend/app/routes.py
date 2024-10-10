@@ -14,7 +14,7 @@ from .config import Config
 from .services.project_services import process_file_for_export
 from .validation.validators import check_file_existence
 
-from .utils.file_utils import create_zip_archive, extract_archive, create_zip_archive_with_scenario
+from .utils.file_utils import extract_archive, create_zip_archive_with_scenario
 
 from .importers.scenario_importer import import_scenario_file
 from .exporters.scenario_exporter import export_scenario_file

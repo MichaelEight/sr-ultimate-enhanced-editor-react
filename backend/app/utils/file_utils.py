@@ -42,33 +42,6 @@ def copy_file(source: Path, destination: Path) -> bool:
         add_to_log(f"Error copying file from {source} to {destination}: {e}", LogLevel.ERROR)
         return False
 
-
-def create_zip_archive(directory_path):
-    """
-    Create a zip archive of the specified directory and return it as an in-memory file-like object.
-
-    Args:
-        directory_path (str or Path): The path to the directory to zip.
-
-    Returns:
-        BytesIO: A file-like object containing the zip archive.
-    """
-    try:
-        directory_path = Path(directory_path)
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for file_path in directory_path.rglob('*'):
-                zip_file.write(
-                    file_path,
-                    arcname=file_path.relative_to(directory_path.parent)
-                )
-        zip_buffer.seek(0)
-        add_to_log(f"Created zip archive for directory: {directory_path}", LogLevel.INFO)
-        return zip_buffer
-    except Exception as e:
-        add_to_log(f"Error creating zip archive: {e}", LogLevel.ERROR)
-        raise
-
 def create_zip_archive_with_scenario(project_dir, scenario_file_path):
     """
     Create a zip archive containing the scenario file and the project directory.
