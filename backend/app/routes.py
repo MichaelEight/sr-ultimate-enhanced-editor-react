@@ -93,6 +93,18 @@ def create_empty_project_route():
         add_to_log(f"Error creating empty project: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
 
+@main_blueprint.route('/close_project', methods=['POST'])
+def close_project():
+    try:
+        add_to_log("=== Starting: Closing Project ===", LogLevel.INFO)
+        project.create_empty()
+        add_to_log("Project data reset to default state", LogLevel.INFO)
+        return jsonify({'message': 'Project closed successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error closing project: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
+
 @main_blueprint.route('/load_data_from_file', methods=['POST'])
 def load_data_from_file_route():
     try:

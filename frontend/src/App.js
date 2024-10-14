@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -68,11 +68,19 @@ const AppContent = ({
     progressMessage,
 }) => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState(location.pathname);
 
     useEffect(() => {
         setActiveTab(location.pathname);
     }, [location]);
+
+    useEffect(() => {
+        if (!project) {
+            setActiveTab('/'); // Reset active tab to ScenarioPage
+            navigate('/');     // Navigate to ScenarioPage
+        }
+    }, [project, navigate]);
 
     return (
         <>

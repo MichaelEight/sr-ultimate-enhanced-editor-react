@@ -113,7 +113,16 @@ const ScenarioPage = ({ project, setProject }) => {
             handleInputChange(extension, newFileName);
         });
     };
-    
+
+    useEffect(() => {
+        if (!project) {
+            // Reset state when project is closed
+            setUseDefaultFiles(true);
+            setIsCacheNameSameAsScenario(false);
+            setIsOOFSameAsMapName(false);
+            // Reset any other state variables as needed
+        }
+    }, [project]);
 
     return (
         <div className="ScenarioPage-container">

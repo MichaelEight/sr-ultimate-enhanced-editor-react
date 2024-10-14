@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { uploadFile } from '../services/api';
 // import { useMessage } from '../contexts/MessageContext';
+import { closeProject } from '../services/api.js';
+
 
 const useProjectManagement = () => {
     // const { addMessage, setProgress, setProgressMessage } = useMessage(); // Use context safely
@@ -62,8 +64,22 @@ const useProjectManagement = () => {
     };
 
     // Handle closing a project
-    const handleCloseProject = () => {
-        setProject(null);
+    const handleCloseProject = async () => {
+        try {
+            // Call backend API to close the project
+            await closeProject();
+
+            // Reset project state
+            setProject(null);
+            setFile(null);
+            setValidationResults(null);
+
+            // Optionally, reset other states or cached data here
+            console.log('Project closed successfully.');
+        } catch (error) {
+            console.error('Error closing project:', error);
+            // Handle error (e.g., display a message to the user)
+        }
     };
 
     // Handle exporting the project

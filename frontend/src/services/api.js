@@ -32,3 +32,14 @@ export const exportFile = async (scenarioName, projectFileStructure) => {
 
     return await response.blob();
 };
+
+export const closeProject = async () => {
+    const response = await fetch('http://localhost:5000/close_project', {
+        method: 'POST',
+    });
+
+    if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to close project');
+    }
+};
