@@ -76,7 +76,7 @@ const AppContent = ({
 
     return (
         <>
-            <Navbar />
+            <Navbar project={project} /> {/* Pass 'project' prop to Navbar */}
             <Sidebar
                 defaultProjects={defaultProjects}
                 project={project}
@@ -89,12 +89,16 @@ const AppContent = ({
             <main>
                 <Routes>
                     <Route path="/" element={<ScenarioPage activeTab={activeTab} project={project} setProject={setProject} />} />
-                    <Route path="/settings" element={<SettingsPage activeTab={activeTab} project={project} setProject={setProject} />} />
-                    <Route path="/regions" element={<RegionsPage activeTab={activeTab} project={project} setProject={setProject} />} />
-                    <Route path="/theaters" element={<TheatersPage activeTab={activeTab} />} />
-                    <Route path="/resources" element={<ResourcesPage activeTab={activeTab} />} />
-                    <Route path="/worldmarket" element={<WorldMarketPage activeTab={activeTab} />} />
-                    <Route path="/orbat" element={<OrbatPage activeTab={activeTab} />} />
+                    {project && ( // Conditionally render other routes only if a project is loaded
+                        <>
+                            <Route path="/settings" element={<SettingsPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                            <Route path="/regions" element={<RegionsPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                            <Route path="/theaters" element={<TheatersPage activeTab={activeTab} />} />
+                            <Route path="/resources" element={<ResourcesPage activeTab={activeTab} />} />
+                            <Route path="/worldmarket" element={<WorldMarketPage activeTab={activeTab} />} />
+                            <Route path="/orbat" element={<OrbatPage activeTab={activeTab} />} />
+                        </>
+                    )}
                 </Routes>
             </main>
             <ProgressBar progress={progress}/>
