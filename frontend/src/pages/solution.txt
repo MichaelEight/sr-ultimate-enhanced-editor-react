@@ -1,0 +1,888 @@
+To implement form validation and control the "Export Project" button in your application, you'll need to ensure that the `Sidebar` component is aware of the form's validity status. Here's a step-by-step guide to achieve this:
+
+1. **Lift the `isFormValid` State to a Shared Context**
+2. **Update `useProjectManagement.js` to Manage Form Validity**
+3. **Modify `ScenarioPage.jsx` to Update Form Validity**
+4. **Update `App.js` to Pass Form Validity to `Sidebar.jsx`**
+5. **Enhance `Sidebar.jsx` to Disable Export Button with Tooltip**
+
+Let's go through each step in detail.
+
+---
+
+## 1. Lift the `isFormValid` State to a Shared Context
+
+To allow multiple components (`ScenarioPage` and `Sidebar`) to access and modify the form's validity, we'll use React's Context API. This approach avoids prop drilling and provides a clean way to share state across components.
+
+### Create a Form Validation Context
+
+**Create a new context file:**
+
+```javascript
+// src/contexts/FormValidationContext.js
+import React, { createContext, useState } from 'react';
+
+export const FormValidationContext = createContext();
+
+export const FormValidationProvider = ({ children }) => {
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    return (
+        <FormValidationContext.Provider value={{ isFormValid, setIsFormValid }}>
+            {children}
+        </FormValidationContext.Provider>
+    );
+};
+```
+
+---
+
+## 2. Update `useProjectManagement.js` to Manage Form Validity
+
+We'll integrate the form validation context within the `useProjectManagement` hook to maintain coherence in state management.
+
+### Modify `useProjectManagement.js`
+
+**Assuming your `useProjectManagement` hook looks something like this, update it as follows:**
+
+```javascript
+// src/hooks/useProjectManagement.js
+import { useState, useContext } from 'react';
+import { FormValidationContext } from '../contexts/FormValidationContext';
+
+const useProjectManagement = () => {
+    const [file, setFile] = useState(null);
+    const [validationResults, setValidationResults] = useState(null);
+    const [project, setProject] = useState(null);
+    const { isFormValid, setIsFormValid } = useContext(FormValidationContext);
+
+    // Existing functions...
+
+    // Handle closing a project
+    const handleCloseProject = async () => {
+        try {
+            // Call backend API to close the project
+            await closeProject();
+
+            // Reset project state
+            setProject(null);
+            setFile(null);
+            setValidationResults(null);
+            setIsFormValid(false); // Reset form validity
+
+            console.log('Project closed successfully.');
+        } catch (error) {
+            console.error('Error closing project:', error);
+            // Handle error (e.g., display a message to the user)
+        }
+    };
+
+    return {
+        file,
+        validationResults,
+        project,
+        setProject,
+        handleFileChangeAndUpload,
+        handleCreateEmptyProject,
+        handleLoadDefaultProject,
+        handleCloseProject,
+        handleExport,
+        isFormValid,
+        setIsFormValid,
+    };
+};
+
+export default useProjectManagement;
+```
+
+**Note:** Ensure that the `closeProject` function is correctly implemented in your API service (as previously discussed).
+
+---
+
+## 3. Modify `ScenarioPage.jsx` to Update Form Validity
+
+`ScenarioPage` needs to validate the form fields and update the `isFormValid` state accordingly.
+
+### Update `ScenarioPage.jsx`
+
+```javascript
+// src/pages/ScenarioPage.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import useProjectManagement from '../hooks/useProjectManagement';
+import useSocket from '../hooks/useSocket';
+import '../assets/styles/ScenarioPage.css';
+import debounce from 'lodash/debounce';
+
+const ScenarioPage = ({ project, setProject }) => {
+    const {
+        handleFileChangeAndUpload,
+        handleExport,
+        progress,
+        setProgress,
+        isFormValid,
+        setIsFormValid
+    } = useProjectManagement();
+
+    useSocket(setProgress);
+
+    const [useDefaultFiles, setUseDefaultFiles] = useState(true);
+    const [isCacheNameSameAsScenario, setIsCacheNameSameAsScenario] = useState(false);
+    const [isOOFSameAsMapName, setIsOOFSameAsMapName] = useState(false);
+    const [errors, setErrors] = useState({}); // State to track validation errors
+
+    // Create a ref to store the debounced function
+    const debouncedHandleInputChange = useRef();
+
+    if (!debouncedHandleInputChange.current) {
+        debouncedHandleInputChange.current = debounce((ext, newFileName) => {
+            console.log(`handleInputChange ${ext} : ${newFileName}`);
+            fetch('http://localhost:5000/rename_file', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ext, newFileName }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('[rename_file] Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('File renamed successfully:', data);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the rename operation:', error);
+                });
+        }, 500);
+    }
+
+    const handleInputChange = (ext, newFileName) => {
+        debouncedHandleInputChange.current(ext, newFileName);
+    };
+
+    // Helper function to get the filename
+    const getFilename = (ext) => {
+        if (project && project[ext] && project[ext]['filename']) {
+            return project[ext]['filename'];
+        }
+        return '';
+    };
+
+    // Update handleInputFieldChange to include logging and validation
+    const handleInputFieldChange = (ext, newFileName) => {
+        console.log(`handleInputFieldChange ${ext} : ${newFileName}`);
+        let extsToUpdate = [ext]; // Keep track of which exts need to send API calls
+
+        // Validate the newFileName
+        if (newFileName.trim() === '') {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                [ext]: 'This field is required.'
+            }));
+        } else {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                [ext]: ''
+            }));
+        }
+
+        setProject((prevProject) => {
+            if (!prevProject) prevProject = {};
+            const prevFileName = prevProject[ext]?.filename || '';
+            if (prevFileName === newFileName) {
+                return prevProject; // No change, return previous state
+            }
+            let updatedProject = {
+                ...prevProject,
+                [ext]: {
+                    ...(prevProject[ext] || {}),
+                    filename: newFileName,
+                },
+            };
+
+            // Synchronize 'sav' with 'scenario' if checkbox is checked
+            if (ext === 'scenario' && isCacheNameSameAsScenario) {
+                updatedProject = {
+                    ...updatedProject,
+                    'sav': {
+                        ...(prevProject['sav'] || {}),
+                        filename: newFileName,
+                    },
+                };
+                extsToUpdate.push('sav'); // Add 'sav' to the list of extensions to update
+            }
+
+            // Synchronize 'oof' with 'mapx' if checkbox is checked
+            if (ext === 'mapx' && isOOFSameAsMapName) {
+                updatedProject = {
+                    ...updatedProject,
+                    'oof': {
+                        ...(prevProject['oof'] || {}),
+                        filename: newFileName,
+                    },
+                };
+                extsToUpdate.push('oof'); // Add 'oof' to the list of extensions to update
+            }
+
+            return updatedProject;
+        });
+
+        // After state update, make API calls for all affected extensions if no validation errors
+        extsToUpdate.forEach((extension) => {
+            if (getFilename(extension).trim() !== '') {
+                handleInputChange(extension, newFileName);
+            }
+        });
+    };
+
+    useEffect(() => {
+        if (!project) {
+            // Reset state when project is closed
+            setUseDefaultFiles(true);
+            setIsCacheNameSameAsScenario(false);
+            setIsOOFSameAsMapName(false);
+            setErrors({});
+            setIsFormValid(false);
+            // Reset any other state variables as needed
+        }
+    }, [project, setIsFormValid]);
+
+    // Function to check if all required fields are filled
+    const validateForm = () => {
+        const requiredFields = [
+            'scenario',
+            'sav',
+            'mapx',
+            'oof',
+            'unit',
+            'pplx',
+            'ttrx',
+            'terx',
+            'newsitems',
+            'prf',
+            'cvp',
+            'wmdata'
+        ];
+
+        let valid = true;
+        requiredFields.forEach(field => {
+            const value = getFilename(field);
+            if (value.trim() === '') {
+                valid = false;
+                setErrors(prevErrors => ({
+                    ...prevErrors,
+                    [field]: 'This field is required.'
+                }));
+            } else {
+                setErrors(prevErrors => ({
+                    ...prevErrors,
+                    [field]: ''
+                }));
+            }
+        });
+
+        setIsFormValid(valid);
+    };
+
+    // Validate form whenever project or errors change
+    useEffect(() => {
+        if (project) {
+            validateForm();
+        }
+    }, [project, errors]);
+
+    return (
+        <div className="ScenarioPage-container">
+            <div className="content">
+                {project && Object.keys(project).length > 0 ? (
+                    <div className="project-content">
+                        <h2>General Information</h2>
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>Scenario Name<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('scenario')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('scenario', e.target.value)
+                                    }
+                                    required
+                                    className={errors.scenario ? 'input-error' : ''}
+                                />
+                                {errors.scenario && <span className="error-text">{errors.scenario}</span>}
+                            </div>
+
+                            <div className="input-group">
+                                <label>Cache Name<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('sav')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('sav', e.target.value)
+                                    }
+                                    disabled={isCacheNameSameAsScenario}
+                                    required
+                                    className={errors.sav ? 'input-error' : ''}
+                                />
+                                {errors.sav && <span className="error-text">{errors.sav}</span>}
+                                <div className="checkbox-under-input">
+                                    <input
+                                        type="checkbox"
+                                        id="same-as-scenario"
+                                        checked={isCacheNameSameAsScenario}
+                                        onChange={() => {
+                                            const newValue = !isCacheNameSameAsScenario;
+                                            setIsCacheNameSameAsScenario(newValue);
+                                            if (newValue) {
+                                                const newFileName = getFilename('scenario');
+                                                handleInputFieldChange('sav', newFileName);
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor="same-as-scenario">Same as Scenario Name</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Map Files</h2>
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>Map Name<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('mapx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('mapx', e.target.value)
+                                    }
+                                    required
+                                    className={errors.mapx ? 'input-error' : ''}
+                                />
+                                {errors.mapx && <span className="error-text">{errors.mapx}</span>}
+                            </div>
+
+                            <div className="input-group">
+                                <label>OOF<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('oof')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('oof', e.target.value)
+                                    }
+                                    disabled={isOOFSameAsMapName}
+                                    required
+                                    className={errors.oof ? 'input-error' : ''}
+                                />
+                                {errors.oof && <span className="error-text">{errors.oof}</span>}
+                                <div className="checkbox-under-input">
+                                    <input
+                                        type="checkbox"
+                                        id="same-as-map"
+                                        checked={isOOFSameAsMapName}
+                                        onChange={() => {
+                                            const newValue = !isOOFSameAsMapName;
+                                            setIsOOFSameAsMapName(newValue);
+                                            if (newValue) {
+                                                const newFileName = getFilename('mapx');
+                                                handleInputFieldChange('oof', newFileName);
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor="same-as-map">Same as Map Name</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Non-editable Data Files</h2>
+                        <div className="checkbox-group">
+                            <input
+                                type="checkbox"
+                                id="use-default-files"
+                                checked={useDefaultFiles}
+                                onChange={() => {
+                                    const newValue = !useDefaultFiles;
+                                    setUseDefaultFiles(newValue);
+                                    if (newValue) {
+                                        const nonEditableExtensions = ['unit', 'pplx', 'ttrx', 'terx', 'newsitems', 'prf'];
+                                        nonEditableExtensions.forEach((ext) => {
+                                            handleInputFieldChange(ext, 'DEFAULT');
+                                        });
+                                    }
+                                }}
+                            />
+                            <label htmlFor="use-default-files">Use Default Files</label>
+                        </div>
+
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>UNIT<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('unit')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('unit', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                    required
+                                    className={errors.unit ? 'input-error' : ''}
+                                />
+                                {errors.unit && <span className="error-text">{errors.unit}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>PPLX<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('pplx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('pplx', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                    required
+                                    className={errors.pplx ? 'input-error' : ''}
+                                />
+                                {errors.pplx && <span className="error-text">{errors.pplx}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>TTRX<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('ttrx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('ttrx', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                    required
+                                    className={errors.ttrx ? 'input-error' : ''}
+                                />
+                                {errors.ttrx && <span className="error-text">{errors.ttrx}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>TERX<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('terx')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('terx', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                    required
+                                    className={errors.terx ? 'input-error' : ''}
+                                />
+                                {errors.terx && <span className="error-text">{errors.terx}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>NEWSITEMS<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('newsitems')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('newsitems', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                    required
+                                    className={errors.newsitems ? 'input-error' : ''}
+                                />
+                                {errors.newsitems && <span className="error-text">{errors.newsitems}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>PROFILE<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('prf')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('prf', e.target.value)
+                                    }
+                                    disabled={useDefaultFiles}
+                                    required
+                                    className={errors.prf ? 'input-error' : ''}
+                                />
+                                {errors.prf && <span className="error-text">{errors.prf}</span>}
+                            </div>
+                        </div>
+
+                        <h2>Editable Data Files</h2>
+                        <div className="form-section">
+                            <div className="input-group">
+                                <label>CVP<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('cvp')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('cvp', e.target.value)
+                                    }
+                                    required
+                                    className={errors.cvp ? 'input-error' : ''}
+                                />
+                                {errors.cvp && <span className="error-text">{errors.cvp}</span>}
+                            </div>
+
+                            <div className="input-group">
+                                <label>WMData<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('wmdata')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('wmdata', e.target.value)
+                                    }
+                                    required
+                                    className={errors.wmdata ? 'input-error' : ''}
+                                />
+                                {errors.wmdata && <span className="error-text">{errors.wmdata}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>OOB<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('oob')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('oob', e.target.value)
+                                    }
+                                    disabled={isOOFSameAsMapName}
+                                    required
+                                    className={errors.oof ? 'input-error' : ''}
+                                />
+                                {errors.oof && <span className="error-text">{errors.oof}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>Pre-Cache<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('preCache')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('preCache', e.target.value)
+                                    }
+                                    required
+                                    className={errors.preCache ? 'input-error' : ''}
+                                />
+                                {errors.preCache && <span className="error-text">{errors.preCache}</span>}
+                            </div>
+                            <div className="input-group">
+                                <label>Post-Cache<span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    value={getFilename('postCache')}
+                                    onChange={(e) =>
+                                        handleInputFieldChange('postCache', e.target.value)
+                                    }
+                                    required
+                                    className={errors.postCache ? 'input-error' : ''}
+                                />
+                                {errors.postCache && <span className="error-text">{errors.postCache}</span>}
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="empty-content">
+                        <p>No project loaded. Please create or load a project.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default ScenarioPage;
+```
+
+### Explanation of Changes
+
+1. **Importing and Using Form Validation Context:**
+   - Imported `useContext` and `FormValidationContext` to manage form validity.
+   - Utilized `isFormValid` and `setIsFormValid` from the context.
+
+2. **Validation Logic:**
+   - Added a `validateForm` function that checks if all required fields are non-empty.
+   - Updated `errors` state to reflect validation errors.
+   - Utilized `useEffect` to re-validate the form whenever `project` or `errors` change.
+
+3. **Conditional API Calls:**
+   - Ensured that API calls to rename files are only made if the new file name is not empty.
+
+4. **Error Display:**
+   - Displayed error messages below each required input field when validation fails.
+   - Added CSS classes (`input-error` and `error-text`) for styling purposes.
+
+5. **Resetting State on Project Closure:**
+   - Reset form-related states (`useDefaultFiles`, `isCacheNameSameAsScenario`, `isOOFSameAsMapName`, `errors`, and `isFormValid`) when the project is closed.
+
+---
+
+## 4. Update `App.js` to Pass Form Validity to `Sidebar.jsx`
+
+We'll pass the `isFormValid` state from the context to the `Sidebar` component to control the "Export Project" button.
+
+### Modify `App.js`
+
+```javascript
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import Header from './components/Header';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Sidebar from './components/Sidebar';
+import ScenarioPage from './pages/ScenarioPage';
+import SettingsPage from './pages/SettingsPage';
+import RegionsPage from './pages/RegionsPage';
+import TheatersPage from './pages/TheatersPage';
+import ResourcesPage from './pages/ResourcesPage';
+import WorldMarketPage from './pages/WorldMarketPage';
+import OrbatPage from './pages/OrbatPage';
+import ProgressBar from './components/Progressbar';
+import useProjectManagement from './hooks/useProjectManagement';
+import { FormValidationProvider } from './contexts/FormValidationContext';
+import './assets/styles/App.css';
+
+const App = () => {
+    const {
+        project,
+        setProject,
+        progress,
+        setProgress,
+        handleCreateEmptyProject,
+        handleFileChangeAndUpload,
+        handleLoadDefaultProject,
+        handleCloseProject,
+        handleExport,
+        isFormValid,
+        setIsFormValid
+    } = useProjectManagement();
+
+    const defaultProjects = ["Project1", "Project2", "Project3"];
+
+    return (
+        <FormValidationProvider>
+            <Router>
+                <AppContent
+                    defaultProjects={defaultProjects}
+                    project={project}
+                    setProject={setProject}
+                    handleLoadDefaultProject={handleLoadDefaultProject}
+                    handleCloseProject={handleCloseProject}
+                    handleExport={handleExport}
+                    handleCreateEmptyProject={handleCreateEmptyProject}
+                    handleFileChangeAndUpload={handleFileChangeAndUpload}
+                    progress={progress}
+                    isFormValid={isFormValid}
+                />
+            </Router>
+        </FormValidationProvider>
+    );
+};
+
+const AppContent = ({
+    defaultProjects,
+    project,
+    setProject,
+    handleLoadDefaultProject,
+    handleCloseProject,
+    handleExport,
+    handleCreateEmptyProject,
+    handleFileChangeAndUpload,
+    progress,
+    isFormValid
+}) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = React.useState(location.pathname);
+
+    useEffect(() => {
+        setActiveTab(location.pathname);
+    }, [location]);
+
+    useEffect(() => {
+        if (!project) {
+            setActiveTab('/'); // Reset active tab to ScenarioPage
+            navigate('/');     // Navigate to ScenarioPage
+        }
+    }, [project, navigate]);
+
+    return (
+        <>
+            <Navbar project={project} />
+            <Sidebar
+                defaultProjects={defaultProjects}
+                project={project}
+                handleLoadDefaultProject={handleLoadDefaultProject}
+                handleCloseProject={handleCloseProject}
+                handleExport={handleExport}
+                handleCreateEmptyProject={handleCreateEmptyProject}
+                handleFileChangeAndUpload={handleFileChangeAndUpload}
+                isFormValid={isFormValid} // Pass isFormValid as a prop
+            />
+            <main>
+                <Routes>
+                    <Route path="/" element={<ScenarioPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                    {project && (
+                        <>
+                            <Route path="/settings" element={<SettingsPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                            <Route path="/regions" element={<RegionsPage activeTab={activeTab} project={project} setProject={setProject} />} />
+                            <Route path="/theaters" element={<TheatersPage activeTab={activeTab} />} />
+                            <Route path="/resources" element={<ResourcesPage activeTab={activeTab} />} />
+                            <Route path="/worldmarket" element={<WorldMarketPage activeTab={activeTab} />} />
+                            <Route path="/orbat" element={<OrbatPage activeTab={activeTab} />} />
+                        </>
+                    )}
+                </Routes>
+            </main>
+            <ProgressBar progress={progress}/>
+            <Footer />
+        </>
+    );
+};
+
+export default App;
+```
+
+### Explanation of Changes
+
+1. **Wrapped the Application with `FormValidationProvider`:**
+   - This provides the form validation context to all nested components.
+
+2. **Passed `isFormValid` as a Prop to `Sidebar.jsx`:**
+   - Allows `Sidebar` to access the form's validity status and control the Export button accordingly.
+
+---
+
+## 5. Enhance `Sidebar.jsx` to Disable Export Button with Tooltip
+
+Finally, we'll update the `Sidebar` component to disable the Export button when the form is invalid and provide a tooltip explaining why.
+
+### Update `Sidebar.jsx`
+
+```javascript
+// src/components/Sidebar.jsx
+import React from 'react';
+import '../assets/styles/Sidebar.css'; // Import the Sidebar CSS
+
+const Sidebar = ({ 
+    defaultProjects = [], 
+    project, 
+    handleLoadDefaultProject, 
+    handleCloseProject, 
+    handleExport, 
+    handleCreateEmptyProject,
+    handleFileChangeAndUpload,
+    isFormValid // Receive isFormValid as a prop
+}) => {
+    const [selectedProject, setSelectedProject] = React.useState(''); // State for selected project in dropdown
+
+    const handleDropdownChange = (e) => {
+        setSelectedProject(e.target.value); // Update selected project
+    };
+
+    return (
+        <div className="sidebar">
+            <button onClick={handleCreateEmptyProject}>Create Empty Project</button>
+            <input type="file" onChange={handleFileChangeAndUpload} style={{ display: 'none' }} id="fileInput" />
+            <button onClick={() => document.getElementById('fileInput').click()}>Upload Project</button>
+
+            {/* <div className="default-projects">
+                <h3>Load Default Project</h3>
+                <select value={selectedProject} onChange={handleDropdownChange}>
+                    <option value="">Not selected</option>
+                    {defaultProjects.map((project, index) => (
+                        <option key={index} value={project}>{project}</option>
+                    ))}
+                </select>
+                <button 
+                    onClick={() => handleLoadDefaultProject(selectedProject)} 
+                    disabled={!selectedProject} // Disable if "Not selected"
+                >
+                    Load Selected
+                </button>
+            </div> // NOT IMPLEMENTED*/}
+
+            {/*<button disabled>Load Last Project</button> // NOT IMPLEMENTED*/}
+            <button onClick={handleCloseProject} disabled={!project}>Close Current Project</button>
+            <button 
+                onClick={handleExport} 
+                disabled={!project || !isFormValid} 
+                title={!project ? "No project loaded." : (!isFormValid ? "Please fill in all required fields before exporting." : "Export Project")}
+                className={!project || !isFormValid ? 'disabled-button' : ''}
+            >
+                Export Project
+            </button>
+        </div>
+    );
+};
+
+export default Sidebar;
+```
+
+### Explanation of Changes
+
+1. **Received `isFormValid` as a Prop:**
+   - Allows the `Sidebar` component to determine the validity of the form.
+
+2. **Modified the Export Button:**
+   - **Disabled State:**
+     - The button is disabled if no project is loaded (`!project`) or if the form is invalid (`!isFormValid`).
+   - **Tooltip (`title` Attribute):**
+     - Provides contextual information when the button is disabled.
+     - Displays "No project loaded." if no project is active.
+     - Displays "Please fill in all required fields before exporting." if the form is invalid.
+     - Shows "Export Project" when the button is enabled.
+   - **Conditional CSS Class:**
+     - Added a `disabled-button` class for additional styling if desired.
+
+3. **Styling for Disabled Button and Tooltip:**
+   - Ensure that the `disabled-button` class is defined in your `Sidebar.css` to visually indicate the disabled state.
+
+### Example CSS for `disabled-button`
+
+```css
+/* src/assets/styles/Sidebar.css */
+
+.disabled-button {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+```
+
+---
+
+## 6. Summary of Changes
+
+1. **Created a Form Validation Context:**
+   - Allows shared state management for form validity across components.
+
+2. **Updated `useProjectManagement.js`:**
+   - Integrated the form validation context.
+   - Managed the `isFormValid` state within the hook.
+
+3. **Enhanced `ScenarioPage.jsx`:**
+   - Implemented validation logic.
+   - Updated form validity based on input fields.
+   - Displayed error messages for required fields.
+
+4. **Modified `App.js`:**
+   - Wrapped the application with `FormValidationProvider`.
+   - Passed `isFormValid` as a prop to `Sidebar.jsx`.
+
+5. **Updated `Sidebar.jsx`:**
+   - Disabled the Export button based on form validity.
+   - Added tooltips to explain why the button is disabled.
+
+6. **Added CSS for Error Indicators and Disabled Button:**
+   - Styled error messages and input fields.
+   - Styled the disabled Export button for better user experience.
+
+---
+
+## 7. Additional Recommendations
+
+- **Prevent Export with Invalid Form:**
+  - Ensure that the backend also validates the form data to prevent any bypass through direct API calls.
+
+- **User Feedback:**
+  - Consider providing real-time feedback or indicators to users about which fields are missing or incorrectly filled.
+
+- **Accessibility:**
+  - Ensure that the tooltips and error messages are accessible to screen readers and meet accessibility standards.
+
+- **Testing:**
+  - Thoroughly test the form validation to ensure that it behaves as expected under various scenarios.
+
+By following these steps, your application will now enforce that critical fields must be filled out before allowing the user to export the project, enhancing both data integrity and user experience.
