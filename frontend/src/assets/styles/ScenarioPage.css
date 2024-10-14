@@ -131,3 +131,17 @@
         font-size: 12px;
     }
 }
+
+.required {
+    color: red;
+    margin-left: 4px;
+}
+
+.input-error {
+    border-color: red;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.8em;
+}
