@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import useFileUpload from '../hooks/useProjectManagement';
-import useSocket from '../hooks/useSocket';
-import { useMessage } from '../contexts/MessageContext';
-import '../assets/styles/ScenarioPage.css';
+import useSocket from '../hooks/useSocket';import '../assets/styles/ScenarioPage.css';
 import debounce from 'lodash/debounce';
 
 const ScenarioPage = ({ project, setProject }) => {
@@ -10,13 +8,12 @@ const ScenarioPage = ({ project, setProject }) => {
         handleFileChangeAndUpload,
         handleExport,
         progress,
-        setProgress,
-        setProgressMessage
+        setProgress
     } = useFileUpload();
 
     const [defaultProjects] = useState(["Project1", "Project2", "Project3"]); // Example default projects
 
-    useSocket(setProgress, setProgressMessage);
+    useSocket(setProgress);
 
     const [useDefaultFiles, setUseDefaultFiles] = useState(true);
     const [isCacheNameSameAsScenario, setIsCacheNameSameAsScenario] = useState(false);

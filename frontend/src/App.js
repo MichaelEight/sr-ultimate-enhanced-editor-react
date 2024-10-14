@@ -12,9 +12,7 @@ import TheatersPage from './pages/TheatersPage';
 import ResourcesPage from './pages/ResourcesPage';
 import WorldMarketPage from './pages/WorldMarketPage';
 import OrbatPage from './pages/OrbatPage';
-import MessageBox from './components/MessageBox';
 import ProgressBar from './components/Progressbar';
-import { MessageProvider } from './contexts/MessageContext';
 import useProjectManagement from './hooks/useProjectManagement';
 import './assets/styles/App.css';
 
@@ -24,8 +22,6 @@ const App = () => {
         setProject,
         progress,
         setProgress,
-        progressMessage,
-        setProgressMessage,
         handleCreateEmptyProject,
         handleFileChangeAndUpload,
         handleLoadDefaultProject,
@@ -36,22 +32,19 @@ const App = () => {
     const defaultProjects = ["Project1", "Project2", "Project3"];
 
     return (
-        <MessageProvider>
-            <Router>
-                <AppContent
-                    defaultProjects={defaultProjects}
-                    project={project}
-                    setProject={setProject}
-                    handleLoadDefaultProject={handleLoadDefaultProject}
-                    handleCloseProject={handleCloseProject}
-                    handleExport={handleExport}
-                    handleCreateEmptyProject={handleCreateEmptyProject}
-                    handleFileChangeAndUpload={handleFileChangeAndUpload}
-                    progress={progress}
-                    progressMessage={progressMessage}
-                />
-            </Router>
-        </MessageProvider>
+        <Router>
+            <AppContent
+                defaultProjects={defaultProjects}
+                project={project}
+                setProject={setProject}
+                handleLoadDefaultProject={handleLoadDefaultProject}
+                handleCloseProject={handleCloseProject}
+                handleExport={handleExport}
+                handleCreateEmptyProject={handleCreateEmptyProject}
+                handleFileChangeAndUpload={handleFileChangeAndUpload}
+                progress={progress}
+            />
+        </Router>
     );
 };
 
@@ -65,7 +58,6 @@ const AppContent = ({
     handleCreateEmptyProject,
     handleFileChangeAndUpload,
     progress,
-    progressMessage,
 }) => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -105,8 +97,7 @@ const AppContent = ({
                     <Route path="/orbat" element={<OrbatPage activeTab={activeTab} />} />
                 </Routes>
             </main>
-            <ProgressBar progress={progress} message={progressMessage} />
-            <MessageBox />
+            <ProgressBar progress={progress}/>
             <Footer />
         </>
     );

@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { uploadFile } from '../services/api';
-// import { useMessage } from '../contexts/MessageContext';
 import { closeProject } from '../services/api.js';
 
 
 const useProjectManagement = () => {
-    // const { addMessage, setProgress, setProgressMessage } = useMessage(); // Use context safely
     const [file, setFile] = useState(null);
     const [validationResults, setValidationResults] = useState(null);
     const [project, setProject] = useState(null);
@@ -78,7 +76,6 @@ const useProjectManagement = () => {
             console.log('Project closed successfully.');
         } catch (error) {
             console.error('Error closing project:', error);
-            // Handle error (e.g., display a message to the user)
         }
     };
 
