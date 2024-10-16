@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { uploadFile } from '../services/api';
-import { closeProject } from '../services/api.js';
+import { uploadFile, closeProject } from '../services/api';
 
 
 const useProjectManagement = () => {
@@ -93,7 +92,7 @@ const useProjectManagement = () => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${project.scenario[0]}.zip`;
+                a.download = `${project.scenario.filename || 'ExportedProject'}.zip`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
