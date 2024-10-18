@@ -1,5 +1,12 @@
 # Release Guide
 
+## Quick Cheat Sheet:
+- git checkout main            # Switch to main branch
+- git merge dev                # Merge dev branch into main
+- git tag -a v0.2.0 -m "Release 0.2.0"  # Create release tag
+- git push origin main         # Push main branch to remote
+- git push origin v0.2.0       # Push release tag to remote
+
 This guide explains the steps to make a release from the project. Follow these steps to ensure a smooth release process with version control, tagging, and proper commit history.
 
 ## 1. Update Version Number
