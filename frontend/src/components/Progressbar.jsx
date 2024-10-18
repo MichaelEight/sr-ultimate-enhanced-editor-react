@@ -2,7 +2,7 @@
 import React from 'react';
 import '../assets/styles/ProgressBar.css';
 
-const ProgressBar = ({ progress, message }) => {
+const ProgressBar = ({ progress }) => {
     return (
         <div className="progress-bar-container">
             <div className="progress-bar">
@@ -10,7 +10,6 @@ const ProgressBar = ({ progress, message }) => {
                     <span className="progress-bar-text">{`${progress}%`}</span>
                 </div>
             </div>
-            <div className="progress-bar-message">{message}</div>
         </div>
     );
 };

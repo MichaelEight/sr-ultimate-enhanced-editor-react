@@ -5,7 +5,6 @@
     background-color: #f1f1f1;
     border-top: 1px solid #ccc;
     position: fixed;
-    bottom: 100px; /* Above the message box */
     z-index: 999;
     left: 0;
     right: 0;
@@ -31,10 +30,4 @@
 
 .progress-bar-text {
     font-size: 12px;
-}
-
-.progress-bar-message {
-    margin-top: 5px;
-    font-size: 14px;
-    text-align: center;
 }

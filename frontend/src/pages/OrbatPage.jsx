@@ -54,20 +54,27 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
     // Fetch regions data from backend
     useEffect(() => {
         fetch('http://localhost:5000/regions')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.regions) {
-                    setRegions(data.regions);
-                    // Set default regionID and regionName
-                    if (data.regions.length > 0) {
-                        setRegionID(data.regions[0].ID);
-                        setRegionName(data.regions[0].Properties.regionname);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching regions:', error);
-            });
+        .then(response => {
+            if (!response.ok) {
+            throw new Error('Failed to fetch regions');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.regions) {
+            setRegions(data.regions);
+            // Set default regionID and regionName
+            if (data.regions.length > 0) {
+                setRegionID(data.regions[0].ID);
+                setRegionName(data.regions[0].Properties.regionname);
+            }
+            } else {
+            setRegions([]);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching regions:', error);
+        });
     }, []);
 
     // Update regionName when regionID changes

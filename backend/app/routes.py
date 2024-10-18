@@ -14,7 +14,7 @@ from .config import Config
 from .services.project_services import process_file_for_export
 from .validation.validators import check_file_existence
 
-from .utils.file_utils import create_zip_archive, extract_archive, create_zip_archive_with_scenario
+from .utils.file_utils import extract_archive, create_zip_archive_with_scenario
 
 from .importers.scenario_importer import import_scenario_file
 from .exporters.scenario_exporter import export_scenario_file
@@ -92,6 +92,18 @@ def create_empty_project_route():
     except Exception as e:
         add_to_log(f"Error creating empty project: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
+
+@main_blueprint.route('/close_project', methods=['POST'])
+def close_project():
+    try:
+        add_to_log("=== Starting: Closing Project ===", LogLevel.INFO)
+        project.create_empty()
+        add_to_log("Project data reset to default state", LogLevel.INFO)
+        return jsonify({'message': 'Project closed successfully'}), 200
+    except Exception as e:
+        add_to_log(f"Error closing project: {e}", LogLevel.ERROR)
+        return jsonify({'error': str(e)}), 500
+
 
 @main_blueprint.route('/load_data_from_file', methods=['POST'])
 def load_data_from_file_route():
@@ -364,9 +376,9 @@ def export_project_files():
             project.export_wmdata_file(str(wmdata_output_path))
             add_to_log(f"Exported WMData file to {wmdata_output_path}", LogLevel.INFO)
 
-        # Process other files for export as needed, excluding 'wmdata'
+        # Process other files for export as needed
         for ext, file_info in project.modified_structure.items():
-            if ext in ['scenario', 'cvp', 'wmdata', 'oob']:
+            if ext in ['scenario', 'cvp', 'wmdata', 'oob', 'regionincl']:
                 continue  # Already handled
             process_file_for_export(ext, file_info, export_base_dir)
             add_to_log(f"Processed file type: .{ext}", LogLevel.DEBUG)
@@ -384,8 +396,8 @@ def export_project_files():
     except Exception as e:
         add_to_log(f"Internal server error during export: {e}", LogLevel.ERROR)
         return jsonify({'error': str(e)}), 500
-
-@main_blueprint.route('/regions', methods=['GET'])
+    
+@main_blueprint.route('/get_regions', methods=['GET'])
 def get_regions():
     try:
         add_to_log("Fetching regions data", LogLevel.INFO)
@@ -395,12 +407,12 @@ def get_regions():
         regionincl_regions = project.regionincl_data.get('regions', [])  # List of regions from REGIONINCL
 
         # Create a mapping of region IDs to isActive status from REGIONINCL
-        regionincl_map = {region['regionId']: region['isActive'] for region in regionincl_regions}
+        regionincl_map = {region.get('regionId', 0): region.get('isActive', False) for region in regionincl_regions}
 
         for region in cvp_regions:
-            region_id = region['ID']
+            region_id = region.get('ID', 0)
             is_active = regionincl_map.get(region_id, False)  # Default to False if not in REGIONINCL
-            region_properties = region['Properties']
+            region_properties = region.get('Properties', {})
             # Combine region data with isActive status
             region_data = {
                 'ID': region_id,

@@ -22,10 +22,10 @@ const Sidebar = ({
             <input type="file" onChange={handleFileChangeAndUpload} style={{ display: 'none' }} id="fileInput" />
             <button onClick={() => document.getElementById('fileInput').click()}>Upload Project</button>
 
-            <div className="default-projects">
+            {/* <div className="default-projects">
                 <h3>Load Default Project</h3>
                 <select value={selectedProject} onChange={handleDropdownChange}>
-                    <option value="">Not selected</option> {/* Default "Not selected" option */}
+                    <option value="">Not selected</option>
                     {defaultProjects.map((project, index) => (
                         <option key={index} value={project}>{project}</option>
                     ))}
@@ -36,11 +36,11 @@ const Sidebar = ({
                 >
                     Load Selected
                 </button>
-            </div>
+            </div> // NOT IMPLEMENTED*/}
 
-            <button disabled>Load Last Project</button>
+            {/*<button disabled>Load Last Project</button> // NOT IMPLEMENTED*/}
             <button onClick={handleCloseProject} disabled={!project}>Close Current Project</button>
-            <button onClick={handleExport} disabled={!project}>Export</button>
+            <button onClick={handleExport} disabled={!project}>Export Project</button>
         </div>
     );
 };

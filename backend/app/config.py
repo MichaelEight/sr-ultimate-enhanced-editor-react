@@ -82,29 +82,20 @@ class Config:
         'campaigngame': 0,                  # 'campaignGame'
         'govchoice': 0,                     # 'govChoice'
         'thirdpartyrelationseffect': 0,     # 'thirdPartyRelationsEffect'
-
-        # Missing values detected
-        # [WARNING][scenario_importer - import_scenario_file]: Unknown key in GMC: wminvolve
-        # [WARNING][scenario_importer - import_scenario_file]: Unknown key in GMC: wmdeff
-        # TODO check their purpose, add them to frontend
         'wminvolve': 0,
         'wmdeff': '',
     }
 
-    DEFAULT_THEATERS_STRUCTURE = {
-        'theaters': {}
-    }
+    DEFAULT_THEATERS_STRUCTURE = []  # Changed from {} to []
 
-    DEFAULT_REGIONS_STRUCTURE = {
-        'regions': {}
-    }
+    DEFAULT_REGIONS_STRUCTURE = []   # Changed from {'regions': {}} to []
 
     DEFAULT_REGIONINCL_STRUCTURE = {
         'regions': {}
     }
 
     DEFAULT_ORBAT_STRUCTURE = {
-        'regions': {}
+        'OOB_Data': []
     }
     
     DEFAULT_RESOURCES_STRUCTURE = {

@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { uploadFile } from '../services/api';
-// import { useMessage } from '../contexts/MessageContext';
+import { uploadFile, closeProject } from '../services/api';
+
 
 const useProjectManagement = () => {
-    // const { addMessage, setProgress, setProgressMessage } = useMessage(); // Use context safely
     const [file, setFile] = useState(null);
     const [validationResults, setValidationResults] = useState(null);
     const [project, setProject] = useState(null);
@@ -62,8 +61,21 @@ const useProjectManagement = () => {
     };
 
     // Handle closing a project
-    const handleCloseProject = () => {
-        setProject(null);
+    const handleCloseProject = async () => {
+        try {
+            // Call backend API to close the project
+            await closeProject();
+
+            // Reset project state
+            setProject(null);
+            setFile(null);
+            setValidationResults(null);
+
+            // Optionally, reset other states or cached data here
+            console.log('Project closed successfully.');
+        } catch (error) {
+            console.error('Error closing project:', error);
+        }
     };
 
     // Handle exporting the project
@@ -80,7 +92,7 @@ const useProjectManagement = () => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${project.scenario[0]}.zip`;
+                a.download = `${project.scenario.filename || 'ExportedProject'}.zip`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();

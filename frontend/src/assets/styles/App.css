@@ -10,7 +10,6 @@ body, html {
 /* Ensure the main content is not hidden under the navbar and there is no unwanted shift */
 main {
     padding-top: 60px; /* Height of the navbar */
-    padding-bottom: 150px; /* Combined height of the progress bar and message box */
     margin: 0;
     overflow: auto;
     box-sizing: border-box;

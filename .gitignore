@@ -66,3 +66,4 @@ backend/app/utils/__pycache__/file_utils.cpython-311.pyc
 backend/app/utils/__pycache__/logging_utils.cpython-311.pyc
 backend/app/validation/__pycache__/validators.cpython-311.pyc
 backend/output_cvp.json
+.vscode/settings.json

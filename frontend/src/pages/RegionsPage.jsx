@@ -91,13 +91,11 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
 
   // Map of property names to expected data types
   const propertyTypes = {
-    ID: 'number',
-    isActive: 'boolean',
-    regionname: 'string',
-    nonplayable: 'boolean',
-    flagnum: 'number',
-    // Continue mapping other properties...
-    // For example:
+    'ID': 'number',
+    'isActive': 'boolean',
+    'regionname': 'string',
+    'nonplayable': 'boolean',
+    'flagnum': 'number',
     'blocknum': 'number',
     'altblocknum': 'number',
     'continentnum': 'number',
@@ -171,7 +169,12 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
   const fetchRegionsData = useCallback(() => {
     setLoading(true);
     fetch('http://localhost:5000/regions')
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch regions');
+        }
+        return response.json();
+      })
       .then((data) => {
         if (data && data.regions) {
           const backendRegions = data.regions;
@@ -180,6 +183,9 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
             setLoading(false);
             console.log('Fetched latest regions data.');
           }
+        } else {
+          setRegions([]);
+          setLoading(false);
         }
       })
       .catch((error) => {
@@ -216,11 +222,7 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
   useEffect(() => {
     isMounted.current = true;
     if (activeTab === '/regions' && project) {
-      if (regions.length === 0) {
-        fetchRegionsData();
-      } else {
-        checkAndFetchRegions();
-      }
+      fetchRegionsData();
     } else if (!project) {
       // Reset state when project is closed
       setRegions([]);
@@ -228,7 +230,7 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
     return () => {
       isMounted.current = false;
     };
-  }, [activeTab, fetchRegionsData, checkAndFetchRegions, regions.length, project]);
+  }, [activeTab, fetchRegionsData, project]);
 
   // Debounced function to handle region updates
   const debouncedHandleRegionChange = useRef();
@@ -294,7 +296,7 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
 
   // Filter regions based on search term
   const filteredRegions = regions.filter((region) => {
-    const regionName = region.Properties.regionname || '';
+    const regionName = region.Properties && region.Properties.regionname ? region.Properties.regionname : '';
     return regionName.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
@@ -326,7 +328,7 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
             <tbody>
               {filteredRegions.length > 0 ? (
                 filteredRegions.map((region, index) => (
-                  <tr key={region.ID}>
+                  <tr key={index}>
                     {propertyOrder.map((key) => {
                       let value;
                       if (key === 'ID' || key === 'isActive') {
