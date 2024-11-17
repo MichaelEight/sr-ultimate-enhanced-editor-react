@@ -1,0 +1,212 @@
+// update for SRU - now unified for W2020 and GC2020
+&&REGIONINCL
+101    //    Egypt - works 2020
+102    //    Libya - works 2020
+103    //    Algeria - works 2020
+104    //    Morocco - works 2020
+105    //    Western Sahara - works 2020
+106    //    Tunisia - works 2020
+109    //    Suez          
+201    //    Nigeria - works 2020
+202    //    Benin - 
+203    //    Burkina Faso - 
+204    //    Cameroun - 
+205    //    Central Africa - 
+206    //    Chad - 
+207    //    Cote D'ivoire - works 2020
+208    //    Mauritania - 
+209    //    Gambia - 
+210    //    Ghana - 
+211    //    Guinea - 
+212    //    Guinea-Bissau - 
+213    //    Liberia - 
+214    //    Mali - 
+215    //    Niger - 
+216    //    Senegal - 
+217    //    Sierra Leone - 
+218    //    Togo - 
+219    //    Cape Verde - 
+224    //    Sao Tome and Principe - 
+301    //    Kenya - 
+302    //    Eritrea - 
+303    //    Ethiopia - 
+304    //    Somalia - works 2020
+305    //    Rwanda - 
+306    //    Djibouti - 
+307    //    Burundi - 
+308    //    Sudan - 
+309    //    Uganda - 
+310    //    Tanzania - 
+//311 British Somaliland?
+313   //    South Sudan
+401    //    South Africa - 
+402    //    Lesotho - 
+403    //    Namibia - 
+404    //    Madagascar - 
+405    //    Botswana - 
+406    //    Mozambique - 
+407    //    Malawi - 
+408    //    Swaziland - 
+409    //    Zimbabwe - 
+410    //    Angola - 
+411    //    Zambia - Works 2020
+412    //    DRC - 
+413    //    Congo - 
+414    //    Gabon - 
+415    //    Equat Guinea - 
+416    //    Comoros - 
+417    //    Mauritius - 
+418    //    Mayotte?
+419    //    Reunion?
+420    //    Seychelles - 
+501    //    Israel - Works 2020
+502    //    Palestine - 
+503    //    Jordan - 
+601    //    Iran
+602    //    Iraq
+603    //    Kuwait
+604    //    Oman
+605    //    Qatar
+606    //    Saudi Arabia 
+607    //    Syria
+608    //    Lebanon
+609    //    Turkey - 
+610    //    UAE - 
+611    //    Yemen - 
+612    //    Kurdistan - 
+613    //    Bahrain - 
+616    //    Turkish Straights
+//617    //    Isis
+// old: 699	//	Turkey
+701    //    Armenia - 
+702    //    Azerbaijan - 
+799    //    Georgia Republic - 
+704    //    Kazakhstan - Works 2020
+705    //    Kyrgyzstan - 
+706    //    Tajikistan - 
+707    //    Turkmenistan - 
+708    //    Uzbekistan -  -
+812    //  Crimea
+889	   //	Russia
+907    //    Nepal - 
+908    //    Bhutan - 
+909    //    Sri Lanka - 
+910    //    Pakistan - 
+911    //    Afghanistan - 
+912    //    Bangladesh - 
+917    //    Maldives
+989	   //	India
+1001    //    **B&H - , replace with 1098?
+1002    //    **Serb Rep - , replace with 1098?
+1003    //    Croatia - 
+1004    //    Serbia
+1005    //    Mont - 
+1006    //    Kos - 
+1007    //    Albania - 
+1008    //    Slovenia - 
+// 1098    //    Bosnia-Herzegovenia
+1101    //    Belarus - 
+1102    //    Ukraine - 
+1103    //    Moldova - 
+1104    //    Romania - 
+1105    //    Bulgaria - 
+1106    //    Poland - 
+1107    //    Hungary - 
+1108    //    Cze - 
+1109    //    Slov - 
+1110    //    Latvia - 
+1111    //    Lithuania - 
+1112    //    Estonia - Works 2020
+//1113	//	Kaliningrad
+1114    //    Greece - 
+1115    //    Macedonia - 
+1116	//	Cyprus (Greek) (also EU Nation)
+1117	//	Cyprus (Turkish)
+// 1199	//	Greece
+1298    //    Denmark - 
+1299    //    Norway - 
+1203    //    Finland - 
+1204    //    Sweden - Works 2020
+1205    //    Iceland - 
+1306    //    Ireland - 
+1399    //    United Kingdom - 
+1404    //    Austria - 
+1499    //    Germany - 
+1505    //    Malta - 
+1599    //    Italy - 
+1699    //    France - 
+1603    //    Belgium - 
+1605    //    Luxembourg - 
+1697    //    Netherlands - 
+1705    //    Andorra - 
+1798    //    Portugal - 
+1799    //    Spain - 
+1801    //    Switzerland - 
+1901    //    Taiwan - 
+1902    //    Hong Kong
+1999    //    China - 
+1907    //    Tibet
+1909    //    Mongolia - 
+2001    //    Japan - Works 2020
+2002    //    N Korea - 
+2003    //    S Korea - 
+2101    //    Thailand - works 2020
+2102    //    Vietnam - 
+2103    //    Myanmar - 
+2104    //    Cambodia - 
+2105    //    Laos - 
+2106    //    Philippines - 
+2199    //    Indonesia - 
+2108    //    East Timor - 
+2110    //    Papua New Guinea - 
+2111    //    Malaysia - ***
+2112    //    Brunei - 
+2113    //    Singapore - 
+2299    //    New Zealand - 
+2203    //    Fiji - 
+2207    //    Solomon Islands - 
+2208    //    Vanuatu - 
+2211    //    Pacific Isles  -   (no a single region)
+2212	//   Yap, Micronesia
+2213	//   Northern Mariana
+2297    //    Australia - 
+2301    //    Argentina - 
+2302    //    Bolivia - 
+2303    //    Brazil - 
+2304    //    Chile - 
+2305    //    Colombia - 
+2306    //    Ecuador - 
+2307	//	Fr Guiana
+2308    //    British Guiana (Guyana) - 
+2309    //    Paraguay - 
+2310    //    Peru - 
+2311    //    Suriname - 
+2312    //    Uruguay - 
+2313    //    Venezuela - 
+2314	//	Falklands
+2414	//    St Pierre & Miq
+2499    //    Canada - 
+2501    //    Bahamas - 
+2503    //    Dom. Republic - 
+2504    //    Haiti - 
+2505    //    Jamaica - 
+2507    //    Puerto Rico
+2511    //    Antigua and Barbuda - 
+2513    //    Barbados - 
+2514    //    Dominica - 
+2515    //    Grenada - 
+2519    //    St Kitts & Nevis - 
+2520    //    Saint Lucia - 
+2521    //    Grenadines - 
+2522    //    Trinidad and Tobago - 
+2601    //    Mexico - 
+2602    //    El Salvador - 
+2603    //    Guatemala - 
+2604    //    Honduras - 
+2605    //    Nicaragua - 
+2606    //    Panama - 
+2607    //    Costa Rica - 
+2608    //    Belize - 
+2609    //    PCZ
+2727    //    Cuba
+2989	//	 USA
