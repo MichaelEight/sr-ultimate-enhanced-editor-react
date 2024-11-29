@@ -53,7 +53,7 @@ const OrbatPage = ({ activeTab, project, setProject }) => {
 
     // Fetch regions data from backend
     useEffect(() => {
-        fetch('http://localhost:5000/regions')
+        fetch('http://localhost:5000/get_regions')
         .then(response => {
             if (!response.ok) {
             throw new Error('Failed to fetch regions');
