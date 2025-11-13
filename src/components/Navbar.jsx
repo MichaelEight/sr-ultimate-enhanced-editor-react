@@ -1,76 +1,82 @@
 // src/components/Navbar.jsx
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import '../assets/styles/Navbar.css';
+import { useNavigate, useLocation } from 'react-router-dom';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import Box from '@mui/material/Box';
 
-const Navbar = ({ project }) => { // Receive 'project' as a prop
+const Navbar = ({ project, drawerOpen, toggleDrawer, drawerWidth }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const navItems = [
+        { label: 'Scenario', path: '/', alwaysVisible: true },
+        { label: 'Settings', path: '/settings', alwaysVisible: false },
+        { label: 'Regions', path: '/regions', alwaysVisible: false },
+        { label: 'Theaters', path: '/theaters', alwaysVisible: false },
+        { label: 'Resources', path: '/resources', alwaysVisible: false },
+        { label: 'World Market', path: '/worldmarket', alwaysVisible: false },
+        { label: 'Orbat', path: '/orbat', alwaysVisible: false },
+    ];
+
+    const visibleItems = navItems.filter(item => item.alwaysVisible || project);
+    const currentTabIndex = visibleItems.findIndex(item => item.path === location.pathname);
+
+    const handleTabChange = (event, newValue) => {
+        navigate(visibleItems[newValue].path);
+    };
+
     return (
-        <nav className="navbar">
-            <div className="navbar-brand">Supreme Ruler Enhanced Editor</div>
-            <ul className="navbar-links">
-                <li>
-                    <NavLink 
-                        to="/" 
-                        exact="true" 
-                        className={({ isActive }) => isActive ? "active" : undefined}
+        <AppBar
+            position="fixed"
+            sx={{
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+                transition: theme => theme.transitions.create(['width', 'margin'], {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.leavingScreen,
+                }),
+            }}
+        >
+            <Toolbar>
+                <IconButton
+                    color="inherit"
+                    aria-label="toggle drawer"
+                    onClick={toggleDrawer}
+                    edge="start"
+                    sx={{ mr: 2 }}
+                >
+                    <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" noWrap component="div" sx={{ mr: 4 }}>
+                    Supreme Ruler Enhanced Editor
+                </Typography>
+                <Box sx={{ flexGrow: 1 }}>
+                    <Tabs
+                        value={currentTabIndex >= 0 ? currentTabIndex : 0}
+                        onChange={handleTabChange}
+                        textColor="inherit"
+                        indicatorColor="secondary"
+                        sx={{
+                            '& .MuiTab-root': {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                '&.Mui-selected': {
+                                    color: 'white',
+                                },
+                            },
+                        }}
                     >
-                        Scenario
-                    </NavLink>
-                </li>
-                {project && (
-                    <>
-                        <li>
-                            <NavLink 
-                                to="/settings" 
-                                className={({ isActive }) => isActive ? "active" : undefined}
-                            >
-                                Settings
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink 
-                                to="/regions" 
-                                className={({ isActive }) => isActive ? "active" : undefined}
-                            >
-                                Regions
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink 
-                                to="/theaters" 
-                                className={({ isActive }) => isActive ? "active" : undefined}
-                            >
-                                Theaters
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink 
-                                to="/resources" 
-                                className={({ isActive }) => isActive ? "active" : undefined}
-                            >
-                                Resources
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink 
-                                to="/worldmarket" 
-                                className={({ isActive }) => isActive ? "active" : undefined}
-                            >
-                                World Market
-                            </NavLink>
-                        </li>
-                        <li>
-                            <NavLink 
-                                to="/orbat" 
-                                className={({ isActive }) => isActive ? "active" : undefined}
-                            >
-                                Orbat
-                            </NavLink>
-                        </li>
-                    </>
-                )}
-            </ul>
-        </nav>
+                        {visibleItems.map((item, index) => (
+                            <Tab key={index} label={item.label} />
+                        ))}
+                    </Tabs>
+                </Box>
+            </Toolbar>
+        </AppBar>
     );
 };
 

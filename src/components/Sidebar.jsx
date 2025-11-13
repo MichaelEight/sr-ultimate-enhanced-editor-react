@@ -1,47 +1,129 @@
-import React, { useState } from 'react';
-import '../assets/styles/Sidebar.css'; // Import the Sidebar CSS
+// src/components/Sidebar.jsx
+import React from 'react';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import List from '@mui/material/List';
+import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import AddIcon from '@mui/icons-material/Add';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
+import FolderIcon from '@mui/icons-material/Folder';
 
-const Sidebar = ({ 
-    defaultProjects = [], 
-    project, 
-    handleLoadDefaultProject, 
-    handleCloseProject, 
-    handleExport, 
+const Sidebar = ({
+    defaultProjects = [],
+    project,
+    handleLoadDefaultProject,
+    handleCloseProject,
+    handleExport,
     handleCreateEmptyProject,
-    handleFileChangeAndUpload 
+    handleFileChangeAndUpload,
+    drawerOpen,
+    drawerWidth
 }) => {
-    const [selectedProject, setSelectedProject] = useState(''); // State for selected project in dropdown
-
-    const handleDropdownChange = (e) => {
-        setSelectedProject(e.target.value); // Update selected project
-    };
-
     return (
-        <div className="sidebar">
-            <button onClick={handleCreateEmptyProject}>Create Empty Project</button>
-            <input type="file" onChange={handleFileChangeAndUpload} style={{ display: 'none' }} id="fileInput" />
-            <button onClick={() => document.getElementById('fileInput').click()}>Upload Project</button>
+        <Drawer
+            variant="persistent"
+            anchor="left"
+            open={drawerOpen}
+            sx={{
+                width: drawerWidth,
+                flexShrink: 0,
+                '& .MuiDrawer-paper': {
+                    width: drawerWidth,
+                    boxSizing: 'border-box',
+                },
+            }}
+        >
+            <Toolbar />
+            <Box sx={{ overflow: 'auto', p: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                    Project Management
+                </Typography>
 
-            {/* <div className="default-projects">
-                <h3>Load Default Project</h3>
-                <select value={selectedProject} onChange={handleDropdownChange}>
-                    <option value="">Not selected</option>
-                    {defaultProjects.map((project, index) => (
-                        <option key={index} value={project}>{project}</option>
-                    ))}
-                </select>
-                <button 
-                    onClick={() => handleLoadDefaultProject(selectedProject)} 
-                    disabled={!selectedProject} // Disable if "Not selected"
-                >
-                    Load Selected
-                </button>
-            </div> // NOT IMPLEMENTED*/}
+                <List sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<AddIcon />}
+                        onClick={handleCreateEmptyProject}
+                        sx={{ justifyContent: 'flex-start', py: 1.5 }}
+                    >
+                        Create Empty Project
+                    </Button>
 
-            {/*<button disabled>Load Last Project</button> // NOT IMPLEMENTED*/}
-            <button onClick={handleCloseProject} disabled={!project}>Close Current Project</button>
-            <button onClick={handleExport} disabled={!project}>Export Project</button>
-        </div>
+                    <input
+                        type="file"
+                        onChange={handleFileChangeAndUpload}
+                        style={{ display: 'none' }}
+                        id="fileInput"
+                    />
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<UploadFileIcon />}
+                        onClick={() => document.getElementById('fileInput').click()}
+                        sx={{ justifyContent: 'flex-start', py: 1.5 }}
+                    >
+                        Upload Project
+                    </Button>
+
+                    <Divider sx={{ my: 1 }} />
+
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={<CloseIcon />}
+                        onClick={handleCloseProject}
+                        disabled={!project}
+                        color="error"
+                        sx={{ justifyContent: 'flex-start', py: 1.5 }}
+                    >
+                        Close Current Project
+                    </Button>
+
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<DownloadIcon />}
+                        onClick={handleExport}
+                        disabled={!project}
+                        color="success"
+                        sx={{ justifyContent: 'flex-start', py: 1.5 }}
+                    >
+                        Export Project
+                    </Button>
+                </List>
+
+                {project && (
+                    <>
+                        <Divider sx={{ my: 3 }} />
+                        <Box sx={{
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                            p: 2,
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                        }}>
+                            <FolderIcon />
+                            <Box>
+                                <Typography variant="caption" display="block" sx={{ opacity: 0.8 }}>
+                                    Current Project
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    Loaded
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </>
+                )}
+            </Box>
+        </Drawer>
     );
 };
 
