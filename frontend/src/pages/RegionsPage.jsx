@@ -1,16 +1,13 @@
 // RegionsPage.jsx
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import debounce from 'lodash/debounce';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useProject } from '../context/ProjectContext';
 import '../assets/styles/RegionsPage.css';
 
-const RegionsPage = ({ activeTab, project, setProject }) => {
+const RegionsPage = ({ activeTab, project }) => {
+  const { projectData, updateData } = useProject();
   const [regions, setRegions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Ref to keep track of whether the component is mounted
-  const isMounted = useRef(false);
 
   // Define the order of properties to display in the table
   const propertyOrder = [
@@ -86,7 +83,6 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
     'parentregion',
     'theatrehome',
     'electiondate',
-    // Add any other properties as needed
   ];
 
   // Map of property names to expected data types
@@ -104,7 +100,6 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
     'politic': 'string',
     'govtype': 'string',
     'refpopulation': 'number',
-    'poptotalarmy': 'number',
     'poptotalarmy': 'number',
     'popminreserve': 'number',
     'treasury': 'number',
@@ -162,136 +157,107 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
     'parentregion': 'number',
     'theatrehome': 'number',
     'electiondate': 'string',
-    // Add types for other properties...
   };
 
-  // Fetch regions data from backend
-  const fetchRegionsData = useCallback(() => {
-    setLoading(true);
-    fetch('http://localhost:5000/get_regions')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch regions');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data && data.regions) {
-          const backendRegions = data.regions;
-          if (isMounted.current) {
-            setRegions(backendRegions);
-            setLoading(false);
-            console.log('Fetched latest regions data.');
-          }
-        } else {
-          setRegions([]);
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        if (isMounted.current) {
-          setLoading(false);
-          console.error('Error fetching regions:', error);
-        }
+  // Load regions data from ProjectContext
+  const loadRegionsData = useCallback(() => {
+    if (projectData && projectData.regions_data) {
+      // Combine regions_data with regionincl_data to get isActive status
+      const regionsWithStatus = projectData.regions_data.map(region => {
+        const regionInclEntry = projectData.regionincl_data?.regions?.find(
+          r => r.regionId === region.ID
+        );
+        return {
+          ...region,
+          isActive: regionInclEntry?.isActive ?? true
+        };
       });
-  }, []);
-
-  // Check if regions data needs to be fetched
-  const checkAndFetchRegions = useCallback(() => {
-    fetch('http://localhost:5000/check_seen_since_last_update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ tab: 'regions' }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.seenSinceLastUpdate === false) {
-          console.log('Regions data has changed. Fetching new data.');
-          fetchRegionsData();
-        } else {
-          console.log('Regions data is up to date.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error checking seenSinceLastUpdate:', error);
-      });
-  }, [fetchRegionsData]);
+      setRegions(regionsWithStatus);
+      console.log('Loaded regions data from context');
+    }
+  }, [projectData]);
 
   useEffect(() => {
-    isMounted.current = true;
     if (activeTab === '/regions' && project) {
-      fetchRegionsData();
+      loadRegionsData();
     } else if (!project) {
-      // Reset state when project is closed
       setRegions([]);
     }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [activeTab, fetchRegionsData, project]);
-
-  // Debounced function to handle region updates
-  const debouncedHandleRegionChange = useRef();
-
-  if (!debouncedHandleRegionChange.current) {
-    debouncedHandleRegionChange.current = debounce((updatedRegion, originalID) => {
-      // Include originalID in the payload
-      const payload = { ...updatedRegion, originalID };
-      fetch('http://localhost:5000/regions/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log('Region updated successfully');
-        })
-        .catch((error) => {
-          console.error('Error updating region:', error);
-        });
-    }, 500);
-  }
+  }, [activeTab, project, loadRegionsData]);
 
   // Handle changes in region data
   const handleRegionChange = (regionIndex, field, value) => {
     const updatedRegions = [...regions];
     const region = { ...updatedRegions[regionIndex] };
 
-    if (field === 'ID' || field === 'isActive') {
-      if (field === 'ID') {
-        // Store original ID for backend reference
-        const originalID = region.ID;
-        region['ID'] = parseInt(value, 10) || 0;
-        updatedRegions[regionIndex] = region;
-        setRegions(updatedRegions);
+    if (field === 'ID') {
+      // Update region ID
+      const oldID = region.ID;
+      region.ID = parseInt(value, 10) || 0;
+      updatedRegions[regionIndex] = region;
+      setRegions(updatedRegions);
 
-        // Send update to backend with originalID
-        debouncedHandleRegionChange.current(region, originalID);
-        return;
-      } else if (field === 'isActive') {
-        region[field] = value;
+      // Update in projectData.regions_data
+      const newRegionsData = projectData.regions_data.map(r =>
+        r.ID === oldID ? { ...r, ID: region.ID } : r
+      );
+      updateData('regions_data', newRegionsData);
+
+      // Also update regionincl_data if it exists
+      if (projectData.regionincl_data?.regions) {
+        const newRegionincl = {
+          ...projectData.regionincl_data,
+          regions: projectData.regionincl_data.regions.map(r =>
+            r.regionId === oldID ? { ...r, regionId: region.ID } : r
+          )
+        };
+        updateData('regionincl_data', newRegionincl);
+      }
+    } else if (field === 'isActive') {
+      // Update isActive status
+      region.isActive = value;
+      updatedRegions[regionIndex] = region;
+      setRegions(updatedRegions);
+
+      // Update in regionincl_data
+      const regioninclData = projectData.regionincl_data || { regions: [] };
+      const existingEntry = regioninclData.regions?.find(r => r.regionId === region.ID);
+
+      if (existingEntry) {
+        // Update existing entry
+        const newRegionincl = {
+          ...regioninclData,
+          regions: regioninclData.regions.map(r =>
+            r.regionId === region.ID ? { ...r, isActive: value } : r
+          )
+        };
+        updateData('regionincl_data', newRegionincl);
+      } else {
+        // Add new entry
+        const newRegionincl = {
+          ...regioninclData,
+          regions: [
+            ...(regioninclData.regions || []),
+            { regionId: region.ID, isActive: value, comment: null }
+          ]
+        };
+        updateData('regionincl_data', newRegionincl);
       }
     } else {
+      // Update property
       if (!region.Properties) {
         region.Properties = {};
       }
       region.Properties[field] = value;
+      updatedRegions[regionIndex] = region;
+      setRegions(updatedRegions);
+
+      // Update in projectData.regions_data
+      const newRegionsData = projectData.regions_data.map(r =>
+        r.ID === region.ID ? { ...r, Properties: region.Properties } : r
+      );
+      updateData('regions_data', newRegionsData);
     }
-
-    updatedRegions[regionIndex] = region;
-    setRegions(updatedRegions);
-
-    // Send update to backend
-    debouncedHandleRegionChange.current(region);
   };
 
   // Filter regions based on search term
@@ -314,78 +280,74 @@ const RegionsPage = ({ activeTab, project, setProject }) => {
       </div>
 
       <div className="region-table-wrapper">
-        {loading ? (
-          <p>Loading data...</p>
-        ) : (
-          <table className="region-table">
-            <thead>
-              <tr>
-                {propertyOrder.map((key, index) => (
-                  <th key={index}>{key}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRegions.length > 0 ? (
-                filteredRegions.map((region, index) => (
-                  <tr key={index}>
-                    {propertyOrder.map((key) => {
-                      let value;
-                      if (key === 'ID' || key === 'isActive') {
-                        value = region[key];
-                      } else {
-                        value = region.Properties ? region.Properties[key] : '';
-                      }
+        <table className="region-table">
+          <thead>
+            <tr>
+              {propertyOrder.map((key, index) => (
+                <th key={index}>{key}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRegions.length > 0 ? (
+              filteredRegions.map((region, index) => (
+                <tr key={index}>
+                  {propertyOrder.map((key) => {
+                    let value;
+                    if (key === 'ID' || key === 'isActive') {
+                      value = region[key];
+                    } else {
+                      value = region.Properties ? region.Properties[key] : '';
+                    }
 
-                      // Determine the input type based on propertyTypes
-                      const propType = propertyTypes[key];
-                      let inputType = 'text';
+                    // Determine the input type based on propertyTypes
+                    const propType = propertyTypes[key];
+                    let inputType = 'text';
 
-                      if (propType === 'number') {
-                        inputType = 'number';
-                      } else if (propType === 'boolean') {
-                        inputType = 'checkbox';
-                      } else {
-                        inputType = 'text';
-                      }
+                    if (propType === 'number') {
+                      inputType = 'number';
+                    } else if (propType === 'boolean') {
+                      inputType = 'checkbox';
+                    } else {
+                      inputType = 'text';
+                    }
 
-                      // Handle boolean (checkbox) inputs
-                      if (inputType === 'checkbox') {
-                        return (
-                          <td key={key}>
-                            <input
-                              type="checkbox"
-                              checked={!!value}
-                              onChange={(e) =>
-                                handleRegionChange(index, key, e.target.checked)
-                              }
-                            />
-                          </td>
-                        );
-                      } else {
-                        return (
-                          <td key={key}>
-                            <input
-                              type={inputType}
-                              value={value !== undefined && value !== null ? value : ''}
-                              onChange={(e) =>
-                                handleRegionChange(index, key, e.target.value)
-                              }
-                            />
-                          </td>
-                        );
-                      }
-                    })}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={propertyOrder.length}>No regions available</td>
+                    // Handle boolean (checkbox) inputs
+                    if (inputType === 'checkbox') {
+                      return (
+                        <td key={key}>
+                          <input
+                            type="checkbox"
+                            checked={!!value}
+                            onChange={(e) =>
+                              handleRegionChange(index, key, e.target.checked)
+                            }
+                          />
+                        </td>
+                      );
+                    } else {
+                      return (
+                        <td key={key}>
+                          <input
+                            type={inputType}
+                            value={value !== undefined && value !== null ? value : ''}
+                            onChange={(e) =>
+                              handleRegionChange(index, key, e.target.value)
+                            }
+                          />
+                        </td>
+                      );
+                    }
+                  })}
                 </tr>
-              )}
-            </tbody>
-          </table>
-        )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan={propertyOrder.length}>No regions available</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -1,111 +1,49 @@
 // ResourcesPage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import '../assets/styles/ResourcesPage.css'; // Ensure this path is correct
+import { useProject } from '../context/ProjectContext';
+import '../assets/styles/ResourcesPage.css';
 
 const ResourcesPage = ({ activeTab }) => {
+  const { projectData, updateData } = useProject();
   const [selectedResource, setSelectedResource] = useState('agriculture');
   const [resourceData, setResourceData] = useState({});
 
-  // Fetch resources data from backend
-  const fetchResourcesData = useCallback(() => {
-    fetch('http://localhost:5000/resources')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.resources) {
-          const fetchedData = data.resources;
-          const processedData = { ...fetchedData };
+  // Load resources data from ProjectContext
+  const loadResourcesData = useCallback(() => {
+    if (projectData && projectData.resources_data) {
+      const processedData = { ...projectData.resources_data };
 
-          const updates = [];
-
-          // Iterate through each resource and its field groups
-          Object.keys(processedData).forEach((resourceName) => {
-            const resource = processedData[resourceName];
-            ['cost', 'production', 'producefrom'].forEach((group) => {
-              if (resource[group]) {
-                Object.keys(resource[group]).forEach((field) => {
-                  if (resource[group][field] === null || resource[group][field] === undefined) {
-                    processedData[resourceName][group][field] = 0;
-                    updates.push({
-                      resourceName,
-                      fieldGroup: group,
-                      name: field,
-                      value: 0,
-                    });
-                  }
-                });
+      // Ensure all fields have default values of 0
+      Object.keys(processedData).forEach((resourceName) => {
+        const resource = processedData[resourceName];
+        ['cost', 'production', 'producefrom'].forEach((group) => {
+          if (resource[group]) {
+            Object.keys(resource[group]).forEach((field) => {
+              if (resource[group][field] === null || resource[group][field] === undefined) {
+                processedData[resourceName][group][field] = 0;
               }
             });
-          });
-
-          // Update state and cache with processed data
-          setResourceData(processedData);
-          localStorage.setItem('resourceData', JSON.stringify(processedData));
-          console.log('Fetched and processed resources data:', processedData);
-
-          // Send updates to backend for null/empty values set to 0
-          updates.forEach((update) => {
-            fetch('http://localhost:5000/resources/update', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(update),
-            })
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json();
-              })
-              .then((data) => {
-                console.log(`Updated ${update.resourceName}.${update.fieldGroup}.${update.name} to 0`);
-              })
-              .catch((error) => {
-                console.error('Error updating resource:', error);
-              });
-          });
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching resources:', error);
-      });
-  }, []);
-
-  // Check if resources data needs to be fetched
-  const checkAndFetchResources = useCallback(() => {
-    fetch('http://localhost:5000/check_seen_since_last_update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tab: 'resources' }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.seenSinceLastUpdate === false) {
-          fetchResourcesData();
-        } else {
-          console.log('Resources data is up to date.');
-          // Load from cache
-          const cachedData = localStorage.getItem('resourceData');
-          if (cachedData) {
-            setResourceData(JSON.parse(cachedData));
-            console.log('Loaded resources data from cache.');
           }
-        }
-      })
-      .catch((error) => {
-        console.error('Error checking seenSinceLastUpdate:', error);
+        });
       });
-  }, [fetchResourcesData]);
+
+      setResourceData(processedData);
+      console.log('Loaded resources data from context');
+    }
+  }, [projectData]);
 
   useEffect(() => {
     if (activeTab === '/resources') {
-      checkAndFetchResources();
+      loadResourcesData();
     }
-  }, [activeTab, checkAndFetchResources]);
+  }, [activeTab, loadResourcesData]);
 
-  // Handle input changes and updates
+  // Handle input changes
   const handleInputChange = (fieldGroup, name, value) => {
-    // Convert value to number if possible
     const numericValue = value === '' ? '' : Number(value);
+
+    // Update local state
     setResourceData((prevData) => {
       const updatedData = { ...prevData };
       if (!updatedData[selectedResource]) {
@@ -118,34 +56,18 @@ const ResourcesPage = ({ activeTab }) => {
       return updatedData;
     });
 
-    // Send update to backend
-    const payload = {
-      resourceName: selectedResource,
-      fieldGroup,
-      name,
-      value: numericValue,
+    // Update in ProjectContext
+    const updatedResources = {
+      ...projectData.resources_data,
+      [selectedResource]: {
+        ...projectData.resources_data[selectedResource],
+        [fieldGroup]: {
+          ...projectData.resources_data[selectedResource]?.[fieldGroup],
+          [name]: numericValue
+        }
+      }
     };
-    fetch('http://localhost:5000/resources/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        console.log('Resource updated successfully');
-        // Update cache with new value
-        const cachedData = localStorage.getItem('resourceData');
-        if (cachedData) {
-          const parsedData = JSON.parse(cachedData);
-          parsedData[selectedResource][fieldGroup][name] = numericValue;
-          localStorage.setItem('resourceData', JSON.stringify(parsedData));
-        }
-      })
-      .catch((error) => {
-        console.error('Error updating resource:', error);
-      });
+    updateData('resources_data', updatedResources);
   };
 
   const resourcesList = [
@@ -163,10 +85,8 @@ const ResourcesPage = ({ activeTab }) => {
   ];
 
   const selectedResourceData = resourceData[selectedResource] || {};
-
   const { cost = {}, production = {}, producefrom = {} } = selectedResourceData;
 
-  // Map backend keys to frontend labels and names
   const costFields = [
     { label: 'Base Cost', name: 'wmbasecost', min: 0, max: 999999999 },
     { label: 'Full Cost', name: 'wmfullcost', min: 0, max: 999999999 },
