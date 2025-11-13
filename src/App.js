@@ -1,9 +1,9 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import Header from './components/Header';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import Box from '@mui/material/Box';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
 import ScenarioPage from './pages/ScenarioPage';
 import SettingsPage from './pages/SettingsPage';
@@ -15,15 +15,20 @@ import OrbatPage from './pages/OrbatPage';
 import ProgressBar from './components/Progressbar';
 import { ProjectProvider } from './context/ProjectContext';
 import useProjectManagement from './hooks/useProjectManagement';
-import './assets/styles/App.css';
+import theme from './theme';
+
+const DRAWER_WIDTH = 280;
 
 const App = () => {
     return (
-        <ProjectProvider>
-            <Router>
-                <AppWrapper />
-            </Router>
-        </ProjectProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <ProjectProvider>
+                <Router>
+                    <AppWrapper />
+                </Router>
+            </ProjectProvider>
+        </ThemeProvider>
     );
 };
 
@@ -69,6 +74,7 @@ const AppContent = ({
 }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [drawerOpen, setDrawerOpen] = useState(true);
     const [activeTab, setActiveTab] = useState(location.pathname);
 
     useEffect(() => {
@@ -77,14 +83,23 @@ const AppContent = ({
 
     useEffect(() => {
         if (!project) {
-            setActiveTab('/'); // Reset active tab to ScenarioPage
-            navigate('/');     // Navigate to ScenarioPage
+            setActiveTab('/');
+            navigate('/');
         }
     }, [project, navigate]);
 
+    const toggleDrawer = () => {
+        setDrawerOpen(!drawerOpen);
+    };
+
     return (
-        <>
-            <Navbar project={project} /> {/* Pass 'project' prop to Navbar */}
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+            <Navbar
+                project={project}
+                drawerOpen={drawerOpen}
+                toggleDrawer={toggleDrawer}
+                drawerWidth={DRAWER_WIDTH}
+            />
             <Sidebar
                 defaultProjects={defaultProjects}
                 project={project}
@@ -93,11 +108,26 @@ const AppContent = ({
                 handleExport={handleExport}
                 handleCreateEmptyProject={handleCreateEmptyProject}
                 handleFileChangeAndUpload={handleFileChangeAndUpload}
+                drawerOpen={drawerOpen}
+                drawerWidth={DRAWER_WIDTH}
             />
-            <main>
+            <Box
+                component="main"
+                sx={{
+                    flexGrow: 1,
+                    p: 3,
+                    mt: 8,
+                    ml: drawerOpen ? 0 : `-${DRAWER_WIDTH}px`,
+                    transition: theme => theme.transitions.create(['margin'], {
+                        easing: theme.transitions.easing.sharp,
+                        duration: theme.transitions.duration.leavingScreen,
+                    }),
+                    backgroundColor: 'background.default',
+                }}
+            >
                 <Routes>
                     <Route path="/" element={<ScenarioPage activeTab={activeTab} project={project} setProject={setProject} />} />
-                    {project && ( // Conditionally render other routes only if a project is loaded
+                    {project && (
                         <>
                             <Route path="/settings" element={<SettingsPage activeTab={activeTab} project={project} setProject={setProject} />} />
                             <Route path="/regions" element={<RegionsPage activeTab={activeTab} project={project} setProject={setProject} />} />
@@ -108,10 +138,9 @@ const AppContent = ({
                         </>
                     )}
                 </Routes>
-            </main>
+            </Box>
             <ProgressBar progress={progress}/>
-            <Footer />
-        </>
+        </Box>
     );
 };
 
