@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useProject } from '../context/ProjectContext';
 import '../assets/styles/SettingsPage.css';
 
-const SettingsPage = ({ activeTab, project, setProject }) => {
+const SettingsPage = ({ activeTab, project }) => {
+    const { projectData, updateData } = useProject();
     const [scenarioSettings, setScenarioSettings] = useState({});
     const [loading, setLoading] = useState(false);
-
-    const isMounted = useRef(false);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -24,7 +24,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
             [name]: newValue,
         }));
 
-        // Send updated value to backend
+        // Get backend key and value
         const backendKey = mapFrontendKeyToBackendKey(name);
         let backendValue;
 
@@ -36,110 +36,35 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
             backendValue = value;
         }
 
-        // Special handling for arrays and complex structures
+        // Update settings in ProjectContext
+        const updatedSettings = { ...projectData.settings_data };
+
         if (['militaryDifficulty', 'economicDifficulty', 'diplomaticDifficulty'].includes(name)) {
-            // Update difficulty array
             const difficultyIndex = {
                 'militaryDifficulty': 0,
                 'economicDifficulty': 1,
                 'diplomaticDifficulty': 2,
             }[name];
 
-            const currentDifficulty = scenarioSettings.difficulty || [2, 2, 2];
+            const currentDifficulty = updatedSettings.difficulty || [2, 2, 2];
             const newDifficulty = [...currentDifficulty];
             newDifficulty[difficultyIndex] = backendValue;
-
-            // Send updated difficulty array
-            fetch('http://localhost:5000/updateSetting', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ key: 'difficulty', value: newDifficulty }),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log('Difficulty setting updated successfully:', data);
-                })
-                .catch((error) => {
-                    console.error('Error updating difficulty setting:', error);
-                });
+            updatedSettings.difficulty = newDifficulty;
         } else if (['victoryHexX', 'victoryHexY'].includes(name)) {
-            // Update victoryhex array
             const victoryHexIndex = name === 'victoryHexX' ? 0 : 1;
-            const currentVictoryHex = scenarioSettings.victoryhex || [0, 0];
+            const currentVictoryHex = updatedSettings.victoryhex || [0, 0];
             const newVictoryHex = [...currentVictoryHex];
             newVictoryHex[victoryHexIndex] = backendValue || 0;
-
-            // Send updated victoryhex array
-            fetch('http://localhost:5000/updateSetting', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ key: 'victoryhex', value: newVictoryHex }),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log('Victory Hex setting updated successfully:', data);
-                })
-                .catch((error) => {
-                    console.error('Error updating Victory Hex setting:', error);
-                });
+            updatedSettings.victoryhex = newVictoryHex;
         } else if (name === 'startingDate') {
-            // Convert date string to array [YYYY, MM, DD]
             const dateArray = value ? value.split('-').map(Number) : [];
-            fetch('http://localhost:5000/updateSetting', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ key: 'startymd', value: dateArray }),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log('Starting date updated successfully:', data);
-                })
-                .catch((error) => {
-                    console.error('Error updating starting date:', error);
-                });
+            updatedSettings.startymd = dateArray;
         } else {
-            // Send other settings directly
-            fetch('http://localhost:5000/updateSetting', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ key: backendKey, value: backendValue }),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log('Setting updated successfully:', data);
-                })
-                .catch((error) => {
-                    console.error('Error updating setting:', error);
-                });
+            updatedSettings[backendKey] = backendValue;
         }
+
+        // Update context
+        updateData('settings_data', updatedSettings);
     };
 
     const mapFrontendKeyToBackendKey = (frontendKey) => {
@@ -202,80 +127,35 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
     };
 
     const resetSettings = () => {
-        // Logic to reset settings to default values
+        // Reset to default settings from config
+        const { DEFAULT_SETTINGS_STRUCTURE } = require('../utils/config');
+        updateData('settings_data', JSON.parse(JSON.stringify(DEFAULT_SETTINGS_STRUCTURE)));
     };
 
     const undoReset = () => {
-        // Logic to undo reset
+        console.log('Undo reset - not implemented');
     };
 
-    const fetchSettingsData = useCallback(() => {
-    setLoading(true);
-    fetch('http://localhost:5000/get_data')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.settings_data) {
-          const backendSettings = data.settings_data;
-          if (isMounted.current) {
-            setScenarioSettings(mapBackendSettingsToFrontend(backendSettings));
-            setLoading(false);
-            console.log('Fetched latest settings data.');
-          }
+    const loadSettingsData = useCallback(() => {
+        if (projectData && projectData.settings_data) {
+            setScenarioSettings(mapBackendSettingsToFrontend(projectData.settings_data));
         }
-      })
-      .catch((error) => {
-        if (isMounted.current) {
-          setLoading(false);
-          console.error('Error fetching settings:', error);
-        }
-      });
-  }, []);
+    }, [projectData]);
 
-  const checkAndFetchSettings = useCallback(() => {
-    fetch('http://localhost:5000/check_seen_since_last_update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ tab: 'settings' }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.seenSinceLastUpdate === false) {
-          console.log('Settings data has changed. Fetching new data.');
-          fetchSettingsData();
-        } else {
-          console.log('Settings data is up to date.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error checking seenSinceLastUpdate:', error);
-      });
-  }, [fetchSettingsData]);
-
-  useEffect(() => {
-        isMounted.current = true;
+    useEffect(() => {
         if (activeTab === '/settings' && project) {
-            if (Object.keys(scenarioSettings).length === 0) {
-                fetchSettingsData();
-            } else {
-                checkAndFetchSettings();
-            }
+            loadSettingsData();
         } else if (!project) {
-            // Reset state when project is closed
             setScenarioSettings({});
         }
-        return () => {
-            isMounted.current = false;
-        };
-    }, [activeTab, fetchSettingsData, checkAndFetchSettings, scenarioSettings, project]);
+    }, [activeTab, project, loadSettingsData]);
 
     const mapBackendSettingsToFrontend = (backendSettings) => {
         const formatDate = (dateArray) => {
-            if (!dateArray || dateArray.length !== 3) return ''; // Return empty if date is invalid
+            if (!dateArray || dateArray.length !== 3) return '';
             const [year, month, day] = dateArray;
-            const formattedMonth = month.toString().padStart(2, '0'); // Ensure two digits for month
-            const formattedDay = day.toString().padStart(2, '0');     // Ensure two digits for day
+            const formattedMonth = month.toString().padStart(2, '0');
+            const formattedDay = day.toString().padStart(2, '0');
             return `${year}-${formattedMonth}-${formattedDay}`;
         };
 
@@ -373,7 +253,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <input
                     type="date"
                     name="startingDate"
-                    value={scenarioSettings.startingDate}
+                    value={scenarioSettings.startingDate || ''}
                     onChange={handleInputChange}
                 />
 
@@ -383,7 +263,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     name="scenarioId"
                     min="0"
                     max="9999"
-                    value={scenarioSettings.scenarioId}
+                    value={scenarioSettings.scenarioId || ''}
                     onChange={handleInputChange}
                 />
 
@@ -393,7 +273,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     name="fastForwardDays"
                     min="0"
                     max="99999"
-                    value={scenarioSettings.fastForwardDays}
+                    value={scenarioSettings.fastForwardDays || ''}
                     onChange={handleInputChange}
                 />
 
@@ -403,7 +283,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     name="defaultRegion"
                     min="0"
                     max="99999"
-                    value={scenarioSettings.defaultRegion}
+                    value={scenarioSettings.defaultRegion || ''}
                     onChange={handleInputChange}
                 />
             </div>
@@ -414,7 +294,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Military Difficulty:</label>
                 <select
                     name="militaryDifficulty"
-                    value={scenarioSettings.militaryDifficulty}
+                    value={scenarioSettings.militaryDifficulty || 2}
                     onChange={handleInputChange}
                 >
                     {difficultyOptions.map((option, index) => (
@@ -425,7 +305,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Economic Difficulty:</label>
                 <select
                     name="economicDifficulty"
-                    value={scenarioSettings.economicDifficulty}
+                    value={scenarioSettings.economicDifficulty || 2}
                     onChange={handleInputChange}
                 >
                     {difficultyOptions.map((option, index) => (
@@ -436,7 +316,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Diplomatic Difficulty:</label>
                 <select
                     name="diplomaticDifficulty"
-                    value={scenarioSettings.diplomaticDifficulty}
+                    value={scenarioSettings.diplomaticDifficulty || 2}
                     onChange={handleInputChange}
                 >
                     {difficultyOptions.map((option, index) => (
@@ -451,7 +331,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Game Length:</label>
                 <select
                     name="gameLength"
-                    value={scenarioSettings.gameLength}
+                    value={scenarioSettings.gameLength || 0}
                     onChange={handleInputChange}
                 >
                     {gameLengthOptions.map((option, index) => (
@@ -462,7 +342,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Victory:</label>
                 <select
                     name="victory"
-                    value={scenarioSettings.victory}
+                    value={scenarioSettings.victory || 0}
                     onChange={handleInputChange}
                 >
                     {victoryOptions.map((option, index) => (
@@ -475,14 +355,14 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     type="number"
                     name="victoryHexX"
                     min="0"
-                    value={scenarioSettings.victoryHexX}
+                    value={scenarioSettings.victoryHexX || ''}
                     onChange={handleInputChange}
                 />
                 <input
                     type="number"
                     name="victoryHexY"
                     min="0"
-                    value={scenarioSettings.victoryHexY}
+                    value={scenarioSettings.victoryHexY || ''}
                     onChange={handleInputChange}
                 />
 
@@ -491,7 +371,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     type="number"
                     name="victoryTech"
                     min="0"
-                    value={scenarioSettings.victoryTech}
+                    value={scenarioSettings.victoryTech || ''}
                     onChange={handleInputChange}
                 />
             </div>
@@ -502,7 +382,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Resources Level:</label>
                 <select
                     name="resourcesLevel"
-                    value={scenarioSettings.resourcesLevel}
+                    value={scenarioSettings.resourcesLevel || 2}
                     onChange={handleInputChange}
                 >
                     {resourcesOptions.map((option, index) => (
@@ -513,7 +393,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Initial Funds:</label>
                 <select
                     name="initialFunds"
-                    value={scenarioSettings.initialFunds}
+                    value={scenarioSettings.initialFunds || 2}
                     onChange={handleInputChange}
                 >
                     {fundsOptions.map((option, index) => (
@@ -528,7 +408,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Global AI Stance:</label>
                 <select
                     name="globalAIStance"
-                    value={scenarioSettings.globalAIStance}
+                    value={scenarioSettings.globalAIStance || 0}
                     onChange={handleInputChange}
                 >
                     {aiStanceOptions.map((option, index) => (
@@ -539,7 +419,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Nuke Effect:</label>
                 <select
                     name="nukeEffect"
-                    value={scenarioSettings.nukeEffect}
+                    value={scenarioSettings.nukeEffect || 2}
                     onChange={handleInputChange}
                 >
                     {nukeEffectOptions.map((option, index) => (
@@ -550,7 +430,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>Approval Effect:</label>
                 <select
                     name="approvalEffect"
-                    value={scenarioSettings.approvalEffect}
+                    value={scenarioSettings.approvalEffect || 0}
                     onChange={handleInputChange}
                 >
                     {approvalOptions.map((option, index) => (
@@ -565,7 +445,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <label>GUI Level:</label>
                 <select
                     name="guiLevel"
-                    value={scenarioSettings.guiLevel}
+                    value={scenarioSettings.guiLevel || 0}
                     onChange={handleInputChange}
                 >
                     {guiLevelOptions.map((option, index) => (
@@ -578,7 +458,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     type="number"
                     name="mapSplash"
                     min="0"
-                    value={scenarioSettings.mapSplash}
+                    value={scenarioSettings.mapSplash || ''}
                     onChange={handleInputChange}
                 />
 
@@ -587,7 +467,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     type="number"
                     name="mapMusic"
                     min="0"
-                    value={scenarioSettings.mapMusic}
+                    value={scenarioSettings.mapMusic || ''}
                     onChange={handleInputChange}
                 />
             </div>
@@ -600,7 +480,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                     type="number"
                     name="startingYear"
                     min="0"
-                    value={scenarioSettings.startingYear}
+                    value={scenarioSettings.startingYear || ''}
                     onChange={handleInputChange}
                 />
 
@@ -608,7 +488,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <input
                     type="text"
                     name="techTreeDefault"
-                    value={scenarioSettings.techTreeDefault}
+                    value={scenarioSettings.techTreeDefault || ''}
                     onChange={handleInputChange}
                 />
 
@@ -616,7 +496,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <input
                     type="text"
                     name="regionAllies"
-                    value={scenarioSettings.regionAllies}
+                    value={scenarioSettings.regionAllies || ''}
                     onChange={handleInputChange}
                 />
 
@@ -624,7 +504,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <input
                     type="text"
                     name="regionAxis"
-                    value={scenarioSettings.regionAxis}
+                    value={scenarioSettings.regionAxis || ''}
                     onChange={handleInputChange}
                 />
 
@@ -632,7 +512,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                 <input
                     type="text"
                     name="sphereNN"
-                    value={scenarioSettings.sphereNN}
+                    value={scenarioSettings.sphereNN || ''}
                     onChange={handleInputChange}
                 />
             </div>
@@ -666,7 +546,7 @@ const SettingsPage = ({ activeTab, project, setProject }) => {
                         <input
                             type="checkbox"
                             name={option}
-                            checked={scenarioSettings[option]}
+                            checked={scenarioSettings[option] || false}
                             onChange={handleInputChange}
                         /> {option.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                     </label>
