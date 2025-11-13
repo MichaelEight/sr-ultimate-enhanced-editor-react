@@ -13,6 +13,7 @@ import ResourcesPage from './pages/ResourcesPage';
 import WorldMarketPage from './pages/WorldMarketPage';
 import OrbatPage from './pages/OrbatPage';
 import ProgressBar from './components/Progressbar';
+import { ProjectProvider } from './context/ProjectContext';
 import useProjectManagement from './hooks/useProjectManagement';
 import './assets/styles/App.css';
 
@@ -32,19 +33,21 @@ const App = () => {
     const defaultProjects = ["Project1", "Project2", "Project3"];
 
     return (
-        <Router>
-            <AppContent
-                defaultProjects={defaultProjects}
-                project={project}
-                setProject={setProject}
-                handleLoadDefaultProject={handleLoadDefaultProject}
-                handleCloseProject={handleCloseProject}
-                handleExport={handleExport}
-                handleCreateEmptyProject={handleCreateEmptyProject}
-                handleFileChangeAndUpload={handleFileChangeAndUpload}
-                progress={progress}
-            />
-        </Router>
+        <ProjectProvider>
+            <Router>
+                <AppContent
+                    defaultProjects={defaultProjects}
+                    project={project}
+                    setProject={setProject}
+                    handleLoadDefaultProject={handleLoadDefaultProject}
+                    handleCloseProject={handleCloseProject}
+                    handleExport={handleExport}
+                    handleCreateEmptyProject={handleCreateEmptyProject}
+                    handleFileChangeAndUpload={handleFileChangeAndUpload}
+                    progress={progress}
+                />
+            </Router>
+        </ProjectProvider>
     );
 };
 

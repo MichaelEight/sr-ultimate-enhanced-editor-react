@@ -1,77 +1,68 @@
 import { useState } from 'react';
-import { uploadFile, closeProject } from '../services/api';
-
+import { useProject } from '../context/ProjectContext';
 
 const useProjectManagement = () => {
+    const {
+        projectData,
+        projectName,
+        isLoading,
+        uploadFile,
+        exportProject,
+        closeProject,
+        createEmptyProject
+    } = useProject();
+
     const [file, setFile] = useState(null);
     const [validationResults, setValidationResults] = useState(null);
-    const [project, setProject] = useState(null);
+    const [progress, setProgress] = useState(0);
+
+    // Map projectData to the legacy 'project' format for compatibility
+    const project = projectData.scenario_data && Object.keys(projectData.scenario_data).length > 0
+        ? projectData.scenario_data
+        : null;
 
     // Handle file change and upload
     const handleFileChangeAndUpload = async (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
-    
+
         setFile(selectedFile);
+        setProgress(0);
         try {
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-    
-            const data = await uploadFile(formData);
-            console.log('Received data:', data);
-    
-            // Assuming the backend returns data with 'projectFileStructure'
-            setProject(data.projectFileStructure);
+            setProgress(30);
+            const result = await uploadFile(selectedFile);
+            setProgress(100);
+            console.log('Project loaded successfully:', result);
         } catch (error) {
-            console.log('Error during upload:', error.message);
+            console.error('Error during upload:', error.message);
+            setProgress(0);
         }
     };
-    
+
     // Handle creating an empty project
     const handleCreateEmptyProject = async () => {
         try {
-            const response = await fetch('http://localhost:5000/create_empty_project', {
-                method: 'GET',
-            });
-    
-            if (response.ok) {
-                const data = await response.json();
-                setProject(data.projectFileStructure);
-            } else {
-                console.error("Failed to create empty project");
-            }
+            createEmptyProject();
+            console.log('Empty project created');
         } catch (error) {
             console.error("Error creating empty project:", error);
         }
     };
 
-    // Handle loading a default project
+    // Handle loading a default project (not implemented in frontend-only version)
     const handleLoadDefaultProject = async (projectName) => {
-        try {
-            const response = await fetch(`http://localhost:5000/load_default_project/${projectName}`);
-            if (response.ok) {
-                const projectData = await response.json();
-                setProject(projectData.scenario_data);
-            } else {
-                console.error("Failed to load project data");
-            }
-        } catch (error) {
-            console.error("Error loading project data:", error);
-        }
+        console.warn('Loading default projects is not implemented in frontend-only version');
+        // This would require the default projects to be bundled with the frontend
+        // or fetched from a static resource
     };
 
     // Handle closing a project
     const handleCloseProject = async () => {
         try {
-            // Call backend API to close the project
-            await closeProject();
-
-            // Reset project state
-            setProject(null);
+            closeProject();
             setFile(null);
             setValidationResults(null);
-
-            // Optionally, reset other states or cached data here
+            setProgress(0);
             console.log('Project closed successfully.');
         } catch (error) {
             console.error('Error closing project:', error);
@@ -83,22 +74,16 @@ const useProjectManagement = () => {
         if (!project) return;
 
         try {
-            const response = await fetch('http://localhost:5000/export', {
-                method: 'GET',
-            });
-
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${project.scenario.filename || 'ExportedProject'}.zip`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } else {
-                console.error('Export failed');
-            }
+            const blob = await exportProject();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectName || 'ExportedProject'}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            console.log('Project exported successfully');
         } catch (error) {
             console.error('Error during export:', error);
         }
@@ -114,16 +99,25 @@ const useProjectManagement = () => {
         }));
     };
 
+    // Provide a setProject function for compatibility
+    const setProject = (newProject) => {
+        console.warn('setProject called - this is a no-op in frontend-only version');
+        // In frontend-only version, project state is managed by ProjectContext
+    };
+
     return {
         file,
         validationResults,
         project,
         setProject,
+        progress,
+        setProgress,
         handleFileChangeAndUpload,
         handleCreateEmptyProject,
         handleLoadDefaultProject,
         handleCloseProject,
         handleExport,
+        isLoading
     };
 };
 
