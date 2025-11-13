@@ -1,164 +1,99 @@
 // TheatersPage.jsx
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import debounce from 'lodash/debounce';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useProject } from '../context/ProjectContext';
 import '../assets/styles/TheatersPage.css';
 
 const TheatersPage = ({ activeTab }) => {
+  const { projectData, updateData } = useProject();
   const [excludeTheatres, setExcludeTheatres] = useState(false);
   const [theaters, setTheaters] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  const isMounted = useRef(false);
-
-  // Fetch theaters data from backend
-  const fetchTheatersData = useCallback(() => {
-    setLoading(true);
-    fetch('http://localhost:5000/theaters')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.theaters) {
-          if (isMounted.current) {
-            setTheaters(data.theaters);
-            setLoading(false);
-            console.log('Fetched latest theaters data.');
-          }
-        }
-      })
-      .catch((error) => {
-        if (isMounted.current) {
-          setLoading(false);
-          console.error('Error fetching theaters:', error);
-        }
-      });
-  }, []);
-
-  // Check if theaters data needs to be fetched
-  const checkAndFetchTheaters = useCallback(() => {
-    fetch('http://localhost:5000/check_seen_since_last_update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ tab: 'theaters' }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && data.seenSinceLastUpdate === false) {
-          console.log('Theaters data has changed. Fetching new data.');
-          fetchTheatersData();
-        } else {
-          console.log('Theaters data is up to date.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error checking seenSinceLastUpdate:', error);
-      });
-  }, [fetchTheatersData]);
+  // Load theaters data from ProjectContext
+  const loadTheatersData = useCallback(() => {
+    if (projectData && projectData.theaters_data) {
+      // Convert theaters object to array for display
+      const theatersArray = Object.entries(projectData.theaters_data).map(([id, theater]) => ({
+        id: parseInt(id, 10),
+        ...theater
+      }));
+      setTheaters(theatersArray);
+      console.log('Loaded theaters data from context');
+    }
+  }, [projectData]);
 
   useEffect(() => {
-    isMounted.current = true;
     if (activeTab === '/theaters') {
-      if (theaters.length === 0) {
-        fetchTheatersData();
-      } else {
-        checkAndFetchTheaters();
+      loadTheatersData();
+      // Load excludeTheatres setting if it exists
+      if (projectData.settings_data?.excludeTheatres !== undefined) {
+        setExcludeTheatres(projectData.settings_data.excludeTheatres === 1);
       }
     }
-    return () => {
-      isMounted.current = false;
-    };
-  }, [activeTab, fetchTheatersData, checkAndFetchTheaters, theaters.length]);
-
-  // Debounced function to handle theater updates
-  const debouncedHandleTheaterChange = useRef();
-
-  if (!debouncedHandleTheaterChange.current) {
-    debouncedHandleTheaterChange.current = debounce((updatedTheater) => {
-      fetch('http://localhost:5000/theaters/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedTheater),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log('Theater updated successfully');
-        })
-        .catch((error) => {
-          console.error('Error updating theater:', error);
-        });
-    }, 500);
-  }
+  }, [activeTab, loadTheatersData, projectData]);
 
   // Handle changes in theater data
   const handleTheaterChange = (theaterIndex, field, value) => {
     const updatedTheaters = [...theaters];
+
     if (field === 'transfers') {
-      updatedTheaters[theaterIndex][field] = value.split(',').map((item) => item.trim());
+      updatedTheaters[theaterIndex][field] = value.split(',').map((item) => item.trim()).map(Number);
+    } else if (field === 'id') {
+      updatedTheaters[theaterIndex][field] = value;
     } else {
       updatedTheaters[theaterIndex][field] = value;
     }
+
     setTheaters(updatedTheaters);
 
-    // Send update to backend
-    debouncedHandleTheaterChange.current(updatedTheaters[theaterIndex]);
+    // Update in ProjectContext - convert array back to object
+    const updatedTheatersObj = {};
+    updatedTheaters.forEach(theater => {
+      const { id, ...theaterData } = theater;
+      updatedTheatersObj[id] = theaterData;
+    });
+    updateData('theaters_data', updatedTheatersObj);
   };
 
   // Handle excludeTheatres checkbox change
   const handleCheckboxChange = (e) => {
-    setExcludeTheatres(e.target.checked);
-    // If necessary, send this state to the backend
-    fetch('http://localhost:5000/updateSetting', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ key: 'excludeTheatres', value: e.target.checked ? 1 : 0 }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Exclude theatres setting updated:', data);
-      })
-      .catch((error) => {
-        console.error('Error updating exclude theatres setting:', error);
-      });
+    const checked = e.target.checked;
+    setExcludeTheatres(checked);
+
+    // Update in settings_data
+    const updatedSettings = {
+      ...projectData.settings_data,
+      excludeTheatres: checked ? 1 : 0
+    };
+    updateData('settings_data', updatedSettings);
   };
 
-  // Handle Generate button click
+  // Handle Generate button click - creates dummy theater data
   const handleGenerateClick = () => {
-    fetch('http://localhost:5000/theaters/generate', {
-      method: 'POST',
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Theaters generated:', data.message);
-        fetchTheatersData(); // Refresh theaters data
-      })
-      .catch((error) => {
-        console.error('Error generating theaters:', error);
-      });
+    const generatedTheaters = {};
+    for (let i = 1; i <= 10; i++) {
+      generatedTheaters[i] = {
+        theatreName: `Theater ${i}`,
+        theatreCode: `TH${i}`,
+        culture: 0,
+        xLocation: 0,
+        yLocation: 0,
+        transfers: []
+      };
+    }
+    updateData('theaters_data', generatedTheaters);
+    console.log('Generated dummy theaters');
   };
 
   // Handle Import from CVP button click
   const handleImportClick = () => {
-    fetch('http://localhost:5000/theaters/import_from_cvp', {
-      method: 'POST',
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Theaters imported from CVP:', data.message);
-        fetchTheatersData(); // Refresh theaters data
-      })
-      .catch((error) => {
-        console.error('Error importing theaters from CVP:', error);
-      });
+    // Import theaters from CVP data (already in projectData.theaters_data from CVP parser)
+    if (projectData.theaters_data && Object.keys(projectData.theaters_data).length > 0) {
+      console.log('Theaters already imported from CVP file');
+      loadTheatersData(); // Just reload to refresh the view
+    } else {
+      console.warn('No CVP data available to import theaters from');
+    }
   };
 
   return (
@@ -180,98 +115,94 @@ const TheatersPage = ({ activeTab }) => {
       </div>
 
       <div className="theater-table-wrapper">
-        {loading ? (
-          <p>Loading data...</p>
-        ) : (
-          <table className="theater-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Theatre Name</th>
-                <th>Theatre Code</th>
-                <th>Culture</th>
-                <th>X Location</th>
-                <th>Y Location</th>
-                <th>Transfers</th>
-              </tr>
-            </thead>
-            <tbody>
-              {theaters.length > 0 ? (
-                theaters.map((theater, index) => (
-                  <tr key={index}>
-                    <td>
-                      <input
-                        type="number"
-                        value={theater.id}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'id', parseInt(e.target.value, 10))
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={theater.theatreName}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'theatreName', e.target.value)
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={theater.theatreCode}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'theatreCode', e.target.value)
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={theater.culture}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'culture', parseInt(e.target.value, 10))
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={theater.xLocation}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'xLocation', parseInt(e.target.value, 10))
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        value={theater.yLocation}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'yLocation', parseInt(e.target.value, 10))
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={theater.transfers.join(', ')}
-                        onChange={(e) =>
-                          handleTheaterChange(index, 'transfers', e.target.value)
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7">No theaters available</td>
+        <table className="theater-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Theatre Name</th>
+              <th>Theatre Code</th>
+              <th>Culture</th>
+              <th>X Location</th>
+              <th>Y Location</th>
+              <th>Transfers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {theaters.length > 0 ? (
+              theaters.map((theater, index) => (
+                <tr key={index}>
+                  <td>
+                    <input
+                      type="number"
+                      value={theater.id || ''}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'id', parseInt(e.target.value, 10) || 0)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={theater.theatreName || ''}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'theatreName', e.target.value)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={theater.theatreCode || ''}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'theatreCode', e.target.value)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={theater.culture || 0}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'culture', parseInt(e.target.value, 10) || 0)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={theater.xLocation || 0}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'xLocation', parseInt(e.target.value, 10) || 0)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={theater.yLocation || 0}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'yLocation', parseInt(e.target.value, 10) || 0)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      value={theater.transfers ? theater.transfers.join(', ') : ''}
+                      onChange={(e) =>
+                        handleTheaterChange(index, 'transfers', e.target.value)
+                      }
+                    />
+                  </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7">No theaters available</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
