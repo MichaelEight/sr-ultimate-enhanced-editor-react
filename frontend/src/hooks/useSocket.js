@@ -1,18 +1,8 @@
 // src/hooks/useSocket.js
-import { useEffect } from 'react';
-import io from 'socket.io-client';
-const socket = io('http://localhost:5000');
+// Socket.io disabled - backend no longer used (frontend-only architecture)
 
 const useSocket = (setProgress) => {
-    useEffect(() => {
-        socket.on('progress', (data) => {
-            // setProgress(data.progress);
-        });
-
-        return () => {
-            socket.off('progress');
-        };
-    }, [setProgress]);
+    // No-op - socket functionality removed as part of backend elimination
 };
 
 export default useSocket;
