@@ -37,32 +37,24 @@ export const useProject = () => {
 };
 
 export const ProjectProvider = ({ children }) => {
-    // Project state
-    const [projectData, setProjectData] = useState(() => {
-        // Try to load from localStorage on init
-        const saved = localStorage.getItem('projectData');
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed to parse saved project data:', e);
-            }
-        }
-        return createEmptyProject();
-    });
-
+    // Project state - start with empty project, no auto-load from localStorage
+    const [projectData, setProjectData] = useState(createEmptyProject);
     const [originalZipFiles, setOriginalZipFiles] = useState({});
     const [projectName, setProjectName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [hasProject, setHasProject] = useState(false); // Track if real project is loaded
 
-    // Save to localStorage whenever projectData changes
+    // Save to localStorage only when a real project is loaded
     useEffect(() => {
-        try {
-            localStorage.setItem('projectData', JSON.stringify(projectData));
-        } catch (e) {
-            console.error('Failed to save project data to localStorage:', e);
+        if (hasProject) {
+            try {
+                localStorage.setItem('projectData', JSON.stringify(projectData));
+                localStorage.setItem('projectName', projectName);
+            } catch (e) {
+                console.error('Failed to save project data to localStorage:', e);
+            }
         }
-    }, [projectData]);
+    }, [projectData, projectName, hasProject]);
 
     function createEmptyProject() {
         return {
@@ -139,6 +131,7 @@ export const ProjectProvider = ({ children }) => {
             }
 
             setProjectData(newProjectData);
+            setHasProject(true); // Mark that a real project is now loaded
             console.log('Project loaded successfully');
             return { success: true, projectFileStructure: newProjectData.scenario_data };
         } catch (error) {
@@ -252,7 +245,9 @@ export const ProjectProvider = ({ children }) => {
         setProjectData(createEmptyProject());
         setOriginalZipFiles({});
         setProjectName('');
+        setHasProject(false); // Clear project loaded flag
         localStorage.removeItem('projectData');
+        localStorage.removeItem('projectName');
         console.log('Project closed');
     }, []);
 
@@ -261,6 +256,7 @@ export const ProjectProvider = ({ children }) => {
         setProjectData(createEmptyProject());
         setOriginalZipFiles({});
         setProjectName('NewProject');
+        setHasProject(true); // Mark that a project (empty) is now loaded
         console.log('Empty project created');
     }, []);
 

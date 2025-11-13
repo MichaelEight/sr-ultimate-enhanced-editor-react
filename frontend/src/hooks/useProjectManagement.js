@@ -17,9 +17,8 @@ const useProjectManagement = () => {
     const [progress, setProgress] = useState(0);
 
     // Map projectData to the legacy 'project' format for compatibility
-    const project = projectData.scenario_data && Object.keys(projectData.scenario_data).length > 0
-        ? projectData.scenario_data
-        : null;
+    // Only return project if projectName exists (indicating a real project is loaded)
+    const project = projectName ? projectData.scenario_data : null;
 
     // Handle file change and upload
     const handleFileChangeAndUpload = async (e) => {
