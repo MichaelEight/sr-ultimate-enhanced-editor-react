@@ -161,18 +161,24 @@ export function extractCvpData(content) {
 
         // Collecting Theaters_Data
         if (inTheaters) {
+            // Skip empty lines
+            if (!strippedLine) {
+                continue;
+            }
+
             const theaterParts = strippedLine.split(',').map(x => x.trim());
-            console.log(`Parsing theater line:`, theaterParts);
-            if (theaterParts.length >= 6) {
+            if (theaterParts.length >= 6 && theaterParts[0]) {
                 const theatreId = parseInt(theaterParts[0], 10);
-                data.Theaters_Data[theatreId] = {
-                    theatreName: theaterParts[1],
-                    theatreCode: theaterParts[2],
-                    culture: parseInt(theaterParts[3], 10),
-                    xLocation: parseInt(theaterParts[4], 10),
-                    yLocation: parseInt(theaterParts[5], 10),
-                    transfers: []
-                };
+                if (!isNaN(theatreId)) {
+                    data.Theaters_Data[theatreId] = {
+                        theatreName: theaterParts[1],
+                        theatreCode: theaterParts[2],
+                        culture: parseInt(theaterParts[3], 10),
+                        xLocation: parseInt(theaterParts[4], 10),
+                        yLocation: parseInt(theaterParts[5], 10),
+                        transfers: []
+                    };
+                }
             }
             continue;
         }
