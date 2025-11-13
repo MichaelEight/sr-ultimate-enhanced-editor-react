@@ -30,7 +30,12 @@ const HEXRESMULTS_LABELS = [
 ];
 
 function ensureLength(lst, length) {
-    lst = [...lst, ...Array(length - lst.length).fill(null)];
+    // Only add elements if list is shorter than desired length
+    const diff = length - lst.length;
+    if (diff > 0) {
+        lst = [...lst, ...Array(diff).fill(null)];
+    }
+    // Remove trailing nulls
     while (lst.length > 0 && lst[lst.length - 1] === null) {
         lst.pop();
     }
