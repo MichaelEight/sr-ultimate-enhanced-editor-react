@@ -1,6 +1,0 @@
-Flask==2.0.3
-Flask-CORS==3.0.10
-flask-socketio==5.2.0
-python-socketio==5.5.2
-rarfile==4.0
-werkzeug==2.0.3
