@@ -18,11 +18,20 @@ import useProjectManagement from './hooks/useProjectManagement';
 import './assets/styles/App.css';
 
 const App = () => {
+    return (
+        <ProjectProvider>
+            <Router>
+                <AppWrapper />
+            </Router>
+        </ProjectProvider>
+    );
+};
+
+const AppWrapper = () => {
     const {
         project,
         setProject,
         progress,
-        setProgress,
         handleCreateEmptyProject,
         handleFileChangeAndUpload,
         handleLoadDefaultProject,
@@ -33,21 +42,17 @@ const App = () => {
     const defaultProjects = ["Project1", "Project2", "Project3"];
 
     return (
-        <ProjectProvider>
-            <Router>
-                <AppContent
-                    defaultProjects={defaultProjects}
-                    project={project}
-                    setProject={setProject}
-                    handleLoadDefaultProject={handleLoadDefaultProject}
-                    handleCloseProject={handleCloseProject}
-                    handleExport={handleExport}
-                    handleCreateEmptyProject={handleCreateEmptyProject}
-                    handleFileChangeAndUpload={handleFileChangeAndUpload}
-                    progress={progress}
-                />
-            </Router>
-        </ProjectProvider>
+        <AppContent
+            defaultProjects={defaultProjects}
+            project={project}
+            setProject={setProject}
+            handleLoadDefaultProject={handleLoadDefaultProject}
+            handleCloseProject={handleCloseProject}
+            handleExport={handleExport}
+            handleCreateEmptyProject={handleCreateEmptyProject}
+            handleFileChangeAndUpload={handleFileChangeAndUpload}
+            progress={progress}
+        />
     );
 };
 
