@@ -1,8 +1,7 @@
 # Supreme Ruler Ultimate Enhanced Editor
 
 ## Tech
-- Frontend: React
-- Backend: Python, Flask
+- React
 
 ## How to use
 1. Clone the repository
@@ -11,13 +10,11 @@ git clone https://github.com/MichaelEight/sr-ultimate-enhanced-editor-react.git
 ```
 2. Install dependencies
 ```bash
-cd frontend
+cd sr-ultimate-enhanced-editor-react
 npm install
 ```
-Wait for the frontend to build, then install the backend dependencies:
+3. Run the project
 ```bash
-cd backend
-pip install -r requirements.txt
+npm start
 ```
-3. Run the project using `start.bat`.
 4. Open your browser and navigate to `http://localhost:3000`.
