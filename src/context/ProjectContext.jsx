@@ -44,6 +44,24 @@ export const ProjectProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [hasProject, setHasProject] = useState(false); // Track if real project is loaded
 
+    // Load from localStorage on mount
+    useEffect(() => {
+        try {
+            const savedProjectData = localStorage.getItem('projectData');
+            const savedProjectName = localStorage.getItem('projectName');
+
+            if (savedProjectData && savedProjectName) {
+                const parsedData = JSON.parse(savedProjectData);
+                setProjectData(parsedData);
+                setProjectName(savedProjectName);
+                setHasProject(true);
+                console.log('Project loaded from localStorage');
+            }
+        } catch (e) {
+            console.error('Failed to load project from localStorage:', e);
+        }
+    }, []); // Run only once on mount
+
     // Save to localStorage only when a real project is loaded
     useEffect(() => {
         if (hasProject) {

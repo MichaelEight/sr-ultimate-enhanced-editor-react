@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
@@ -12,7 +13,9 @@ import Tooltip from '@mui/material/Tooltip';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import AddIcon from '@mui/icons-material/Add';
+import { DataGrid, GridToolbar, GridActionsCellItem } from '@mui/x-data-grid';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const RegionsPage = ({ activeTab, project }) => {
   const { projectData, updateData } = useProject();
@@ -90,6 +93,120 @@ const RegionsPage = ({ activeTab, project }) => {
     }
 
     return newRow;
+  }, [regions, projectData, updateData]);
+
+  // Add new region
+  const handleAddRegion = useCallback(() => {
+    const newId = Math.max(...regions.map(r => r.ID), 0) + 1;
+    const newRegion = {
+      ID: newId,
+      Properties: {
+        regionname: `New Region ${newId}`,
+        nonplayable: 0,
+        flagnum: 0,
+        prefixname: '',
+        altregionname: '',
+        blocknum: 0,
+        altblocknum: 0,
+        continentnum: 0,
+        musictrack: '',
+        regioncolor: '',
+        politic: '',
+        govtype: '',
+        loyalty: 50,
+        playeragenda: '',
+        playeraistance: '',
+        refpopulation: 1000000,
+        poptotalarmy: 0,
+        popminreserve: 0,
+        literacy: 50,
+        lifeexp: 70,
+        avgchildren: 2,
+        crimerate: 5,
+        treasury: 1000000,
+        nationaldebtgdp: 0,
+        unemployment: 5,
+        gdpc: 10000,
+        inflation: 2,
+        buyingpower: 100,
+        prodefficiency: 100,
+        civapproval: 50,
+        milapproval: 50,
+        creditrating: 50,
+        tourismrating: 50,
+        envrating: 50,
+        defcon: 5,
+        fanaticism: 0,
+        techlevel: 5,
+        alertlevel: 0,
+        bconscript: 0,
+        forcesplan: 0,
+        milspendsalary: 0,
+        milspendmaint: 0,
+        milspendintel: 0,
+        milspendresearch: 0,
+        milsubsidyrating: 0,
+        worldavail: 100,
+        armsavail: 100,
+        worldintegrity: 100,
+        treatyintegrity: 100,
+        domsubsidyrating: 0,
+        bwmmember: 0,
+        masterdata: 0,
+        influence: '',
+        influenceval: '',
+        couppossibility: 0,
+        revoltpossibility: 0,
+        independencedesire: 0,
+        parentloyalty: 0,
+        independencetarget: 0,
+        sphere: 0,
+        civiliansphere: 0,
+        keepregion: 0,
+        parentregion: 0,
+        capitalx: 0,
+        capitaly: 0,
+        theatrehome: 0,
+        religionstate: 0,
+        RacePrimary: 0,
+        RaceSecondary: 0,
+        electiondate: '',
+      }
+    };
+
+    const updatedRegions = [...regions, { ...newRegion, isActive: true, ...newRegion.Properties }];
+    setRegions(updatedRegions);
+
+    const newRegionsData = [...projectData.regions_data, newRegion];
+    updateData('regions_data', newRegionsData);
+
+    // Add to regionincl
+    const regioninclData = projectData.regionincl_data || { regions: [] };
+    const newRegionincl = {
+      ...regioninclData,
+      regions: [
+        ...(regioninclData.regions || []),
+        { regionId: newId, isActive: true, comment: null }
+      ]
+    };
+    updateData('regionincl_data', newRegionincl);
+  }, [regions, projectData, updateData]);
+
+  // Delete region
+  const handleDeleteRegion = useCallback((id) => {
+    const updatedRegions = regions.filter(r => r.ID !== id);
+    setRegions(updatedRegions);
+
+    const newRegionsData = projectData.regions_data.filter(r => r.ID !== id);
+    updateData('regions_data', newRegionsData);
+
+    // Remove from regionincl
+    const regioninclData = projectData.regionincl_data || { regions: [] };
+    const newRegionincl = {
+      ...regioninclData,
+      regions: regioninclData.regions.filter(r => r.regionId !== id)
+    };
+    updateData('regionincl_data', newRegionincl);
   }, [regions, projectData, updateData]);
 
   // Define columns with categories
@@ -203,7 +320,21 @@ const RegionsPage = ({ activeTab, project }) => {
     { field: 'RacePrimary', headerName: 'Race Primary', width: 130, type: 'number', editable: true },
     { field: 'RaceSecondary', headerName: 'Race Secondary', width: 150, type: 'number', editable: true },
     { field: 'electiondate', headerName: 'Election Date', width: 150, editable: true },
-  ], []);
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 80,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<DeleteIcon />}
+          label="Delete"
+          onClick={() => handleDeleteRegion(params.id)}
+          color="error"
+        />,
+      ],
+    },
+  ], [handleDeleteRegion]);
 
   // Filter regions based on search term
   const filteredRegions = useMemo(() => {
@@ -241,6 +372,13 @@ const RegionsPage = ({ activeTab, project }) => {
           <Typography variant="h5" sx={{ fontWeight: 600, flexGrow: 1 }}>
             Regions Editor
           </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddRegion}
+          >
+            Add Region
+          </Button>
           <Chip
             label={`${filteredRegions.length} regions`}
             color="primary"
