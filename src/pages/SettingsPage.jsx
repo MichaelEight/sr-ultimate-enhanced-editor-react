@@ -199,24 +199,24 @@ const SettingsPage = ({ activeTab, project }) => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>Military</InputLabel>
-                <Select value={settings.militaryDifficulty ?? 2} onChange={(e) => handleChange('militaryDifficulty', e.target.value, 'number')}>
+                <InputLabel shrink>Military</InputLabel>
+                <Select value={settings.militaryDifficulty ?? 2} onChange={(e) => handleChange('militaryDifficulty', e.target.value, 'number')} notched>
                   {difficultyOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>Economic</InputLabel>
-                <Select value={settings.economicDifficulty ?? 2} onChange={(e) => handleChange('economicDifficulty', e.target.value, 'number')}>
+                <InputLabel shrink>Economic</InputLabel>
+                <Select value={settings.economicDifficulty ?? 2} onChange={(e) => handleChange('economicDifficulty', e.target.value, 'number')} notched>
                   {difficultyOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>Diplomatic</InputLabel>
-                <Select value={settings.diplomaticDifficulty ?? 2} onChange={(e) => handleChange('diplomaticDifficulty', e.target.value, 'number')}>
+                <InputLabel shrink>Diplomatic</InputLabel>
+                <Select value={settings.diplomaticDifficulty ?? 2} onChange={(e) => handleChange('diplomaticDifficulty', e.target.value, 'number')} notched>
                   {difficultyOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
@@ -234,16 +234,16 @@ const SettingsPage = ({ activeTab, project }) => {
           <Grid container spacing={2}>
             <Grid item xs={6} sm={3}>
               <FormControl fullWidth size="small">
-                <InputLabel>Game Length</InputLabel>
-                <Select value={settings.gameLength ?? 0} onChange={(e) => handleChange('gameLength', e.target.value, 'number')}>
+                <InputLabel shrink>Game Length</InputLabel>
+                <Select value={settings.gameLength ?? 0} onChange={(e) => handleChange('gameLength', e.target.value, 'number')} notched>
                   {gameLengthOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={6} sm={3}>
               <FormControl fullWidth size="small">
-                <InputLabel>Victory Type</InputLabel>
-                <Select value={settings.victory ?? 0} onChange={(e) => handleChange('victory', e.target.value, 'number')}>
+                <InputLabel shrink>Victory Type</InputLabel>
+                <Select value={settings.victory ?? 0} onChange={(e) => handleChange('victory', e.target.value, 'number')} notched>
                   {victoryOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
@@ -270,16 +270,16 @@ const SettingsPage = ({ activeTab, project }) => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
-                <InputLabel>Resources Level</InputLabel>
-                <Select value={settings.resourcesLevel ?? 2} onChange={(e) => handleChange('resourcesLevel', e.target.value, 'number')}>
+                <InputLabel shrink>Resources Level</InputLabel>
+                <Select value={settings.resourcesLevel ?? 2} onChange={(e) => handleChange('resourcesLevel', e.target.value, 'number')} notched>
                   {resourcesOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
-                <InputLabel>Initial Funds</InputLabel>
-                <Select value={settings.initialFunds ?? 2} onChange={(e) => handleChange('initialFunds', e.target.value, 'number')}>
+                <InputLabel shrink>Initial Funds</InputLabel>
+                <Select value={settings.initialFunds ?? 2} onChange={(e) => handleChange('initialFunds', e.target.value, 'number')} notched>
                   {fundsOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
@@ -297,24 +297,24 @@ const SettingsPage = ({ activeTab, project }) => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>Global AI Stance</InputLabel>
-                <Select value={settings.globalAIStance ?? 0} onChange={(e) => handleChange('globalAIStance', e.target.value, 'number')}>
+                <InputLabel shrink>Global AI Stance</InputLabel>
+                <Select value={settings.globalAIStance ?? 0} onChange={(e) => handleChange('globalAIStance', e.target.value, 'number')} notched>
                   {aiStanceOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>Nuke Effect</InputLabel>
-                <Select value={settings.nukeEffect ?? 2} onChange={(e) => handleChange('nukeEffect', e.target.value, 'number')}>
+                <InputLabel shrink>Nuke Effect</InputLabel>
+                <Select value={settings.nukeEffect ?? 2} onChange={(e) => handleChange('nukeEffect', e.target.value, 'number')} notched>
                   {nukeEffectOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>Approval Effect</InputLabel>
-                <Select value={settings.approvalEffect ?? 0} onChange={(e) => handleChange('approvalEffect', e.target.value, 'number')}>
+                <InputLabel shrink>Approval Effect</InputLabel>
+                <Select value={settings.approvalEffect ?? 0} onChange={(e) => handleChange('approvalEffect', e.target.value, 'number')} notched>
                   {approvalOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
@@ -332,8 +332,8 @@ const SettingsPage = ({ activeTab, project }) => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel>GUI Level</InputLabel>
-                <Select value={settings.guiLevel ?? 0} onChange={(e) => handleChange('guiLevel', e.target.value, 'number')}>
+                <InputLabel shrink>GUI Level</InputLabel>
+                <Select value={settings.guiLevel ?? 0} onChange={(e) => handleChange('guiLevel', e.target.value, 'number')} notched>
                   {guiLevelOptions.map((opt, idx) => <MenuItem key={idx} value={idx}>{opt}</MenuItem>)}
                 </Select>
               </FormControl>
