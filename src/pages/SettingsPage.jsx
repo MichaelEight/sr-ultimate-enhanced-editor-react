@@ -174,16 +174,16 @@ const SettingsPage = ({ activeTab, project }) => {
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth label="Starting Date" type="date" value={settings.startingDate || ''} onChange={(e) => handleChange('startingDate', e.target.value, 'date')} size="small" InputLabelProps={{ shrink: true }} />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth label="Scenario ID" type="number" value={settings.scenarioId || ''} onChange={(e) => handleChange('scenarioId', e.target.value, 'number')} size="small" />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth label="Fast Forward Days" type="number" value={settings.fastForwardDays || ''} onChange={(e) => handleChange('fastForwardDays', e.target.value, 'number')} size="small" />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth label="Default Region" type="number" value={settings.defaultRegion || ''} onChange={(e) => handleChange('defaultRegion', e.target.value, 'number')} size="small" />
             </Grid>
           </Grid>
@@ -232,7 +232,7 @@ const SettingsPage = ({ activeTab, project }) => {
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth size="small">
                 <InputLabel shrink>Game Length</InputLabel>
                 <Select value={settings.gameLength ?? 0} onChange={(e) => handleChange('gameLength', e.target.value, 'number')} notched>
@@ -240,7 +240,7 @@ const SettingsPage = ({ activeTab, project }) => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth size="small">
                 <InputLabel shrink>Victory Type</InputLabel>
                 <Select value={settings.victory ?? 0} onChange={(e) => handleChange('victory', e.target.value, 'number')} notched>
@@ -248,13 +248,13 @@ const SettingsPage = ({ activeTab, project }) => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid item xs={12} sm={4} md={2}>
               <TextField fullWidth label="Victory Hex X" type="number" value={settings.victoryHexX || ''} onChange={(e) => handleChange('victoryHexX', e.target.value, 'number')} size="small" />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid item xs={12} sm={4} md={2}>
               <TextField fullWidth label="Victory Hex Y" type="number" value={settings.victoryHexY || ''} onChange={(e) => handleChange('victoryHexY', e.target.value, 'number')} size="small" />
             </Grid>
-            <Grid item xs={4} sm={2}>
+            <Grid item xs={12} sm={4} md={2}>
               <TextField fullWidth label="Victory Tech" type="number" value={settings.victoryTech || ''} onChange={(e) => handleChange('victoryTech', e.target.value, 'number')} size="small" />
             </Grid>
           </Grid>
@@ -355,19 +355,19 @@ const SettingsPage = ({ activeTab, project }) => {
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth label="Starting Year" type="number" value={settings.startingYear || ''} onChange={(e) => handleChange('startingYear', e.target.value, 'number')} size="small" />
             </Grid>
-            <Grid item xs={6} sm={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField fullWidth label="Tech Tree Default" value={settings.techTreeDefault || ''} onChange={(e) => handleChange('techTreeDefault', e.target.value, 'text')} size="small" />
             </Grid>
-            <Grid item xs={6} sm={2}>
+            <Grid item xs={12} sm={4} md={2}>
               <TextField fullWidth label="Region Allies" value={settings.regionAllies || ''} onChange={(e) => handleChange('regionAllies', e.target.value, 'text')} size="small" />
             </Grid>
-            <Grid item xs={6} sm={2}>
+            <Grid item xs={12} sm={4} md={2}>
               <TextField fullWidth label="Region Axis" value={settings.regionAxis || ''} onChange={(e) => handleChange('regionAxis', e.target.value, 'text')} size="small" />
             </Grid>
-            <Grid item xs={6} sm={2}>
+            <Grid item xs={12} sm={4} md={2}>
               <TextField fullWidth label="Sphere NN" value={settings.sphereNN || ''} onChange={(e) => handleChange('sphereNN', e.target.value, 'text')} size="small" />
             </Grid>
           </Grid>
