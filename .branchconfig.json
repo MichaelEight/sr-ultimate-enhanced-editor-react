@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "branchingStrategy": {
+    "defaultBranch": "dev",
+    "releaseBranch": "main",
+    "developmentBranch": "dev",
+    "description": "Development happens on 'dev' branch. 'main' is reserved for releases only.",
+    "workflow": {
+      "newFeatures": "Create feature branches from 'dev'",
+      "bugFixes": "Create fix branches from 'dev'",
+      "releases": "Merge 'dev' into 'main' for releases"
+    }
+  },
+  "branchNaming": {
+    "convention": "prefix/description",
+    "allowedPrefixes": [
+      "feat",
+      "fix",
+      "refactor",
+      "docs",
+      "test",
+      "chore",
+      "style",
+      "perf",
+      "ci",
+      "build",
+      "revert"
+    ],
+    "examples": [
+      "feat/user-authentication",
+      "fix/login-bug",
+      "refactor/database-queries",
+      "docs/api-documentation"
+    ],
+    "pattern": "^(feat|fix|refactor|docs|test|chore|style|perf|ci|build|revert)/[a-z0-9-]+$"
+  },
+  "commitMessage": {
+    "format": "[prefix]: [short summary of changes]",
+    "rules": [
+      "Single line only (no multi-line commits)",
+      "Start with lowercase prefix (feat, fix, refactor, etc.)",
+      "Brief, clear summary of what changed",
+      "No period at the end"
+    ],
+    "examples": [
+      "feat: Add user login functionality",
+      "fix: Bug with dropdown input labels",
+      "refactor: Simplify database query logic",
+      "docs: Update API documentation",
+      "feat: Add unit handling to ORBAT tab"
+    ]
+  },
+  "protectedBranches": {
+    "main": {
+      "allowDirectPush": false,
+      "requiresPR": true,
+      "description": "Release branch - no direct pushes allowed"
+    },
+    "dev": {
+      "allowDirectPush": false,
+      "requiresPR": true,
+      "description": "Main development branch - use feature branches"
+    }
+  },
+  "rules": [
+    "Always branch from 'dev' for new work",
+    "Never push directly to 'main'",
+    "Use conventional commit prefixes (feat/, fix/, etc.)",
+    "Create pull requests to merge into 'dev'",
+    "Only merge 'dev' into 'main' for releases"
+  ]
+}
