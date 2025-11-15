@@ -1,18 +1,32 @@
 // WorldMarketPage.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useProject } from '../context/ProjectContext';
-import '../assets/styles/WorldMarketPage.css';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const WorldMarketPage = ({ activeTab }) => {
   const { projectData, updateData } = useProject();
   const [worldMarketData, setWorldMarketData] = useState({});
+  const [expanded, setExpanded] = useState(['settings']);
 
-  // Load world market data from ProjectContext
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(prev =>
+      isExpanded ? [...prev, panel] : prev.filter(p => p !== panel)
+    );
+  };
+
   const loadWorldMarketData = useCallback(() => {
-    if (projectData && projectData.worldmarket_data) {
+    if (projectData?.worldmarket_data) {
       setWorldMarketData(projectData.worldmarket_data);
-      console.log('Loaded world market data from context');
     }
   }, [projectData]);
 
@@ -22,11 +36,9 @@ const WorldMarketPage = ({ activeTab }) => {
     }
   }, [activeTab, loadWorldMarketData]);
 
-  // Handle input changes for nested properties
   const handleInputChange = (category, field, value) => {
     const numericValue = value === '' ? '' : Number(value);
 
-    // Update local state
     setWorldMarketData((prevData) => ({
       ...prevData,
       [category]: {
@@ -35,7 +47,6 @@ const WorldMarketPage = ({ activeTab }) => {
       }
     }));
 
-    // Update in ProjectContext
     const updatedWorldMarket = {
       ...projectData.worldmarket_data,
       [category]: {
@@ -46,131 +57,172 @@ const WorldMarketPage = ({ activeTab }) => {
     updateData('worldmarket_data', updatedWorldMarket);
   };
 
+  const handleNestedChange = (category, parent, field, value) => {
+    const numericValue = Number(value) || 0;
+
+    setWorldMarketData((prevData) => ({
+      ...prevData,
+      [category]: {
+        ...prevData[category],
+        [parent]: {
+          ...prevData[category]?.[parent],
+          [field]: numericValue
+        }
+      }
+    }));
+
+    const updatedWorldMarket = {
+      ...projectData.worldmarket_data,
+      [category]: {
+        ...projectData.worldmarket_data[category],
+        [parent]: {
+          ...projectData.worldmarket_data[category]?.[parent],
+          [field]: numericValue
+        }
+      }
+    };
+    updateData('worldmarket_data', updatedWorldMarket);
+  };
+
   const settings = worldMarketData.settings || {};
   const military = worldMarketData.military || {};
   const economic = worldMarketData.economic || {};
 
+  const battleStrengthFields = military.battstrdefault ? Object.keys(military.battstrdefault).map(key => ({
+    key,
+    label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
+  })) : [];
+
+  const socialDefaultsFields = economic.socialdefaults ? Object.keys(economic.socialdefaults).map(key => ({
+    key,
+    label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
+  })) : [];
+
+  const hexMultipliersFields = economic.hexresourcemultiplier ? Object.keys(economic.hexresourcemultiplier).map(key => ({
+    key,
+    label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
+  })) : [];
+
   return (
-    <div className="worldmarket-page">
-      <h2>World Market Settings</h2>
+    <Box>
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography variant="h5" sx={{ fontWeight: 600, flexGrow: 1 }}>
+            World Market Settings
+          </Typography>
+          <Chip label="Global Economy" color="primary" size="small" />
+        </Stack>
+      </Paper>
 
-      {/* Settings Group */}
-      <div className="worldmarket-group">
-        <h3>General Settings</h3>
-        <div className="field-row">
-          <label>Prime Rate:</label>
-          <input
-            type="number"
-            value={settings.primerate || 0}
-            onChange={(e) => handleInputChange('settings', 'primerate', e.target.value)}
-            step="0.01"
-          />
-        </div>
-        <div className="field-row">
-          <label>Social Adjustment:</label>
-          <input
-            type="number"
-            value={settings.socadj || 0}
-            onChange={(e) => handleInputChange('settings', 'socadj', e.target.value)}
-            step="0.01"
-          />
-        </div>
-        <div className="field-row">
-          <label>WM Relation Rate:</label>
-          <input
-            type="number"
-            value={settings.wmrelrate || 0}
-            onChange={(e) => handleInputChange('settings', 'wmrelrate', e.target.value)}
-          />
-        </div>
-      </div>
+      <Accordion expanded={expanded.includes('settings')} onChange={handleAccordionChange('settings')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>General Settings</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            <Grid item xs={6} sm={4}>
+              <TextField
+                fullWidth
+                label="Prime Rate"
+                type="number"
+                value={settings.primerate ?? ''}
+                onChange={(e) => handleInputChange('settings', 'primerate', e.target.value)}
+                size="small"
+                inputProps={{ step: 0.01 }}
+              />
+            </Grid>
+            <Grid item xs={6} sm={4}>
+              <TextField
+                fullWidth
+                label="Social Adjustment"
+                type="number"
+                value={settings.socadj ?? ''}
+                onChange={(e) => handleInputChange('settings', 'socadj', e.target.value)}
+                size="small"
+                inputProps={{ step: 0.01 }}
+              />
+            </Grid>
+            <Grid item xs={6} sm={4}>
+              <TextField
+                fullWidth
+                label="WM Relation Rate"
+                type="number"
+                value={settings.wmrelrate ?? ''}
+                onChange={(e) => handleInputChange('settings', 'wmrelrate', e.target.value)}
+                size="small"
+              />
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* Military Defaults */}
-      <div className="worldmarket-group">
-        <h3>Battle Strength Defaults</h3>
-        {military.battstrdefault && Object.entries(military.battstrdefault).map(([key, val]) => (
-          <div key={key} className="field-row">
-            <label>{key}:</label>
-            <input
-              type="number"
-              value={val || 0}
-              onChange={(e) => {
-                const updated = {
-                  ...military.battstrdefault,
-                  [key]: Number(e.target.value) || 0
-                };
-                const updatedWorldMarket = {
-                  ...projectData.worldmarket_data,
-                  military: {
-                    ...projectData.worldmarket_data.military,
-                    battstrdefault: updated
-                  }
-                };
-                updateData('worldmarket_data', updatedWorldMarket);
-                setWorldMarketData(updatedWorldMarket);
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Battle Strength Defaults</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            {battleStrengthFields.map(({ key, label }) => (
+              <Grid item xs={6} sm={4} md={3} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  type="number"
+                  value={military.battstrdefault?.[key] ?? ''}
+                  onChange={(e) => handleNestedChange('military', 'battstrdefault', key, e.target.value)}
+                  size="small"
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* Economic Defaults */}
-      <div className="worldmarket-group">
-        <h3>Social Defaults</h3>
-        {economic.socialdefaults && Object.entries(economic.socialdefaults).map(([key, val]) => (
-          <div key={key} className="field-row">
-            <label>{key}:</label>
-            <input
-              type="number"
-              value={val || 0}
-              onChange={(e) => {
-                const updated = {
-                  ...economic.socialdefaults,
-                  [key]: Number(e.target.value) || 0
-                };
-                const updatedWorldMarket = {
-                  ...projectData.worldmarket_data,
-                  economic: {
-                    ...projectData.worldmarket_data.economic,
-                    socialdefaults: updated
-                  }
-                };
-                updateData('worldmarket_data', updatedWorldMarket);
-                setWorldMarketData(updatedWorldMarket);
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Social Defaults</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            {socialDefaultsFields.map(({ key, label }) => (
+              <Grid item xs={6} sm={4} md={3} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  type="number"
+                  value={economic.socialdefaults?.[key] ?? ''}
+                  onChange={(e) => handleNestedChange('economic', 'socialdefaults', key, e.target.value)}
+                  size="small"
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
-      <div className="worldmarket-group">
-        <h3>Hex Resource Multipliers</h3>
-        {economic.hexresmults && Object.entries(economic.hexresmults).map(([key, val]) => (
-          <div key={key} className="field-row">
-            <label>{key}:</label>
-            <input
-              type="number"
-              value={val || 0}
-              onChange={(e) => {
-                const updated = {
-                  ...economic.hexresmults,
-                  [key]: Number(e.target.value) || 0
-                };
-                const updatedWorldMarket = {
-                  ...projectData.worldmarket_data,
-                  economic: {
-                    ...projectData.worldmarket_data.economic,
-                    hexresmults: updated
-                  }
-                };
-                updateData('worldmarket_data', updatedWorldMarket);
-                setWorldMarketData(updatedWorldMarket);
-              }}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Hex Resource Multipliers</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            {hexMultipliersFields.map(({ key, label }) => (
+              <Grid item xs={6} sm={4} md={3} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  type="number"
+                  value={economic.hexresourcemultiplier?.[key] ?? ''}
+                  onChange={(e) => handleNestedChange('economic', 'hexresourcemultiplier', key, e.target.value)}
+                  size="small"
+                  inputProps={{ step: 0.01 }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+    </Box>
   );
 };
 

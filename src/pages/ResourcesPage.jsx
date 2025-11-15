@@ -1,20 +1,35 @@
 // ResourcesPage.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useProject } from '../context/ProjectContext';
-import '../assets/styles/ResourcesPage.css';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const ResourcesPage = ({ activeTab }) => {
   const { projectData, updateData } = useProject();
   const [selectedResource, setSelectedResource] = useState('agriculture');
   const [resourceData, setResourceData] = useState({});
+  const [expanded, setExpanded] = useState(['cost', 'production']);
 
-  // Load resources data from ProjectContext
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(prev =>
+      isExpanded ? [...prev, panel] : prev.filter(p => p !== panel)
+    );
+  };
+
   const loadResourcesData = useCallback(() => {
-    if (projectData && projectData.resources_data) {
+    if (projectData?.resources_data) {
       const processedData = { ...projectData.resources_data };
-
-      // Ensure all fields have default values of 0
       Object.keys(processedData).forEach((resourceName) => {
         const resource = processedData[resourceName];
         ['cost', 'production', 'producefrom'].forEach((group) => {
@@ -27,9 +42,7 @@ const ResourcesPage = ({ activeTab }) => {
           }
         });
       });
-
       setResourceData(processedData);
-      console.log('Loaded resources data from context');
     }
   }, [projectData]);
 
@@ -39,24 +52,17 @@ const ResourcesPage = ({ activeTab }) => {
     }
   }, [activeTab, loadResourcesData]);
 
-  // Handle input changes
   const handleInputChange = (fieldGroup, name, value) => {
     const numericValue = value === '' ? '' : Number(value);
 
-    // Update local state
     setResourceData((prevData) => {
       const updatedData = { ...prevData };
-      if (!updatedData[selectedResource]) {
-        updatedData[selectedResource] = {};
-      }
-      if (!updatedData[selectedResource][fieldGroup]) {
-        updatedData[selectedResource][fieldGroup] = {};
-      }
+      if (!updatedData[selectedResource]) updatedData[selectedResource] = {};
+      if (!updatedData[selectedResource][fieldGroup]) updatedData[selectedResource][fieldGroup] = {};
       updatedData[selectedResource][fieldGroup][name] = numericValue;
       return updatedData;
     });
 
-    // Update in ProjectContext
     const updatedResources = {
       ...projectData.resources_data,
       [selectedResource]: {
@@ -71,125 +77,129 @@ const ResourcesPage = ({ activeTab }) => {
   };
 
   const resourcesList = [
-    'agriculture',
-    'rubber',
-    'timber',
-    'petroleum',
-    'coal',
-    'ore',
-    'uranium',
-    'electricity',
-    'consumergoods',
-    'militarygoods',
-    'industrialgoods',
+    { key: 'agriculture', label: 'Agriculture' },
+    { key: 'rubber', label: 'Rubber' },
+    { key: 'timber', label: 'Timber' },
+    { key: 'petroleum', label: 'Petroleum' },
+    { key: 'coal', label: 'Coal' },
+    { key: 'ore', label: 'Ore' },
+    { key: 'uranium', label: 'Uranium' },
+    { key: 'electricity', label: 'Electricity' },
+    { key: 'consumergoods', label: 'Consumer Goods' },
+    { key: 'militarygoods', label: 'Military Goods' },
+    { key: 'industrialgoods', label: 'Industrial Goods' },
   ];
 
   const selectedResourceData = resourceData[selectedResource] || {};
   const { cost = {}, production = {}, producefrom = {} } = selectedResourceData;
 
   const costFields = [
-    { label: 'Base Cost', name: 'wmbasecost', min: 0, max: 999999999 },
-    { label: 'Full Cost', name: 'wmfullcost', min: 0, max: 999999999 },
-    { label: 'Margin', name: 'wmmargin', min: 0, max: 999999999 },
+    { label: 'Base Cost', name: 'wmbasecost' },
+    { label: 'Full Cost', name: 'wmfullcost' },
+    { label: 'Margin', name: 'wmmargin' },
   ];
 
   const productionFields = [
-    { label: 'Node Production', name: 'nodeproduction', min: 0, max: 999999 },
-    { label: 'Max Production Per Person', name: 'wmprodperpersonmax', min: 0, max: 999999 },
-    { label: 'Min Production Per Person', name: 'wmprodperpersonmin', min: 0, max: 999999 },
-    { label: 'Urban Production', name: 'wmurbanproduction', min: 0, max: 999999 },
+    { label: 'Node Production', name: 'nodeproduction' },
+    { label: 'Max Prod/Person', name: 'wmprodperpersonmax' },
+    { label: 'Min Prod/Person', name: 'wmprodperpersonmin' },
+    { label: 'Urban Production', name: 'wmurbanproduction' },
   ];
 
   return (
-    <div className="resources-page">
-      {/* Resource Selection */}
-      <div className="resource-group">
-        <h3>Resources</h3>
-        <div className="resource-selection">
-          {resourcesList.map((resource) => (
-            <label key={resource} className="resource-label">
-              <input
-                type="radio"
-                value={resource}
-                checked={selectedResource === resource}
-                onChange={(e) => setSelectedResource(e.target.value)}
-              />
-              {resource.charAt(0).toUpperCase() + resource.slice(1)}
-            </label>
+    <Box>
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600, flexGrow: 1 }}>
+            Resources Editor
+          </Typography>
+          <Chip label="11 Resources" color="primary" size="small" />
+        </Stack>
+
+        <ToggleButtonGroup
+          value={selectedResource}
+          exclusive
+          onChange={(e, newValue) => newValue && setSelectedResource(newValue)}
+          size="small"
+          sx={{ flexWrap: 'wrap', gap: 0.5 }}
+        >
+          {resourcesList.map(({ key, label }) => (
+            <ToggleButton key={key} value={key}>
+              {label}
+            </ToggleButton>
           ))}
-        </div>
-      </div>
+        </ToggleButtonGroup>
+      </Paper>
 
-      {/* Cost Group */}
-      <div className="cost-group">
-        <h3>Cost</h3>
-        {costFields.map((field) => (
-          <div key={field.name} className="field-row">
-            <label className="field-label">{field.label}:</label>
-            <input
-              type="number"
-              name={field.name}
-              value={cost[field.name] !== undefined ? cost[field.name] : 0}
-              onChange={(e) => handleInputChange('cost', field.name, e.target.value)}
-              min={field.min}
-              max={field.max}
-              className="field-input"
-            />
-          </div>
-        ))}
-      </div>
+      <Accordion expanded={expanded.includes('cost')} onChange={handleAccordionChange('cost')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Cost</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            {costFields.map(({ label, name }) => (
+              <Grid item xs={6} sm={4} key={name}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  type="number"
+                  value={cost[name] ?? ''}
+                  onChange={(e) => handleInputChange('cost', name, e.target.value)}
+                  size="small"
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* Production Group */}
-      <div className="production-group">
-        <h3>Production</h3>
-        {productionFields.map((field) => (
-          <div key={field.name} className="field-row">
-            <label className="field-label">{field.label}:</label>
-            <input
-              type="number"
-              name={field.name}
-              value={production[field.name] !== undefined ? production[field.name] : 0}
-              onChange={(e) => handleInputChange('production', field.name, e.target.value)}
-              min={field.min}
-              max={field.max}
-              className="field-input"
-            />
-          </div>
-        ))}
-      </div>
+      <Accordion expanded={expanded.includes('production')} onChange={handleAccordionChange('production')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Production</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            {productionFields.map(({ label, name }) => (
+              <Grid item xs={6} sm={3} key={name}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  type="number"
+                  value={production[name] ?? ''}
+                  onChange={(e) => handleInputChange('production', name, e.target.value)}
+                  size="small"
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* Produced From Group */}
-      <div className="produced-from-group">
-        <h3>Produced From</h3>
-        <div className="produced-from-table-wrapper">
-          <table className="produced-from-table">
-            <thead>
-              <tr>
-                <th>Resource</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {resourcesList.map((resource) => (
-                <tr key={resource}>
-                  <td>{resource.charAt(0).toUpperCase() + resource.slice(1)}</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={producefrom[resource] !== undefined ? producefrom[resource] : 0}
-                      onChange={(e) => handleInputChange('producefrom', resource, e.target.value)}
-                      min="0"
-                      max="999999999"
-                      className="producefrom-input"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Produced From (Resource Dependencies)</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Specify how much of each resource is needed to produce this resource
+          </Typography>
+          <Grid container spacing={2}>
+            {resourcesList.map(({ key, label }) => (
+              <Grid item xs={6} sm={4} md={3} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  type="number"
+                  value={producefrom[key] ?? ''}
+                  onChange={(e) => handleInputChange('producefrom', key, e.target.value)}
+                  size="small"
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+    </Box>
   );
 };
 
