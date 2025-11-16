@@ -46,7 +46,7 @@ const Sidebar = ({
 
                 <List sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         fullWidth
                         startIcon={<AddIcon />}
                         onClick={handleCreateEmptyProject}
@@ -62,7 +62,7 @@ const Sidebar = ({
                         id="fileInput"
                     />
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         fullWidth
                         startIcon={<UploadFileIcon />}
                         onClick={() => document.getElementById('fileInput').click()}
@@ -86,7 +86,7 @@ const Sidebar = ({
                     </Button>
 
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         fullWidth
                         startIcon={<DownloadIcon />}
                         onClick={handleExport}
@@ -102,20 +102,21 @@ const Sidebar = ({
                     <>
                         <Divider sx={{ my: 3 }} />
                         <Box sx={{
-                            bgcolor: 'primary.main',
-                            color: 'white',
+                            bgcolor: 'action.selected',
+                            border: 1,
+                            borderColor: 'divider',
                             p: 2,
                             borderRadius: 1,
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1
                         }}>
-                            <FolderIcon />
+                            <FolderIcon sx={{ color: 'success.main' }} />
                             <Box>
-                                <Typography variant="caption" display="block" sx={{ opacity: 0.8 }}>
+                                <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
                                     Current Project
                                 </Typography>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                     Loaded
                                 </Typography>
                             </Box>
