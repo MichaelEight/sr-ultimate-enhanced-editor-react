@@ -7,12 +7,17 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Box from '@mui/material/Box';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = ({ project, drawerOpen, toggleDrawer, drawerWidth }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { mode, toggleTheme } = useTheme();
 
     const navItems = [
         { label: 'Scenario', path: '/', alwaysVisible: true },
@@ -75,6 +80,15 @@ const Navbar = ({ project, drawerOpen, toggleDrawer, drawerWidth }) => {
                         ))}
                     </Tabs>
                 </Box>
+                <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+                    <IconButton
+                        color="inherit"
+                        onClick={toggleTheme}
+                        sx={{ ml: 2 }}
+                    >
+                        {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                    </IconButton>
+                </Tooltip>
             </Toolbar>
         </AppBar>
     );
