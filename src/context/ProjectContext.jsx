@@ -12,7 +12,7 @@ import {
     DEFAULT_WORLDMARKET_STRUCTURE,
     DEFAULT_PROJECT_FILE_STRUCTURE,
     SUPPORTED_EXTENSIONS
-} from '../utils/config';
+} from '../config/config';
 import { importScenarioFile } from '../utils/parsers/scenarioParser';
 import { extractCvpData } from '../utils/parsers/cvpParser';
 import { extractOobData } from '../utils/parsers/oobParser';
@@ -196,6 +196,24 @@ export const ProjectProvider = ({ children }) => {
 
     // Export project as ZIP
     const exportProject = useCallback(async () => {
+        // Helper function to get filename from scenario_data (handles both array and object formats)
+        const getFilenameFromScenarioData = (ext, defaultName) => {
+            const data = projectData.scenario_data[ext];
+
+            // If it's an array, return first element
+            if (Array.isArray(data) && data.length > 0) {
+                return data[0];
+            }
+
+            // If it's an object with filename property, return it
+            if (data && typeof data === 'object' && 'filename' in data && data.filename) {
+                return data.filename;
+            }
+
+            // Return default
+            return defaultName;
+        };
+
         try {
             const zip = new JSZip();
             const projectFolder = zip.folder(projectName || 'Project');
@@ -210,21 +228,21 @@ export const ProjectProvider = ({ children }) => {
                     Regions_Data: projectData.regions_data,
                     Theaters_Data: projectData.theaters_data
                 });
-                const cvpFilename = projectData.scenario_data.cvp?.[0] || projectName || 'data';
+                const cvpFilename = getFilenameFromScenarioData('cvp', projectName || 'data');
                 projectFolder.file(`Maps/${cvpFilename}.CVP`, cvpContent);
             }
 
             // Generate OOB file if orbat data exists
             if (projectData.orbat_data.OOB_Data && projectData.orbat_data.OOB_Data.length > 0) {
                 const oobContent = exportOob(projectData.orbat_data);
-                const oobFilename = projectData.scenario_data.oob?.[0] || projectName || 'data';
+                const oobFilename = getFilenameFromScenarioData('oob', projectName || 'data');
                 projectFolder.file(`Maps/ORBATS/${oobFilename}.OOB`, oobContent);
             }
 
             // Generate REGIONINCL file if data exists
             if (projectData.regionincl_data.regions && projectData.regionincl_data.regions.length > 0) {
                 const regioninclContent = exportRegionincl(projectData.regionincl_data);
-                const regioninclFilename = projectData.scenario_data.regionincl?.[0] || projectName || 'data';
+                const regioninclFilename = getFilenameFromScenarioData('regionincl', projectName || 'data');
                 projectFolder.file(`Maps/${regioninclFilename}.REGIONINCL`, regioninclContent);
             }
 
@@ -234,7 +252,7 @@ export const ProjectProvider = ({ children }) => {
                     worldmarket: projectData.worldmarket_data,
                     resources: projectData.resources_data
                 });
-                const wmdataFilename = projectData.scenario_data.wmdata?.[0] || 'DEFAULT';
+                const wmdataFilename = getFilenameFromScenarioData('wmdata', 'DEFAULT');
                 projectFolder.file(`Maps/DATA/${wmdataFilename}.WMDATA`, wmdataContent);
             }
 

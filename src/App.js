@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import Box from '@mui/material/Box';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
+import Navbar from './components/layout/Navbar';
+import Sidebar from './components/layout/Sidebar';
 import ScenarioPage from './pages/ScenarioPage';
 import SettingsPage from './pages/SettingsPage';
 import RegionsPage from './pages/RegionsPage';
@@ -12,10 +12,10 @@ import TheatersPage from './pages/TheatersPage';
 import ResourcesPage from './pages/ResourcesPage';
 import WorldMarketPage from './pages/WorldMarketPage';
 import OrbatPage from './pages/OrbatPage';
-import ProgressBar from './components/Progressbar';
+import ProgressBar from './components/common/Progressbar';
 import { ProjectProvider } from './context/ProjectContext';
 import useProjectManagement from './hooks/useProjectManagement';
-import theme from './theme';
+import theme from './config/theme';
 
 const DRAWER_WIDTH = 280;
 
