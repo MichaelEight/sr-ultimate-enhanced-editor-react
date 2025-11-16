@@ -38,6 +38,10 @@ export const createAppTheme = (mode = 'dark') => {
         secondary: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
       },
       divider: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
+      action: {
+        selected: isDark ? 'rgba(144, 202, 249, 0.16)' : 'rgba(25, 118, 210, 0.08)',
+        hover: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+      },
     },
     typography: {
       fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',

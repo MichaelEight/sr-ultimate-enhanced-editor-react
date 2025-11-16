@@ -37,6 +37,7 @@ export const ThemeProvider = ({ children }) => {
             root.style.setProperty('--input-border', '#555');
             root.style.setProperty('--input-bg', '#2a2a2a');
             root.style.setProperty('--primary-color', '#90caf9');
+            root.style.setProperty('--success-color', '#66bb6a');
             root.style.setProperty('--navbar-bg', '#1e1e1e');
         } else {
             root.style.setProperty('--bg-default', '#f5f5f5');
@@ -48,7 +49,8 @@ export const ThemeProvider = ({ children }) => {
             root.style.setProperty('--border-color', 'rgba(0, 0, 0, 0.12)');
             root.style.setProperty('--input-border', '#ced4da');
             root.style.setProperty('--input-bg', '#ffffff');
-            root.style.setProperty('--primary-color', '#007bff');
+            root.style.setProperty('--primary-color', '#1976d2');
+            root.style.setProperty('--success-color', '#2e7d32');
             root.style.setProperty('--navbar-bg', '#333');
         }
     }, [mode]);
