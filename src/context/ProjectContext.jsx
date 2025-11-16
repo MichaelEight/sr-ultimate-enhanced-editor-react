@@ -12,7 +12,7 @@ import {
     DEFAULT_WORLDMARKET_STRUCTURE,
     DEFAULT_PROJECT_FILE_STRUCTURE,
     SUPPORTED_EXTENSIONS
-} from '../utils/config';
+} from '../config/config';
 import { importScenarioFile } from '../utils/parsers/scenarioParser';
 import { extractCvpData } from '../utils/parsers/cvpParser';
 import { extractOobData } from '../utils/parsers/oobParser';
