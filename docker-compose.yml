@@ -1,0 +1,23 @@
+# Docker Compose configuration for development environment
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: sr-ultimate-editor-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot-reload
+      - ./src:/app/src
+      - ./public:/app/public
+      # Use anonymous volume for node_modules to prevent overwriting
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Enable polling for file changes (useful on Windows)
+      - WATCHPACK_POLLING=true
+    stdin_open: true  # Keep stdin open for interactive debugging
+    tty: true         # Allocate a pseudo-TTY
