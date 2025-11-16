@@ -1,6 +1,6 @@
 // scenarioParser.js - Parse .SCENARIO files
 
-import { DEFAULT_PROJECT_FILE_STRUCTURE, DEFAULT_SETTINGS_STRUCTURE } from '../config';
+import { DEFAULT_PROJECT_FILE_STRUCTURE, DEFAULT_SETTINGS_STRUCTURE } from '../../config/config';
 
 export function importScenarioFile(content, filename) {
     console.log(`Parsing scenario file: ${filename}`);

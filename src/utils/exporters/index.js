@@ -1,6 +1,6 @@
 // exporters/index.js - Export all file type exporters
 
-import { DEFAULT_PROJECT_FILE_STRUCTURE } from '../config';
+import { DEFAULT_PROJECT_FILE_STRUCTURE } from '../../config/config';
 
 // Scenario Exporter
 export function exportScenarioFile(scenarioData, settingsData) {
