@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { createAppTheme } from '../theme';
+import { createAppTheme } from '../config/theme';
 
 const ThemeContext = createContext();
 
