@@ -3,7 +3,7 @@
     padding: 20px;
     margin-left: 250px; /* Space for the sidebar */
     width: calc(100% - 250px); /* Full width minus the sidebar */
-    background-color: #f4f7fa; /* Light background */
+    background-color: var(--bg-default); /* Light background */
     min-height: 100vh; /* Ensure full height */
     box-sizing: border-box; /* Ensure padding is included in width */
 }
@@ -12,10 +12,10 @@
 .scenario-group {
     margin-bottom: 20px;
     padding: 15px;
-    background-color: #ffffff;
+    background-color: var(--bg-section);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     display: flex;
     flex-wrap: wrap;
     gap: 10px; /* Tighter gap between elements */
@@ -24,9 +24,9 @@
 /* Section headers */
 .scenario-group h3 {
     font-size: 18px;
-    color: #007bff;
+    color: var(--primary-color);
     margin-bottom: 10px;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 5px;
     width: 100%; /* Header takes full width */
 }
@@ -43,7 +43,7 @@
 /* Label with a fixed width next to the input */
 .scenario-group label {
     font-size: 14px;
-    color: #333;
+    color: var(--text-label);
     font-weight: bold;
     margin-right: 10px; /* Space between label and input */
     white-space: nowrap; /* Prevent label from breaking */
@@ -56,7 +56,9 @@
     width: 180px; /* Consistent input width */
     padding: 8px;
     font-size: 14px;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
     border-radius: 6px;
     transition: border-color 0.3s;
     box-sizing: border-box; /* Ensure padding is included in width */
@@ -65,7 +67,7 @@
 .scenario-group input[type="text"]:focus,
 .scenario-group input[type="number"]:focus,
 .scenario-group select:focus {
-    border-color: #007bff;
+    border-color: var(--primary-color);
     outline: none;
 }
 
@@ -85,7 +87,7 @@
 /* Checkbox and label aligned */
 .scenario-group input[type="checkbox"] + label {
     font-size: 14px;
-    color: #555;
+    color: var(--text-secondary);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -100,7 +102,7 @@
 
 .button-group button {
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 6px;
@@ -111,12 +113,13 @@
 }
 
 .button-group button:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-color);
+    opacity: 0.8;
     box-shadow: 0 6px 8px rgba(0, 123, 255, 0.2);
 }
 
 .button-group button:active {
-    background-color: #004080;
+    opacity: 0.6;
 }
 
 /* Responsiveness for smaller screens */

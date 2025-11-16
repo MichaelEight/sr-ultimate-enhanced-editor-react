@@ -2,7 +2,7 @@
 .region-page {
     padding: 20px;
     margin-left: 250px; /* Keep space for the sidebar */
-    background-color: #f4f7fa; /* Light background */
+    background-color: var(--bg-default); /* Light background */
     min-height: 100vh; /* Ensure full page height */
 }
 
@@ -16,7 +16,7 @@
 /* Button styling - similar to ScenarioPage */
 .region-page .button-group button {
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 6px;
@@ -27,12 +27,13 @@
 }
 
 .region-page .button-group button:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-color);
+    opacity: 0.8;
     box-shadow: 0 6px 8px rgba(0, 123, 255, 0.2);
 }
 
 .region-page .button-group button:active {
-    background-color: #004080;
+    opacity: 0.6;
 }
 
 /* Search box styling */

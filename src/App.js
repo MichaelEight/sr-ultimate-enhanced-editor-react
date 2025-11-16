@@ -1,7 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
 import Box from '@mui/material/Box';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -14,15 +13,14 @@ import WorldMarketPage from './pages/WorldMarketPage';
 import OrbatPage from './pages/OrbatPage';
 import ProgressBar from './components/Progressbar';
 import { ProjectProvider } from './context/ProjectContext';
+import { ThemeProvider } from './context/ThemeContext';
 import useProjectManagement from './hooks/useProjectManagement';
-import theme from './theme';
 
 const DRAWER_WIDTH = 280;
 
 const App = () => {
     return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
+        <ThemeProvider>
             <ProjectProvider>
                 <Router>
                     <AppWrapper />
