@@ -12,6 +12,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import FolderIcon from '@mui/icons-material/Folder';
+import packageJson from '../../../package.json';
 
 const Sidebar = ({
     defaultProjects = [],
@@ -35,11 +36,13 @@ const Sidebar = ({
                 '& .MuiDrawer-paper': {
                     width: drawerWidth,
                     boxSizing: 'border-box',
+                    display: 'flex',
+                    flexDirection: 'column',
                 },
             }}
         >
             <Toolbar />
-            <Box sx={{ overflow: 'auto', p: 2 }}>
+            <Box sx={{ overflow: 'auto', p: 2, flexGrow: 1 }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                     Project Management
                 </Typography>
@@ -123,6 +126,14 @@ const Sidebar = ({
                         </Box>
                     </>
                 )}
+            </Box>
+            <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+                <Typography
+                    variant="caption"
+                    sx={{ color: 'text.secondary', opacity: 0.7 }}
+                >
+                    v{packageJson.version}
+                </Typography>
             </Box>
         </Drawer>
     );
