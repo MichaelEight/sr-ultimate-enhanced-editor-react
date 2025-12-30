@@ -28,7 +28,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <ProjectProvider>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
           <AppWrapper />
         </Router>
       </ProjectProvider>
