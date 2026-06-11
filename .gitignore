@@ -44,6 +44,9 @@ yarn-error.log*
 # Build files and dependencies
 /build
 
+# AWS deploy config (secrets/infra ids)
+deploy.env
+
 # Uploaded, extracted, and exported files (used files)
 /backend/uploaded/*
 /backend/extracted/*
